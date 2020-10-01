@@ -1,3 +1,7 @@
+<script>
+  import { likes } from "./data/datastores";
+</script>
+
 <style>
   ul {
     margin: 0 0 1em 0;
@@ -12,8 +16,19 @@
 <h1>Svelte Examples</h1>
 <ul>
   <li><a href="./examples/svelte/actions">Actions</a></li>
+  <li><a href="./examples/svelte/stores">Stores</a></li>
+  <li><a href="./examples/svelte/transitions">Transitions</a></li>
 </ul>
 <h1>Sapper Examples</h1>
 <ul>
   <li><a href="./examples/sapper/links">Links</a></li>
 </ul>
+
+<footer>
+  <p>
+    You have
+    {$likes}
+    likes
+    {#if 0 != $likes}<button on:click={() => ($likes = 0)}>Clear</button>{/if}
+  </p>
+</footer>
