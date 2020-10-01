@@ -1,7 +1,14 @@
 <svelte:head>
-	<title>About</title>
+  <title>Learning Svelte and Sapper</title>
 </svelte:head>
 
-<h1>About this site</h1>
+<h1>Learning Svelte and Sapper</h1>
 
-<p>This is the 'about' page. There's not much here.</p>
+<figure>
+  <caption>Svelte</caption>
+  best thing sense sliced bread
+</figure>
+<figure>
+  <caption>Sapper</caption>
+  best thing sense the toaster
+</figure>

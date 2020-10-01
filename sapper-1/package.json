@@ -1,6 +1,6 @@
 {
-  "name": "TODO",
-  "description": "TODO",
+  "name": "@ca0v/sapper-lab",
+  "description": "Sapper Playground",
   "version": "0.0.1",
   "scripts": {
     "dev": "sapper dev",
