@@ -19,7 +19,7 @@
 
   img {
     width: 100%;
-    max-width: 400px;
+    max-width: 20em;
     margin: 0 0 1em 0;
   }
 
@@ -27,7 +27,7 @@
     margin: 1em auto;
   }
 
-  @media (min-width: 480px) {
+  @media (min-width: 50em) {
     h1 {
       font-size: 4em;
     }
@@ -40,13 +40,19 @@
 
 <h1>Pick a Faction</h1>
 
-<figure>
-  <img alt="Svelte" src="successkid.jpg" />
-  <figcaption>Svelte Examples</figcaption>
-</figure>
-<figure>
-  <img alt="Sapper" src="successkid.jpg" />
-  <figcaption>Sapper Examples</figcaption>
-</figure>
+<a href="./examples/svelte">
+  <figure>
+    <img alt="Svelte" src="logo-512.png" />
+    <figcaption>Svelte Examples</figcaption>
+  </figure>
+</a>
+
+<a href="./examples/sapper">
+  <figure>
+    <img alt="Sapper" src="logo-512.png" />
+    <figcaption>Sapper Examples</figcaption>
+  </figure></a>
 
 <p><strong>Think Small</strong></p>
+
+<a href="./links">Links</a>

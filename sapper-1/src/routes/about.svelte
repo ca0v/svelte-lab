@@ -6,9 +6,9 @@
 
 <figure>
   <caption>Svelte</caption>
-  best thing sense sliced bread
+  best thing since sliced bread
 </figure>
 <figure>
   <caption>Sapper</caption>
-  best thing sense the toaster
+  best thing since the toaster
 </figure>
