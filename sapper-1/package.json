@@ -5,9 +5,10 @@
   "scripts": {
     "dev": "sapper dev",
     "build": "sapper build",
-    "export": "sapper export",
+    "export": "sapper export --basepath svelte-lab/apps/sapper-1",
     "start": "node __sapper__/build",
-    "validate": "svelte-check --ignore src/node_modules/@sapper"
+    "validate": "svelte-check --ignore src/node_modules/@sapper",
+    "deploy": "mv __sapper__/export/svelte-lab/apps/sapper-1/ ../apps/sapper-1/"
   },
   "dependencies": {
     "compression": "^1.7.1",
