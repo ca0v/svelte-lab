@@ -1,34 +1,33 @@
-## Sapper Sample App
+## Svelte Sample Apps
 [sapper-1](https://ca0v.github.io/svelte-lab/apps/sapper-1)
 
-### Markdown
+### Notes
+Sapper is a static site generator and needs to be configured to generate to a specific path.  That required making changes to server.ts and package.json.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+server.ts - I added `"svelte-lab/apps/sapper-1"`
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
 ```
+polka() // You can also use Express
+  .use(
+    "svelte-lab/apps/sapper-1",
+    compression({ threshold: 0 }),
+    sirv("static", { dev }),
+    sapper.middleware()
+  )
+  .listen(PORT, (err) => {
+    if (err) console.log("error", err);
+  });
+  ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+  package.json - I also added `"svelte-lab/apps/sapper-1"`
 
-### Jekyll Themes
+  ```
+    "export": "sapper export --basepath svelte-lab/apps/sapper-1",
+  ```
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/ca0v/svelte-lab/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+Move the build artifacts so the path makes sense when hosted at https://ca0v.github.io/svelte-lab/apps/sapper-1/
 
-### Support or Contact
+ ```
+    "deploy": "mv __sapper__/export/svelte-lab/apps/sapper-1/ ../apps/sapper-1/"
+  ```
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
