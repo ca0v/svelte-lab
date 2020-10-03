@@ -1,3 +1,29 @@
+<script lang="ts">
+  interface Figure {
+    icon: string;
+    caption: string;
+    link: string;
+  }
+
+  const figures: Array<Figure> = [
+    {
+      icon: "logo-512.png",
+      caption: "Svelte Examples",
+      link: "./examples/svelte",
+    },
+    {
+      icon: "logo-512.png",
+      caption: "Sapper Examples",
+      link: "./examples/sapper",
+    },
+    {
+      icon: "logo-512.png",
+      caption: "What Others Say",
+      link: "./links",
+    },
+  ];
+</script>
+
 <style>
   h1,
   h2 {
@@ -20,6 +46,11 @@
     width: 8em;
   }
 
+  .centered {
+    display: grid;
+    grid-auto-flow: row;
+  }
+
   @media (min-width: 50em) {
     h1 {
       font-size: 4em;
@@ -34,17 +65,11 @@
 <h1>Choose Wisely</h1>
 <h2>Think Small</h2>
 
-<figure>
-  <img alt="Svelte" src="logo-512.png" />
-  <figcaption><a href="./examples/svelte">Svelte Examples</a></figcaption>
-</figure>
-
-<figure>
-  <img alt="Sapper" src="logo-512.png" />
-  <figcaption><a href="./examples/sapper">Sapper Examples</a></figcaption>
-</figure>
-
-<figure>
-  <img alt="Sapper" src="logo-512.png" />
-  <figcaption><a href="./links">What Others Say</a></figcaption>
-</figure>
+<div class="centered">
+  {#each figures as figure}
+    <figure>
+      <a href={figure.link}><img alt={figure.caption} src={figure.icon} /></a>
+      <figcaption><a href={figure.link}>{figure.caption}</a></figcaption>
+    </figure>
+  {/each}
+</div>

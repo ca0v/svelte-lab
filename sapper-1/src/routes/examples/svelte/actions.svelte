@@ -17,7 +17,6 @@
 
   function action2(node: HTMLElement, title: string) {
     node.title = title;
-
     return {
       update: (title: string) => {
         node.title = title;
@@ -47,3 +46,10 @@
 <dummy class="action" />
 <div>Div without action</div>
 <div use:action1 use:action2={defaultTitle}>Div with action</div>
+
+<p>
+  There is some markedown tool that mixes code with MD better. There is also
+  Jupyter notebook which might assist with this?
+</p>
+<p><code>{action1.toString()}</code></p>
+<p><code>{action2.toString()}</code></p>

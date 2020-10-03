@@ -3,9 +3,7 @@
   import SvelteExamples from "./_examples.svelte";
 </script>
 
-<h1 transition:fade>Svelte Examples</h1>
+<h1>Svelte Examples</h1>
 <SvelteExamples />
 
-<li in:receive={{ key: 'you' }} out:send={{ key: 'you' }}>
-  <a href="./examples/svelte/transitions">Transitions</a>
-</li>
+<li><a href="./examples/svelte/transitions">Transitions</a></li>

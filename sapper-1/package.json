@@ -1,9 +1,9 @@
 {
   "name": "@ca0v/sapper-lab",
   "description": "Sapper Playground",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
-    "dev": "sapper dev",
+    "dev": "sapper dev -p 3001",
     "build": "sapper build",
     "export": "sapper export --basepath svelte-lab/apps/sapper-1",
     "start": "node __sapper__/build",
