@@ -1,9 +1,7 @@
 <style>
   h1,
-  figure,
-  p {
+  h2 {
     text-align: center;
-    margin: 0 auto;
   }
 
   h1 {
@@ -14,17 +12,12 @@
   }
 
   figure {
-    margin: 0 0 1em 0;
+    display: inline-block;
+    text-align: center;
   }
 
   img {
-    width: 100%;
-    max-width: 20em;
-    margin: 0 0 1em 0;
-  }
-
-  p {
-    margin: 1em auto;
+    width: 8em;
   }
 
   @media (min-width: 50em) {
@@ -38,21 +31,20 @@
   <title>Welcome Home</title>
 </svelte:head>
 
-<h1>Pick a Faction</h1>
+<h1>Choose Wisely</h1>
+<h2>Think Small</h2>
 
-<a href="./examples/svelte">
-  <figure>
-    <img alt="Svelte" src="logo-512.png" />
-    <figcaption>Svelte Examples</figcaption>
-  </figure>
-</a>
+<figure>
+  <img alt="Svelte" src="logo-512.png" />
+  <figcaption><a href="./examples/svelte">Svelte Examples</a></figcaption>
+</figure>
 
-<a href="./examples/sapper">
-  <figure>
-    <img alt="Sapper" src="logo-512.png" />
-    <figcaption>Sapper Examples</figcaption>
-  </figure></a>
+<figure>
+  <img alt="Sapper" src="logo-512.png" />
+  <figcaption><a href="./examples/sapper">Sapper Examples</a></figcaption>
+</figure>
 
-<p><strong>Think Small</strong></p>
-
-<a href="./links">Links</a>
+<figure>
+  <img alt="Sapper" src="logo-512.png" />
+  <figcaption><a href="./links">What Others Say</a></figcaption>
+</figure>

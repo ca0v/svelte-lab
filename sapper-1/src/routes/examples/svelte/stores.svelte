@@ -1,18 +1,8 @@
 <script>
-  import { likes } from "../data/datastores";
-
-  function inc() {
-    $likes = $likes + 1;
-  }
-
-  function dec() {
-    $likes = $likes - 1;
-  }
+  import { like as inc, dislike as dec } from "../../../data/datastores";
 </script>
 
 <h1>Stores</h1>
 
 <button on:click={inc}>Like</button>
 <button on:click={dec}>Dislike</button>
-
-<p>You have {$likes} likes</p>

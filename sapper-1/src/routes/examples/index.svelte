@@ -1,34 +1,14 @@
 <script>
-  import { likes } from "./data/datastores";
+  import SvelteExamples from "./svelte/_examples.svelte";
+  import SapperExamples from "./sapper/_examples.svelte";
 </script>
-
-<style>
-  ul {
-    margin: 0 0 1em 0;
-    line-height: 1.5;
-  }
-</style>
 
 <svelte:head>
   <title>Svelte and Sapper Examples</title>
 </svelte:head>
 
 <h1>Svelte Examples</h1>
-<ul>
-  <li><a href="./examples/svelte/actions">Actions</a></li>
-  <li><a href="./examples/svelte/stores">Stores</a></li>
-  <li><a href="./examples/svelte/transitions">Transitions</a></li>
-</ul>
-<h1>Sapper Examples</h1>
-<ul>
-  <li><a href="./examples/sapper/links">Links</a></li>
-</ul>
+<SvelteExamples />
 
-<footer>
-  <p>
-    You have
-    {$likes}
-    likes
-    {#if 0 != $likes}<button on:click={() => ($likes = 0)}>Clear</button>{/if}
-  </p>
-</footer>
+<h1>Sapper Examples</h1>
+<SapperExamples />
