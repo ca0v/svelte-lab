@@ -11,4 +11,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "16"
-      - run: ./deploy.sh
+      - run: npm build
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: ./dist
