@@ -13,9 +13,9 @@ jobs:
           node-version: "16"
       - run: npm install
       - run: npm run build
-      - uses: actions/upload-artifact@v3
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v1.0.5
         with:
-          name: github-pages
           path: ./dist
   deploy:
     needs: build
