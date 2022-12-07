@@ -11,7 +11,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "16"
-      - run: npm install, npm run build
+      - run: npm install
+      - run: npm run build
       - uses: actions/upload-artifact@v3
         with:
           name: dist
