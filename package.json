@@ -1,23 +1,22 @@
 {
   "name": "svelte-lab",
-  "version": "1.0.2",
-  "description": "svelte-lab",
-  "main": "index.js",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ca0v/svelte-lab.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ca0v/svelte-lab/issues"
-  },
-  "homepage": "https://github.com/ca0v/svelte-lab#readme",
   "devDependencies": {
-    "degit": "^2.8.0"
+    "@sveltejs/vite-plugin-svelte": "^1.1.0",
+    "@tsconfig/svelte": "^3.0.0",
+    "svelte": "^3.52.0",
+    "svelte-check": "^2.9.2",
+    "svelte-preprocess": "^4.10.7",
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.2.3"
   }
 }
