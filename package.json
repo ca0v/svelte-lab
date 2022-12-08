@@ -1,4 +1,5 @@
 {
+  "homepage": "https://ca0v.github.io/svelte-lab/",
   "name": "svelte-lab",
   "private": true,
   "version": "0.0.0",
@@ -7,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "deploy": "gh-pages -d dist",
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
@@ -18,5 +20,8 @@
     "tslib": "^2.4.0",
     "typescript": "^4.6.4",
     "vite": "^3.2.3"
+  },
+  "dependencies": {
+    "gh-pages": "^4.0.0"
   }
 }

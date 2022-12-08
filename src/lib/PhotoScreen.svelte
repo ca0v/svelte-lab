@@ -45,24 +45,18 @@
 <style>
   .frame {
     position: relative;
-    width: 80vw;
-    height: 80vh;
+    width: 100%;
+    height: 100%;
   }
 
   .frame > img {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    object-fit: contain;
-    background-color: rgba(50, 50, 50, 1);
-  }
-
-  img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    background-color: rgba(50, 50, 50, 1);
     border-radius: 50%;
   }
 
@@ -89,6 +83,7 @@
     20%,
     to {
       opacity: 0;
+      object-position: 50% 50%;
     }
   }
 

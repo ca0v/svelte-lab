@@ -21,7 +21,9 @@
 <main>
   <h1>Photos</h1>
   <div class="frame">
-    <PhotoScreen sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)} />
+    <div class="fit">
+      <PhotoScreen sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)} />
+    </div>
     {#each photos as photo}
       <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
       <img
@@ -35,13 +37,16 @@
 </main>
 
 <style>
+  .fit {
+    width: 95vmin;
+    height: 95vmin;
+    opacity: 0.1;
+  }
   .frame {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
+    display: grid;
     justify-content: center;
-    max-width: 40rem;
     gap: 3rem;
+    width: clamp(20rem, 50vw, 50rem);
   }
 
   .photo {
