@@ -1,10 +1,11 @@
 <script lang="ts">
   import PhotoScreen from "./lib/PhotoScreen.svelte"
+  import { photoUrl as PHOTOS } from "./lib/globals"
+  import HexagonSpiral from "./lib/HexagonSpiral.svelte"
   type Photo = {
     id: string
     href: string
   }
-  const PHOTOS = "http://localhost:5107/Photo"
 
   let photos: Array<Photo> = []
 
@@ -24,6 +25,7 @@
     <div class="fit">
       <PhotoScreen sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)} />
     </div>
+    <HexagonSpiral />
     {#each photos as photo}
       <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
       <img
