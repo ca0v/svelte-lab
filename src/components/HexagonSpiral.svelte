@@ -9,11 +9,12 @@
   export let duration = 0.1
 
   type ImagePosition = {
+    target: string
     url: string
-    x: string
-    y: string
-    width: string
-    height: string
+    x: number
+    y: number
+    width: number
+    height: number
   }
 
   const scope = `hexagon_spiral_${id}`
@@ -92,9 +93,9 @@
   // assign tabindex and keydown event to all images
   function assignTabIndex() {
     const images = document.querySelectorAll(`.${scope} image`)
-    images.forEach((image, i) => {
+    images.forEach((image: SVGImageElement, i) => {
       image.setAttribute("tabindex", "0")
-      image.addEventListener("keydown", (e: KeyboardEvent) => {
+      image.addEventListener("keydown", async (e: KeyboardEvent) => {
         let x = parseInt(image.getAttribute("x"))
         let y = parseInt(image.getAttribute("y"))
         let width = parseInt(image.getAttribute("width"))
@@ -127,14 +128,25 @@
           case "Delete":
             addToBlacklist(image.getAttribute("href"))
             break
+          case " ": {
+            // swap this image with the center image
+            const centerImage = document.querySelector(
+              `.${scope} image.i0`
+            ) as SVGImageElement
+            const centerInfo = queryImagePosition(centerImage)
+            const outerInfo = queryImagePosition(image)
+            setImagePosition(centerImage, outerInfo)
+            sleep(20).then(() => setImagePosition(image, centerInfo))
+            break
+          }
           default:
             return
         }
 
-        image.setAttribute("x", x.toString())
-        image.setAttribute("y", y.toString())
-        image.setAttribute("width", width.toString())
-        image.setAttribute("height", height.toString())
+        image.setAttribute("x", x + "px")
+        image.setAttribute("y", y + "px")
+        image.setAttribute("width", width + "px")
+        image.setAttribute("height", height + "px")
 
         e.stopPropagation()
         e.preventDefault()
@@ -146,29 +158,44 @@
     blacklist.add(bannedUrl)
   }
 
+  function queryImagePositions() {
+    // persist image positions
+    const images = document.querySelectorAll(`.${scope} image`)
+    return Array.from(images).map(queryImagePosition)
+  }
+
+  function queryImagePosition(image: HTMLElement | SVGElement): ImagePosition {
+    return {
+      target: image.dataset.target,
+      url: image.getAttribute("href"),
+      x: parseInt(image.getAttribute("x")),
+      y: parseInt(image.getAttribute("y")),
+      width: parseInt(image.getAttribute("width")),
+      height: parseInt(image.getAttribute("height")),
+    }
+  }
+
   function save(): void {
     // persist blacklist
     localStorage.setItem(
       `${id}.blacklist`,
       JSON.stringify(Array.from(blacklist))
     )
-    // persist image positions
-    const images = document.querySelectorAll(`.${scope} image`)
-    let positions = Array.from(images).map((image) => {
-      return {
-        url: image.getAttribute("href"),
-        x: image.getAttribute("x"),
-        y: image.getAttribute("y"),
-        width: image.getAttribute("width"),
-        height: image.getAttribute("height"),
-      }
-    })
+
+    let positions = queryImagePositions()
 
     // if hexagons then remove the positions that already match the hexagon positions
     if (hexagons) {
       positions = positions.filter((p) => {
         const match = hexagons.positions.find((h) => {
-          return h.url === p.url && h.x === p.x && h.y === p.y
+          return (
+            h.url === p.url &&
+            h.x === p.x &&
+            h.y === p.y &&
+            h.width === p.width &&
+            h.height === p.height &&
+            h.target === p.target
+          )
         })
         return !match
       })
@@ -176,7 +203,7 @@
     localStorage.setItem(`${id}.positions`, JSON.stringify(positions))
   }
 
-  function getImagePositions(): Array<ImagePosition> {
+  function loadImagePositions(): Array<ImagePosition> {
     if (hexagons) {
       return hexagons.positions
     }
@@ -198,25 +225,34 @@
     assignTabIndex()
     const images = getImages()
     assignImages(images)
-    const positions = getImagePositions()
+    const positions = loadImagePositions()
     positions.forEach((position) => {
       const image = document.querySelector(
         `image[href="${position.url}"]`
       ) as SVGImageElement
       if (image) {
-        image.setAttribute("x", position.x)
-        image.setAttribute("y", position.y)
-        image.setAttribute("width", position.width)
-        image.setAttribute("height", position.height)
+        setImagePosition(image, position)
       }
     })
   })
+
+  function setImagePosition(image: SVGImageElement, position: ImagePosition) {
+    image.setAttribute("href", position.url)
+    image.setAttribute("x", position.x + "px")
+    image.setAttribute("y", position.y + "px")
+    image.setAttribute("width", position.width + "px")
+    image.setAttribute("height", position.height + "px")
+  }
 
   function getImages() {
     if (hexagons) {
       return hexagons.positions.map((location) => location.url)
     }
     return sources.filter((url) => !blacklist.has(url))
+  }
+
+  async function sleep(delay: number) {
+    return new Promise((resolve) => setTimeout(resolve, delay))
   }
 </script>
 
@@ -234,6 +270,7 @@
       </clipPath>
       <image
         class="i0"
+        data-target="center"
         href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
         width="50"
         height="50"
@@ -244,6 +281,7 @@
       {#each Array(6).fill(0) as _, i}
         <image
           class={`i${i + 1}`}
+          data-target={`i${i + 1}`}
           href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
           width="50"
           height="50"
@@ -258,6 +296,7 @@
       {#each Array(6).fill(0) as _, i}
         <image
           class={`i${i + 7}`}
+          data-target={`i${i + 7}`}
           href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
           width="50"
           height="50"
@@ -272,6 +311,7 @@
       {#each Array(6).fill(0) as _, i}
         <image
           class={`i${i + 13}`}
+          data-target={`i${i + 13}`}
           href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
           width="50"
           height="50"
@@ -285,12 +325,12 @@
       {/each}
     </svg>
   </section>
-  <button on:click={() => save()}>save</button>
+  <button on:click={() => save()}>Save</button>
   <button on:click={() => (play = !play)}>{play ? "Play" : "Unplay"}</button>
   <button
     title="Copy settings to clipboard"
     on:click={() => {
-      const settings = { id, positions: getImagePositions() }
+      const settings = { id, positions: queryImagePositions() }
       navigator.clipboard.writeText(JSON.stringify(settings))
     }}>Copy</button
   >
@@ -308,7 +348,7 @@
 
   image {
     transition-timing-function: ease-out;
-    opacity: 1;
+    opacity: 0.8;
   }
 
   .play image {
@@ -316,8 +356,13 @@
   }
 
   image:focus {
-    transition-delay: 20ms;
-    transition-duration: 20ms;
     outline: 1pt solid white;
+    opacity: 1;
+    outline-width: 0.25em;
+    border-radius: 20%;
+  }
+
+  section:focus-within image {
+    transition-duration: 0ms;
   }
 </style>
