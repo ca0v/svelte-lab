@@ -34,7 +34,7 @@
     return Array(size)
       .fill(0)
       .map((_, i) => {
-        const t = `translate(${size / 2 - i}em,-10em)`
+        const t = `translate(${size / 2 - i}em,-12vh)`
         return `transform: ${t} !important;opacity(0);`
       })
       .map((t, i) => `.${scope} .play .i${i} { ${t} }`)
@@ -45,10 +45,8 @@
     return Array(size)
       .fill(0)
       .map((_, i) => {
-        return `transition-delay: ${
-          i * 10 * duration
-        }ms; transition-duration: ${
-          (size / 2) * (1 + Math.random()) * duration
+        return `transition-delay: ${i * duration}ms; transition-duration: ${
+          (5 + i) * duration
         }s; opacity:1;`
       })
       .map((t, i) => `.${scope} .i${i} { ${t} }`)
@@ -265,12 +263,13 @@
 </div>
 
 <style>
+  svg {
+    overflow: visible;
+  }
   section {
     position: relative;
-    left: 25vmin;
-    width: 50vmin;
-    height: 50vmin;
-    overflow: hidden;
+    width: 100%;
+    height: 100%;
   }
 
   image {

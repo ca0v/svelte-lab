@@ -22,19 +22,17 @@
 <main>
   <h1>Photos</h1>
   <div class="frame">
+    <div class="side-by-side">
+      <HexagonSpiral
+        id="phase-1"
+        duration={0.2}
+        sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)}
+      />
+    </div>
     <div class="fit">
       <PhotoScreen sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)} />
     </div>
-    <HexagonSpiral
-      id="phase-1"
-      duration={1}
-      sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)}
-    />
-    <HexagonSpiral
-      id="phase-2"
-      duration={0.1}
-      sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`).reverse()}
-    />
+
     {#each photos as photo}
       <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
       <img
@@ -48,6 +46,13 @@
 </main>
 
 <style>
+  .side-by-side {
+    display: flex;
+    flex-direction: row;
+    /* center this flex box*/
+    justify-content: center;
+    height: 50vmin;
+  }
   .fit {
     width: 95vmin;
     height: 95vmin;
