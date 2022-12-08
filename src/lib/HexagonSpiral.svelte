@@ -1,5 +1,7 @@
 <script lang="ts">
   export let sources: Array<string> = []
+  export let duration = 0.1
+
   // function for producing a polygon path
   function polygonPath(
     sides: number,
@@ -29,7 +31,8 @@
     return Array(size)
       .fill(0)
       .map((_, i) => {
-        return `transform: translate(${size / 2 - i}em,-10em) !important;`
+        const t = `translate(${size / 2 - i}em,-10em)`
+        return `transform: ${t} !important;opacity(0);`
       })
       .map((t, i) => `.play .i${i} { ${t} }`)
       .join("\n")
@@ -39,9 +42,11 @@
     return Array(size)
       .fill(0)
       .map((_, i) => {
-        return `transition-delay: ${i * 10}ms; transition-duration: ${
-          size / 2 - i
-        }s;`
+        return `transition-delay: ${
+          i * 10 * duration
+        }ms; transition-duration: ${
+          (size / 2) * (1 + Math.random()) * duration
+        }s; opacity:1;`
       })
       .map((t, i) => `.i${i} { ${t} }`)
       .join("\n")
@@ -64,11 +69,128 @@
   function assignImages(urls: string[]) {
     const images = document.querySelectorAll("image")
     images.forEach((image, i) => {
-      image.setAttribute("href", urls[i % urls.length])
+      const url = urls[i % urls.length]
+      image.setAttribute("href", url)
+      console.log(url)
+
+      if (url.includes("IMG_20200718_140220")) {
+        image.setAttribute("width", "100")
+        image.setAttribute("height", "100")
+        image.setAttribute("x", "-50")
+        image.setAttribute("y", "-30")
+      }
     })
   }
 
-  $: assignImages(sources)
+  // assign tabindex and keydown event to all images
+  function assignTabIndex() {
+    const images = document.querySelectorAll("image")
+    images.forEach((image, i) => {
+      image.setAttribute("tabindex", "0")
+      console.log("tabindex set on image", i)
+      image.addEventListener("keydown", (e) => {
+        let x = parseInt(image.getAttribute("x"))
+        let y = parseInt(image.getAttribute("y"))
+        let width = parseInt(image.getAttribute("width"))
+        let height = parseInt(image.getAttribute("height"))
+        switch (e.key) {
+          case "ArrowUp":
+            y -= 1
+            break
+          case "ArrowDown":
+            y += 1
+            break
+          case "ArrowLeft":
+            x -= 1
+            break
+          case "ArrowRight":
+            x += 1
+            break
+          case "+":
+            width += 2
+            height += 2
+            x -= 1
+            y -= 1
+            break
+          case "-":
+            width -= 2
+            height -= 2
+            x += 1
+            y += 1
+            break
+          case "Delete":
+            addToBlacklist(image.getAttribute("href"))
+            break
+          default:
+            return
+        }
+
+        image.setAttribute("x", x.toString())
+        image.setAttribute("y", y.toString())
+        image.setAttribute("width", width.toString())
+        image.setAttribute("height", height.toString())
+
+        e.stopPropagation()
+        e.preventDefault()
+      })
+    })
+  }
+
+  let blacklist = getBlacklist()
+
+  function addToBlacklist(bannedUrl: string) {
+    blacklist.add(bannedUrl)
+  }
+
+  function save(): any {
+    // persist blacklist
+    localStorage.setItem("blacklist", JSON.stringify(Array.from(blacklist)))
+    // persist image positions
+    const images = document.querySelectorAll("image")
+    const positions = Array.from(images).map((image) => {
+      return {
+        url: image.getAttribute("href"),
+        x: image.getAttribute("x"),
+        y: image.getAttribute("y"),
+        width: image.getAttribute("width"),
+        height: image.getAttribute("height"),
+      }
+    })
+    localStorage.setItem("positions", JSON.stringify(positions))
+  }
+
+  function getImagePositions() {
+    const positions = localStorage.getItem("positions")
+    if (positions) {
+      return JSON.parse(positions)
+    }
+    return []
+  }
+
+  function getBlacklist() {
+    const blacklist = localStorage.getItem("blacklist")
+    if (blacklist) {
+      return new Set(JSON.parse(blacklist))
+    }
+    return new Set()
+  }
+
+  $: {
+    assignTabIndex()
+    assignImages(sources.filter((s) => !blacklist.has(s)))
+    const positions = getImagePositions()
+    positions.forEach((position) => {
+      const image = document.querySelector(
+        `image[href="${position.url}"]`
+      ) as SVGImageElement
+      if (image) {
+        image.setAttribute("x", position.x)
+        image.setAttribute("y", position.y)
+        image.setAttribute("width", position.width)
+        image.setAttribute("height", position.height)
+      }
+    })
+  }
 </script>
 
 <section class:play>
@@ -136,6 +258,7 @@
     {/each}
   </svg>
 </section>
+<button on:click={() => save()}>save</button>
 
 <style>
   section {
@@ -153,5 +276,11 @@
 
   .play image {
     opacity: 0;
+  }
+
+  image:focus {
+    transition-delay: 20ms;
+    transition-duration: 20ms;
+    outline: 1px solid white;
   }
 </style>
