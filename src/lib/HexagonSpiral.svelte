@@ -1,4 +1,5 @@
 <script lang="ts">
+  export let sources: Array<string> = []
   // function for producing a polygon path
   function polygonPath(
     sides: number,
@@ -58,6 +59,16 @@
 
   let play = true
   setTimeout(() => (play = false), 1000)
+
+  // assign images to each image element
+  function assignImages(urls: string[]) {
+    const images = document.querySelectorAll("image")
+    images.forEach((image, i) => {
+      image.setAttribute("href", urls[i % urls.length])
+    })
+  }
+
+  $: assignImages(sources)
 </script>
 
 <section class:play>

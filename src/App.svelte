@@ -25,7 +25,7 @@
     <div class="fit">
       <PhotoScreen sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)} />
     </div>
-    <HexagonSpiral />
+    <HexagonSpiral sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)} />
     {#each photos as photo}
       <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
       <img
