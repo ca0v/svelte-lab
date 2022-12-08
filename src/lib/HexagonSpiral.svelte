@@ -23,9 +23,44 @@
         .join(" ") + "Z"
     )
   }
+
+  function createCssTransforms(size = 20) {
+    return Array(size)
+      .fill(0)
+      .map((_, i) => {
+        return `transform: translate(${size / 2 - i}em,-10em) !important;`
+      })
+      .map((t, i) => `.play .i${i} { ${t} }`)
+      .join("\n")
+  }
+
+  function createInitialCss(size = 20) {
+    return Array(size)
+      .fill(0)
+      .map((_, i) => {
+        return `transition-delay: ${i * 10}ms; transition-duration: ${
+          size / 2 - i
+        }s;`
+      })
+      .map((t, i) => `.i${i} { ${t} }`)
+      .join("\n")
+  }
+
+  // inject css into style tag
+  function injectCss(css: string) {
+    const style = document.createElement("style")
+    style.innerHTML = css
+    document.head.appendChild(style)
+  }
+
+  injectCss(createInitialCss())
+  injectCss(createCssTransforms())
+
+  let play = true
+  setTimeout(() => (play = false), 1000)
 </script>
 
-<section>
+<section class:play>
   <svg
     id="center"
     viewBox="-100 -100 200 200"
@@ -48,7 +83,7 @@
     />
     {#each Array(6).fill(0) as _, i}
       <image
-        id={`i${i + 1}`}
+        class={`i${i + 1}`}
         href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
         width="50"
         height="50"
@@ -101,6 +136,11 @@
   }
 
   image {
-    transition-duration: 500ms;
+    transition-timing-function: ease-out;
+    opacity: 1;
+  }
+
+  .play image {
+    opacity: 0;
   }
 </style>
