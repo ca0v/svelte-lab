@@ -1,7 +1,7 @@
 <script lang="ts">
-  import PhotoScreen from "./lib/PhotoScreen.svelte"
+  import PhotoScreen from "./components/PhotoScreen.svelte"
   import { photoUrl as PHOTOS } from "./lib/globals"
-  import HexagonSpiral from "./lib/HexagonSpiral.svelte"
+  import HexagonSpiral from "./components/HexagonSpiral.svelte"
   type Photo = {
     id: string
     href: string
