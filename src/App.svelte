@@ -1,45 +1,62 @@
 <script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
-  import Counter from './lib/Counter.svelte'
+  import PhotoScreen from "./lib/PhotoScreen.svelte"
+  type Photo = {
+    id: string
+    href: string
+  }
+  const PHOTOS = "http://localhost:5107/Photo"
+
+  let photos: Array<Photo> = []
+
+  ;(async () => {
+    const response = await fetch(`${PHOTOS}/list`)
+    if (response.ok) {
+      const data = (await response.json()) as Array<Photo>
+      console.log(data)
+      photos = data
+    }
+  })()
 </script>
 
 <main>
-  <div>
-    <a href="https://vitejs.dev" target="_blank" rel="noreferrer"> 
-      <img src="/vite.svg" class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer"> 
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
+  <h1>Photos</h1>
+  <div class="frame">
+    <PhotoScreen sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)} />
+    {#each photos as photo}
+      <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+      <img
+        tabindex="0"
+        class="photo"
+        src={`${PHOTOS}/get?id=${photo.id}`}
+        alt={photo.id}
+      />
+    {/each}
   </div>
-  <h1>Vite + Svelte</h1>
-
-  <div class="card">
-    <Counter />
-  </div>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
 </main>
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
+  .frame {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 40rem;
+    gap: 3rem;
   }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
+
+  .photo {
+    --border-color: 255, 0, 0;
+    width: 100%;
+    box-shadow: 0 0 20px rgba(var(--border-color), 1);
+    border-style: solid;
+    border-width: 1rem;
+    border-color: transparent;
+    border-radius: 2rem;
+    background-color: rgba(var(--border-color), 0.5);
+    opacity: 0.5;
   }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
+
+  .photo:focus {
+    opacity: 1;
   }
 </style>
