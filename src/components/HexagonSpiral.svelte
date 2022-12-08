@@ -1,7 +1,20 @@
 <script lang="ts">
+  import { onMount } from "svelte"
   export let id = "default"
   export let sources: Array<string> = []
+  export let hexagons: {
+    id: string
+    positions: Array<ImagePosition>
+  }
   export let duration = 0.1
+
+  type ImagePosition = {
+    url: string
+    x: string
+    y: string
+    width: string
+    height: string
+  }
 
   const scope = `hexagon_spiral_${id}`
 
@@ -141,7 +154,7 @@
     )
     // persist image positions
     const images = document.querySelectorAll(`.${scope} image`)
-    const positions = Array.from(images).map((image) => {
+    let positions = Array.from(images).map((image) => {
       return {
         url: image.getAttribute("href"),
         x: image.getAttribute("x"),
@@ -150,16 +163,23 @@
         height: image.getAttribute("height"),
       }
     })
+
+    // if hexagons then remove the positions that already match the hexagon positions
+    if (hexagons) {
+      positions = positions.filter((p) => {
+        const match = hexagons.positions.find((h) => {
+          return h.url === p.url && h.x === p.x && h.y === p.y
+        })
+        return !match
+      })
+    }
     localStorage.setItem(`${id}.positions`, JSON.stringify(positions))
   }
 
-  function getImagePositions(): Array<{
-    url: string
-    x: string
-    y: string
-    width: string
-    height: string
-  }> {
+  function getImagePositions(): Array<ImagePosition> {
+    if (hexagons) {
+      return hexagons.positions
+    }
     const positions = localStorage.getItem(`${id}.positions`)
     if (positions) {
       return JSON.parse(positions)
@@ -174,10 +194,9 @@
 
   let blacklist = getBlacklist()
 
-  $: {
+  onMount(() => {
     assignTabIndex()
-    const images = sources.filter((url) => !blacklist.has(url))
-    console.log({ blacklist, sources, images })
+    const images = getImages()
     assignImages(images)
     const positions = getImagePositions()
     positions.forEach((position) => {
@@ -191,6 +210,13 @@
         image.setAttribute("height", position.height)
       }
     })
+  })
+
+  function getImages() {
+    if (hexagons) {
+      return hexagons.positions.map((location) => location.url)
+    }
+    return sources.filter((url) => !blacklist.has(url))
   }
 </script>
 
@@ -260,6 +286,14 @@
     </svg>
   </section>
   <button on:click={() => save()}>save</button>
+  <button on:click={() => (play = !play)}>{play ? "Play" : "Unplay"}</button>
+  <button
+    title="Copy settings to clipboard"
+    on:click={() => {
+      const settings = { id, positions: getImagePositions() }
+      navigator.clipboard.writeText(JSON.stringify(settings))
+    }}>Copy</button
+  >
 </div>
 
 <style>

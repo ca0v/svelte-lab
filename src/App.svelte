@@ -2,6 +2,7 @@
   import PhotoScreen from "./components/PhotoScreen.svelte"
   import { photoUrl as PHOTOS } from "./lib/globals"
   import HexagonSpiral from "./components/HexagonSpiral.svelte"
+  import { hexagons } from "./data/hexagons"
   type Photo = {
     id: string
     href: string
@@ -26,6 +27,7 @@
       <HexagonSpiral
         id="phase-1"
         duration={0.2}
+        {hexagons}
         sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)}
       />
     </div>
