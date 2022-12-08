@@ -23,92 +23,84 @@
         .join(" ") + "Z"
     )
   }
-
-  // put an image inside an svg
-  function imageToPath(
-    src: string,
-    width: number = 1,
-    height: number = 1,
-    x: number = 0,
-    y: number = 0
-  ) {
-    return `<image href="${src}" width="${width}" height="${height}" x="${x}" y="${y}" />`
-  }
 </script>
 
 <section>
   <svg
     id="center"
-    viewBox="-1 -1 2 2"
-    width="100"
-    height="100"
+    viewBox="-100 -100 200 200"
+    width="100%"
+    height="100%"
     stroke-width="0"
-    fill="#ccc"
+    fill="#000"
   >
     <clipPath id="clip">
-      <path d={polygonToPath(polygonPath(6, 0.8, 30))} />
+      <path d={polygonToPath(polygonPath(6, 21, 30))} />
     </clipPath>
-    <path d={polygonToPath(polygonPath(6, 0.9, 30))} />
     <image
+      class="i0"
       href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
-      width="2"
-      height="2"
-      x="-1"
-      y="-1"
+      width="50"
+      height="50"
+      x="-25"
+      y="-25"
       clip-path="url(#clip)"
     />
-  </svg>
-  {#each Array(6).fill(0) as _, i}
-    <svg
-      viewBox="-1 -1 2 2"
-      width="100"
-      height="100"
-      style={`transform: rotate(${i * 60}deg) translate(92px, 0)`}
-      fill="green"
-    >
-      <path d={polygonToPath(polygonPath(6, 1, 30))} />
-    </svg>
-  {/each}
-  {#each Array(6).fill(0) as _, i}
-    <svg
-      viewBox="-1 -1 2 2"
-      width="100"
-      height="100"
-      style={`transform: rotate(${i * 60}deg) translate(182px, 0)`}
-    >
-      <path
-        d={polygonToPath(polygonPath(6, 0.25, 30))}
-        fill="none"
-        stroke="red"
+    {#each Array(6).fill(0) as _, i}
+      <image
+        id={`i${i + 1}`}
+        href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
+        width="50"
+        height="50"
+        x="-25"
+        y="-25"
+        clip-path="url(#clip)"
+        style={`transform: rotate(${i * 60}deg) translate(40px, 0) rotate(${
+          -i * 60
+        }deg)`}
       />
-    </svg>
-  {/each}
-  {#each Array(6).fill(0) as _, i}
-    <svg
-      viewBox="-1 -1 2 2"
-      width="100"
-      height="100"
-      style={`transform: rotate(${30 + i * 60}deg) translate(152px, 0)`}
-    >
-      <path d={polygonToPath(polygonPath(6, 1, 0))} fill="none" stroke="red" />
-    </svg>
-  {/each}
+    {/each}
+    {#each Array(6).fill(0) as _, i}
+      <image
+        class={`i${i + 7}`}
+        href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
+        width="50"
+        height="50"
+        x="-25"
+        y="-25"
+        clip-path="url(#clip)"
+        style={`transform: rotate(${i * 60}deg) translate(80px, 0) rotate(-${
+          i * 60
+        }deg) `}
+      />
+    {/each}
+    {#each Array(6).fill(0) as _, i}
+      <image
+        class={`i${i + 13}`}
+        href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
+        width="50"
+        height="50"
+        x="-25"
+        y="-25"
+        clip-path="url(#clip)"
+        style={`transform: rotate(${
+          30 + i * 60
+        }deg) translate(69.5px, 0) rotate(-${30 + i * 60}deg)`}
+      />
+    {/each}
+  </svg>
 </section>
 
 <style>
   section {
     position: relative;
-    width: 100vmin;
-    height: 100vmin;
-    border: 1px solid white;
+    left: 25vmin;
+    width: 50vmin;
+    height: 50vmin;
     overflow: hidden;
   }
 
-  section > svg {
-    outline: 1px solid rgba(200, 200, 200, 0.25);
-    border-radius: 50%;
-    position: absolute;
-    top: calc(50vmin - 50px);
-    left: calc(50vmin - 50px);
+  image {
+    transition-duration: 500ms;
   }
 </style>
