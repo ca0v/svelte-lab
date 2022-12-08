@@ -26,8 +26,14 @@
       <PhotoScreen sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)} />
     </div>
     <HexagonSpiral
+      id="phase-1"
       duration={1}
       sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)}
+    />
+    <HexagonSpiral
+      id="phase-2"
+      duration={0.1}
+      sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`).reverse()}
     />
     {#each photos as photo}
       <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
