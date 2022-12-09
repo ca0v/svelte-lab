@@ -19,6 +19,8 @@
     height: number
   }
 
+  let photoWheelComponent: PhotoWheel
+
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
   const scope = `hexagon_spiral_${id}`
 
@@ -74,15 +76,11 @@
     images.forEach((image: SVGImageElement, i) => {
       image.setAttribute("tabindex", "0")
       image.addEventListener("keydown", async (e: KeyboardEvent) => {
-        if (e.shiftKey) return
         if (e.ctrlKey) return
         if (e.altKey) return
         if (e.metaKey) return
 
-        let x = parseInt(image.getAttribute("x"))
-        let y = parseInt(image.getAttribute("y"))
-        let width = parseInt(image.getAttribute("width"))
-        let height = parseInt(image.getAttribute("height"))
+        let { x, y, width, height } = queryImagePosition(image)
         switch (e.key) {
           case "ArrowUp":
             y -= 1
@@ -119,13 +117,22 @@
             swap(centerImage, image)
             break
           }
+          case ".":
+            // set focus to the photo wheel
+            photoWheelComponent.focus()
+            break
+
           default:
             if (!ID_MAP.includes(e.key.toLocaleUpperCase())) return
             const index = ID_MAP.indexOf(e.key.toLocaleUpperCase())
             const targetImage = document.querySelector(
               `.${scope} image.i${index}`
             ) as SVGImageElement
-            swap(targetImage, image)
+            if (e.shiftKey) {
+              targetImage?.focus()
+            } else {
+              swap(targetImage, image)
+            }
             break
         }
 
@@ -366,7 +373,32 @@
         }}><u>C</u>opy</button
       >
     </div>
-    <div class="if-focus"><PhotoWheel {sources} /></div>
+    <div class="if-focus">
+      <PhotoWheel
+        {sources}
+        bind:this={photoWheelComponent}
+        on:goto={(data) => {
+          const { key } = data.detail
+          const index = ID_MAP.indexOf(key.toLocaleUpperCase())
+          if (index < 0) return
+          const targetImage = document.querySelector(
+            `.${scope} image.i${index}`
+          )
+          targetImage?.focus()
+        }}
+        on:keydown={(data) => {
+          const { key, source } = data.detail
+          const index = ID_MAP.indexOf(key.toLocaleUpperCase())
+          if (index < 0) return
+          const targetImage = document.querySelector(
+            `.${scope} image.i${index}`
+          )
+          if (targetImage) {
+            targetImage.setAttribute("href", source)
+          }
+        }}
+      />
+    </div>
   </section>
 </div>
 
@@ -409,7 +441,7 @@
   }
 
   .if-focus {
-    visibility: visible;
+    visibility: hidden;
   }
 
   section:focus-within .if-focus {

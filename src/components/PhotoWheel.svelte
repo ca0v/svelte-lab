@@ -1,10 +1,22 @@
 <script lang="ts">
+  import { createEventDispatcher } from "svelte"
   import { polygonPath, polygonToPath, translatePath } from "../data/hexagons"
-
+  const dispatch = createEventDispatcher()
   export let sources: Array<string> = []
+  let container: HTMLElement
+
+  let lastFocusedElement: any = null
+
+  export const focus = () => {
+    // set focus to the first focusable element
+    const first = lastFocusedElement || container.querySelector("button")
+    if (first) {
+      first.focus()
+    }
+  }
 </script>
 
-<container>
+<container bind:this={container}>
   <svg
     viewBox="-100 -100 200 200"
     width="100%"
@@ -19,7 +31,23 @@
     </clipPath>
   </svg>
   {#each sources as source}
-    <button>
+    <button
+      on:focus={(event) => {
+        // keep track of the last focused element
+        lastFocusedElement = event.target
+      }}
+      on:click={() => {
+        // emit a click event so the parent can handle it
+        dispatch("click", source)
+      }}
+      on:keydown={(e) => {
+        if (e.shiftKey) {
+          dispatch("goto", { key: e.key })
+          return
+        }
+        dispatch("keydown", { key: e.key, source })
+      }}
+    >
       <img src={source} />
     </button>
   {/each}
