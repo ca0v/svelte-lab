@@ -22,14 +22,12 @@
 <main>
   <h1>Photos</h1>
   <div class="frame">
-    <div class="side-by-side">
-      <HexagonSpiral
-        id="phase-1"
-        duration={0.2}
-        {hexagons}
-        sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)}
-      />
-    </div>
+    <HexagonSpiral
+      id="phase-1"
+      duration={0.2}
+      {hexagons}
+      sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)}
+    />
     <div class="fit">
       <PhotoScreen sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)} />
     </div>
@@ -47,13 +45,6 @@
 </main>
 
 <style>
-  .side-by-side {
-    display: flex;
-    flex-direction: row;
-    /* center this flex box*/
-    justify-content: center;
-    height: 50vmin;
-  }
   .fit {
     width: 95vmin;
     height: 95vmin;

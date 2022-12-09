@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import { polygonPath, polygonToPath } from "../data/hexagons"
-  import PhotoScreen from "./PhotoScreen.svelte"
   import PhotoWheel from "./PhotoWheel.svelte"
   export let id = "default"
   export let sources: Array<string> = []
@@ -263,7 +262,6 @@
 </script>
 
 <div class={scope} on:keydown={handleShortcutKeys}>
-  <PhotoWheel {sources} />
   <section class:play>
     <svg
       viewBox="-100 -100 200 200"
@@ -354,32 +352,35 @@
         >
       {/each}
     </svg>
-    <button class="if-focus" data-shortcut="S" on:click={() => save()}
-      ><u>S</u>ave</button
-    >
-    <button class="if-focus" on:click={() => (play = !play)}
-      >{play ? "Play" : "Unplay"}</button
-    >
-    <button
-      class="if-focus"
-      data-shortcut="C"
-      title="Copy settings to clipboard"
-      on:click={() => {
-        const settings = { id, positions: queryImagePositions() }
-        navigator.clipboard.writeText(JSON.stringify(settings))
-      }}><u>C</u>opy</button
-    >
+    <div class="toolbar">
+      <button class="if-focus" data-shortcut="S" on:click={() => save()}
+        ><u>S</u>ave</button
+      >
+      <button
+        class="if-focus"
+        data-shortcut="C"
+        title="Copy settings to clipboard"
+        on:click={() => {
+          const settings = { id, positions: queryImagePositions() }
+          navigator.clipboard.writeText(JSON.stringify(settings))
+        }}><u>C</u>opy</button
+      >
+    </div>
+    <div class="if-focus"><PhotoWheel {sources} /></div>
   </section>
 </div>
 
 <style>
   svg {
+    position: relative;
     overflow: visible;
   }
+
   section {
-    position: relative;
-    width: 100%;
-    height: 100%;
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-columns: 70cqmin;
+    justify-content: center;
   }
 
   image {
@@ -408,7 +409,7 @@
   }
 
   .if-focus {
-    visibility: hidden;
+    visibility: visible;
   }
 
   section:focus-within .if-focus {

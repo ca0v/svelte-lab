@@ -30,7 +30,6 @@
     display: grid;
     grid-auto-flow: column;
     gap: 0.5rem;
-    width: 80vw;
     overflow-x: scroll;
     padding: 1rem;
     align-items: top;
