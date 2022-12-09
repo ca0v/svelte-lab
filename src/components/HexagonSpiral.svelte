@@ -171,6 +171,7 @@
         break
       }
       let { x, y, width, height } = svgImage.getBBox()
+      let resize = false
       switch (e.key) {
         case "Delete":
           addToBlacklist(svgImage.href)
@@ -179,27 +180,33 @@
           break
         case "ArrowUp":
           y -= 1
+          resize = true
           break
         case "ArrowDown":
           y += 1
+          resize = true
           break
         case "ArrowLeft":
           x -= 1
+          resize = true
           break
         case "ArrowRight":
           x += 1
+          resize = true
           break
         case "+":
           width += 2
           height += 2
           x -= 1
           y -= 1
+          resize = true
           break
         case "-":
           width -= 2
           height -= 2
           x += 1
           y += 1
+          resize = true
           break
         default:
           if (!ID_MAP.includes(e.key.toLocaleUpperCase())) break
@@ -217,11 +224,13 @@
           break
       }
 
-      image.setAttribute("x", x + "px")
-      image.setAttribute("y", y + "px")
-      image.setAttribute("width", width + "px")
-      image.setAttribute("height", height + "px")
-      handled = true
+      if (!handled && resize) {
+        image.setAttribute("x", x + "px")
+        image.setAttribute("y", y + "px")
+        image.setAttribute("width", width + "px")
+        image.setAttribute("height", height + "px")
+        handled = true
+      }
       break
     }
 
@@ -260,12 +269,19 @@
   }
 
   function swapHandler(e) {
-    const targetElement = e.detail.element
-    const targetImage = svgImages.find((i) => i.target === targetElement)
-    if (!targetImage) return
-    const activeImage = svgImages.find((i) => i.active)
-    if (!activeImage) return
-    swap(targetImage, activeImage)
+    const { target1, target2 } = e.detail
+    const t1 = svgImages.find((i) => i.target === target1)
+    if (!t1) {
+      console.log("no target image")
+      return
+    }
+
+    const t2 = svgImages.find((i) => i.target === target2)
+    if (!t2) {
+      console.log("no active image")
+      return
+    }
+    swap(t1, t2)
   }
 </script>
 
@@ -299,6 +315,7 @@
           bind:this={svgImages[i + 1]}
           {play}
           {editmode}
+          on:swap={swapHandler}
           target={`i${i + 1}`}
           hotkey={ID_MAP[i + 1]}
           style={`transform: rotate(${i * 60}deg) translate(40px, 0) rotate(${
@@ -310,6 +327,7 @@
         <SvgImage
           {play}
           {editmode}
+          on:swap={swapHandler}
           bind:this={svgImages[i + 7]}
           target={`i${i + 7}`}
           hotkey={ID_MAP[i + 7]}
@@ -322,6 +340,7 @@
         <SvgImage
           {play}
           {editmode}
+          on:swap={swapHandler}
           bind:this={svgImages[i + 13]}
           target={`i${i + 13}`}
           hotkey={ID_MAP[i + 13]}

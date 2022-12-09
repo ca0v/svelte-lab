@@ -85,7 +85,7 @@
       if (element instanceof SVGImageElement) {
         element.classList.remove("dropping")
         element.focus()
-        dispatch("swap", { element })
+        dispatch("swap", { target1: element.dataset.target, target2: target })
       }
     }
 
