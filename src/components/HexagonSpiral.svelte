@@ -21,6 +21,8 @@
   let photoWheelComponent: PhotoWheel
   let svgImages: Array<SvgImage> = []
 
+  let editmode = false
+
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
   const scope = `hexagon_spiral_${id}`
 
@@ -175,6 +177,10 @@
         break
       case "Delete":
         addToBlacklist(image.getAttribute("href"))
+        image.setAttribute("href", "")
+        break
+      case "?":
+        editmode = !editmode
         break
       case " ":
         // set focus to the photo wheel
@@ -231,18 +237,21 @@
 </script>
 
 <div class={scope} on:keydown={keyDownHandler}>
-  <section
-    on:dragenter={() => {
-      console.log("dragenter")
-    }}
-  >
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <section>
     <svg viewBox="-100 -100 200 200" stroke-width="0" fill="#000">
+      <defs>
+        <g id="hexagon">
+          <path d={polygonToPath(polygonPath(6, 21, 30))} />
+        </g>
+      </defs>
       <clipPath id="clip">
         <path d={polygonToPath(polygonPath(6, 21, 30))} />
       </clipPath>
       <SvgImage
         bind:this={svgImages[0]}
         {play}
+        {editmode}
         target={`i0`}
         hotkey={ID_MAP[0]}
       />
@@ -250,6 +259,7 @@
         <SvgImage
           bind:this={svgImages[i + 1]}
           {play}
+          {editmode}
           target={`i${i + 1}`}
           hotkey={ID_MAP[i + 1]}
           style={`transform: rotate(${i * 60}deg) translate(40px, 0) rotate(${
@@ -260,6 +270,7 @@
       {#each Array(6).fill(0) as _, i}
         <SvgImage
           {play}
+          {editmode}
           bind:this={svgImages[i + 7]}
           target={`i${i + 7}`}
           hotkey={ID_MAP[i + 7]}
@@ -271,6 +282,7 @@
       {#each Array(6).fill(0) as _, i}
         <SvgImage
           {play}
+          {editmode}
           bind:this={svgImages[i + 13]}
           target={`i${i + 13}`}
           hotkey={ID_MAP[i + 13]}
@@ -291,6 +303,7 @@
         on:click={() => {
           const settings = { id, positions: queryImagePositions() }
           navigator.clipboard.writeText(JSON.stringify(settings))
+          editmode = false
         }}><u>C</u>opy</button
       >
     </div>

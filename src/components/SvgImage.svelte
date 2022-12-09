@@ -10,6 +10,8 @@
 
   let thisImage: SVGImageElement
   export let fast = false
+  export let editmode = true
+  let active = false
 
   export function disableAnimations() {
     fast = true
@@ -45,6 +47,10 @@
       cloneElement.style.top = y + dy + "px"
       cloneElement.style.left = x + dx + "px"
 
+      thisImage.parentElement.querySelectorAll("image").forEach((el) => {
+        el.classList.remove("dropping")
+      })
+
       document.elementsFromPoint(e.clientX, e.clientY).forEach((el) => {
         if (el instanceof SVGImageElement) {
           el.classList.add("dropping")
@@ -79,7 +85,11 @@
   tabindex="0"
   class:play
   class:fast
+  class:editmode
+  class:active
   bind:this={thisImage}
+  on:focus={() => console.log("focus", (active = true))}
+  on:blur={() => (active = false)}
   on:mousedown={mouseDownHandler}
   on:dragstart={(e) => {
     console.log("dragstart never fires")
@@ -112,9 +122,25 @@
 />
 
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<text tabindex="0" class="selector if-focus" textLength="1" {style}
-  >{hotkey}{play ? "." : ""}</text
+<text
+  class="selector if-focus"
+  class:editmode
+  class:active
+  textLength="1"
+  {style}>{hotkey}{play ? "." : ""}</text
 >
+
+<use
+  class="border"
+  class:active
+  cx="0"
+  cy="0"
+  r="21"
+  fill="none"
+  stroke-width="1"
+  {style}
+  xlink:href="#hexagon"
+/>
 
 <style>
   image {
@@ -122,42 +148,49 @@
     opacity: 1;
   }
 
-  image:focus {
+  image:focus,
+  image.fast {
+    transition-duration: 0ms;
+  }
+
+  image.active {
     outline: none;
+  }
+
+  .border {
+    visibility: hidden;
+    stroke: white;
+  }
+
+  .border.active {
+    visibility: visible;
   }
 
   image.play {
     opacity: 0;
   }
 
-  /*
-  get the text element that is a sibling to the focused image
-  */
-  image:focus + text {
-    stroke: #0f0;
-  }
-
-  image.dropping + text {
-    stroke: #0f0;
-  }
-
-  text {
+  .selector {
+    fill: #fff;
+    font-size: 0.5em;
     stroke-width: 0.25px;
     stroke: #fff;
-    translate: 0 12px;
-    /* prevent selection */
-    user-select: none;
-  }
-
-  .selector {
-    font-size: 0.5em;
     text-anchor: middle;
-    fill: #fff;
     text-shadow: 0 0 1em black;
+    translate: 0 12px;
+    user-select: none;
+    visibility: hidden;
   }
 
-  image:focus,
-  image.fast {
-    transition-duration: 0ms;
+  .selector.editmode {
+    visibility: visible;
+  }
+
+  image:focus + .selector {
+    stroke: #0f0;
+  }
+
+  image.dropping + .selector {
+    stroke: #0f0;
   }
 </style>
