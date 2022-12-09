@@ -78,52 +78,65 @@
       image.setAttribute("tabindex", "0")
 
       /* register drag-and-drop callback using mouse events */
-      image.addEventListener("mousedown", (e: MouseEvent) => {
-        const { url } = queryImagePosition(image)
-        const startX = e.clientX
-        const startY = e.clientY
+      image.addEventListener(
+        "mousedown",
+        (e: MouseEvent & { layerX: number; layerY: number }) => {
+          const { url } = queryImagePosition(image)
+          const startX = e.screenX
+          const startY = e.screenY
+          console.log({ e })
 
-        // get the width of the svg element
-        const svg = document.querySelector(`.${scope} svg`) as SVGSVGElement
-        const svgActualWidth = svg.getBoundingClientRect().width
-        const svgDeclaredWidth = svg.viewBox.baseVal.width
-        const svgScale = svg.currentScale
+          // get the width of the svg element
+          const svg = document.querySelector(`.${scope} svg`) as SVGSVGElement
 
-        const [width, height] = [128, 128]
-        cloneElement.style.width = width + "px"
-        cloneElement.style.height = height + "px"
-        let [x, y] = [startX - width / 2, startY - height / 2]
-        cloneElement.style.top = y + "px"
-        cloneElement.style.left = x + "px"
-        cloneElement.style.backgroundImage = `url(${url})`
+          const width = cloneElement.offsetWidth
+          const height = cloneElement.offsetHeight
+          cloneElement.style.width = width + "px"
+          cloneElement.style.height = height + "px"
 
-        const onMouseMove = (e: MouseEvent) => {
-          const scale = 1 //svgDeclaredWidth / svgActualWidth // not sure why this is needed, depends on screen size and size of the hive (grid-template-column: 70cqmin)
-          const dx = scale * (e.clientX - startX)
-          const dy = scale * (e.clientY - startY)
-          cloneElement.style.top = y + dy + "px"
-          cloneElement.style.left = x + dx + "px"
-        }
+          let [x, y] = [e.pageX - width / 2, e.pageY - height / 2]
 
-        const onMouseUp = (e: MouseEvent) => {
-          cloneElement.style.top = "-1000px"
-          cloneElement.style.left = "-1000px"
-          document.removeEventListener("mousemove", onMouseMove)
-          document.removeEventListener("mouseup", onMouseUp)
-          // find image under the mouse
-          const x = e.clientX
-          const y = e.clientY
-          const element = document.elementFromPoint(x, y)
-          console.log({ x, y, element })
-          if (element instanceof SVGImageElement) {
-            console.log("setting url!")
-            swap(image, element)
+          cloneElement.style.top = y + "px"
+          cloneElement.style.left = x + "px"
+          cloneElement.style.backgroundImage = `url(${url})`
+
+          const onMouseMove = (e: MouseEvent) => {
+            cloneElement.classList.add("dragging")
+            const scale = 1 //svgDeclaredWidth / svgActualWidth // not sure why this is needed, depends on screen size and size of the hive (grid-template-column: 70cqmin)
+            const dx = scale * (e.screenX - startX)
+            const dy = scale * (e.screenY - startY)
+            cloneElement.style.top = y + dy + "px"
+            cloneElement.style.left = x + dx + "px"
+
+            images.forEach((i) => i.classList.remove("dropping"))
+            document.elementsFromPoint(e.clientX, e.clientY).forEach((el) => {
+              if (el instanceof SVGImageElement) {
+                el.classList.add("dropping")
+              }
+            })
           }
-        }
 
-        document.addEventListener("mousemove", onMouseMove)
-        document.addEventListener("mouseup", onMouseUp)
-      })
+          const onMouseUp = (e: MouseEvent) => {
+            cloneElement.classList.remove("dragging")
+            cloneElement.style.top = "-1000px"
+            cloneElement.style.left = "-1000px"
+            document.removeEventListener("mousemove", onMouseMove)
+            document.removeEventListener("mouseup", onMouseUp)
+            // find image under the mouse
+            const x = e.clientX
+            const y = e.clientY
+            const element = document.elementFromPoint(x, y)
+            if (element instanceof SVGImageElement) {
+              element.classList.remove("dropping")
+              swap(image, element)
+              element.focus()
+            }
+          }
+
+          document.addEventListener("mousemove", onMouseMove)
+          document.addEventListener("mouseup", onMouseUp)
+        }
+      )
 
       image.addEventListener("keydown", async (e: KeyboardEvent) => {
         if (e.ctrlKey) return
@@ -460,7 +473,6 @@
     </div>
   </section>
 </div>
-
 <div bind:this={cloneElement} class="clone">Clone Here</div>
 
 <style>
@@ -496,6 +508,10 @@
     stroke: #0f0;
   }
 
+  section image.dropping + text {
+    stroke: #0f0;
+  }
+
   svg text {
     stroke-width: 0.25px;
     stroke: #fff;
@@ -527,8 +543,8 @@
     position: absolute;
     top: 0;
     left: 0;
-    height: 128px;
-    width: 128px;
+    height: 96px;
+    width: 96px;
     border: 1px solid #fff;
     border-radius: 50%;
     background-size: cover;
@@ -539,5 +555,10 @@
     justify-content: center;
     /* prevent selection */
     user-select: none;
+    visibility: hidden;
+  }
+
+  .clone.dragging {
+    visibility: visible;
   }
 </style>
