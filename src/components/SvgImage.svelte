@@ -1,3 +1,5 @@
+<svelte:options accessors={true} />
+
 <script lang="ts">
   import { sleep, swap } from "../data/hexagons"
 
@@ -17,10 +19,6 @@
     fast = true
   }
 
-  export function test() {
-    return thisImage
-  }
-
   function mouseDownHandler(e: MouseEvent) {
     const startX = e.screenX
     const startY = e.screenY
@@ -30,13 +28,9 @@
 
     const width = cloneElement.offsetWidth
     const height = cloneElement.offsetHeight
-    cloneElement.style.width = width + "px"
-    cloneElement.style.height = height + "px"
 
     let [x, y] = [e.pageX - width / 2, e.pageY - height / 2]
 
-    cloneElement.style.top = y + "px"
-    cloneElement.style.left = x + "px"
     cloneElement.style.backgroundImage = `url(${href})`
 
     const onMouseMove = (e: MouseEvent) => {
@@ -60,8 +54,6 @@
 
     const onMouseUp = (e: MouseEvent) => {
       cloneElement.classList.remove("dragging")
-      cloneElement.style.top = "-1000px"
-      cloneElement.style.left = "-1000px"
       document.removeEventListener("mousemove", onMouseMove)
       document.removeEventListener("mouseup", onMouseUp)
       // find image under the mouse
@@ -137,7 +129,7 @@
   cy="0"
   r="21"
   fill="none"
-  stroke-width="1"
+  stroke-width="2"
   {style}
   xlink:href="#hexagon"
 />
@@ -160,6 +152,14 @@
   .border {
     visibility: hidden;
     stroke: white;
+  }
+
+  /*
+    select the second sibling of image
+  */
+  image:hover:not(.active) + .selector + .border {
+    opacity: 0.5;
+    visibility: visible;
   }
 
   .border.active {

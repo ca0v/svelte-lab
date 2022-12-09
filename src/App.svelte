@@ -19,8 +19,6 @@
   })()
 </script>
 
-<div class="clone dragging">Clone Here</div>
-
 <main>
   <h1>Photos</h1>
   <div class="frame">
@@ -44,6 +42,7 @@
       />
     {/each}
   </div>
+  <div class="clone dragging">Clone Here</div>
 </main>
 
 <style>
@@ -79,12 +78,10 @@
     position: absolute;
     top: 0;
     left: 0;
-    height: 96px;
-    width: 96px;
-    border: 1px solid #fff;
-    border-radius: 50%;
+    height: 128px;
+    width: 128px;
     background-size: cover;
-    opacity: 0.2;
+    opacity: 0.5;
     /* center text vertically */
     display: flex;
     align-items: center;
@@ -92,6 +89,7 @@
     /* prevent selection */
     user-select: none;
     visibility: hidden;
+    clip-path: url(#clip2);
   }
 
   .clone.dragging {

@@ -6,6 +6,7 @@
     queryImagePosition,
     setImagePosition,
     swap,
+    translatePath,
     type ImagePosition,
   } from "../data/hexagons"
   import PhotoWheel from "./PhotoWheel.svelte"
@@ -65,10 +66,9 @@
 
   // assign images to each image element
   function autoAssignImages(urls: string[]) {
-    const images = document.querySelectorAll(`.${scope} image`)
-    images.forEach((image, i) => {
+    svgImages.forEach((image, i) => {
       const url = urls[i % urls.length]
-      image.setAttribute("href", url)
+      image.href = url
     })
   }
 
@@ -146,7 +146,7 @@
     // get the image that is currently focused
     const image = document.activeElement as SVGImageElement
     // get the svgImage from this
-    const svgImage = svgImages.find((i) => i.test() === image)
+    const svgImage = svgImages.find((i) => i.thisImage === image)
     if (!svgImage) return
 
     let { x, y, width, height } = queryImagePosition(image)
@@ -193,10 +193,10 @@
         const targetImage = svgImages[index]
         if (!targetImage) return
         if (e.shiftKey) {
-          targetImage.test().focus()
+          targetImage.thisImage.focus()
         } else {
           targetImage.disableAnimations()
-          swap(targetImage.test(), image)
+          swap(targetImage.thisImage, image)
         }
         break
     }
@@ -242,11 +242,16 @@
     <svg viewBox="-100 -100 200 200" stroke-width="0" fill="#000">
       <defs>
         <g id="hexagon">
-          <path d={polygonToPath(polygonPath(6, 21, 30))} />
+          <path d={polygonToPath(polygonPath(6, 22, 30))} />
         </g>
       </defs>
       <clipPath id="clip">
         <path d={polygonToPath(polygonPath(6, 21, 30))} />
+      </clipPath>
+      <clipPath id="clip2">
+        <path
+          d={polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64))}
+        />
       </clipPath>
       <SvgImage
         bind:this={svgImages[0]}
@@ -324,7 +329,7 @@
           if (index < 0) return
           const targetImage = svgImages[index]
           if (targetImage) {
-            targetImage.test().setAttribute("href", source)
+            targetImage.thisImage.href = source
           }
         }}
       />
