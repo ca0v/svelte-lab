@@ -1,7 +1,8 @@
 <svelte:options accessors={true} />
 
 <script lang="ts">
-  import { sleep, swap } from "../data/hexagons"
+  import { createEventDispatcher } from "svelte"
+  const dispatch = createEventDispatcher()
 
   export let target = "center"
   export let style = ""
@@ -14,6 +15,10 @@
   export let fast = false
   export let editmode = true
   let active = false
+
+  export function focus() {
+    thisImage.focus()
+  }
 
   export function getBBox() {
     const { x, y, width, height } = thisImage.getBBox()
@@ -80,7 +85,7 @@
       if (element instanceof SVGImageElement) {
         element.classList.remove("dropping")
         element.focus()
-        swap(thisImage, element)
+        dispatch("swap", { element })
       }
     }
 

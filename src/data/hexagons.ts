@@ -45,35 +45,9 @@ function polygonToPath(points: Array<[number, number]>) {
     )
 }
 
-function queryImagePosition(image: HTMLElement | SVGElement): ImagePosition {
-    return {
-        target: image.dataset.target,
-        url: image.getAttribute("href"),
-        x: parseInt(image.getAttribute("x")),
-        y: parseInt(image.getAttribute("y")),
-        width: parseInt(image.getAttribute("width")),
-        height: parseInt(image.getAttribute("height")),
-    }
-}
-
-function setImagePosition(image: SVGImageElement, position: ImagePosition) {
-    image.setAttribute("href", position.url)
-    image.setAttribute("x", position.x + "px")
-    image.setAttribute("y", position.y + "px")
-    image.setAttribute("width", position.width + "px")
-    image.setAttribute("height", position.height + "px")
-}
-
-function swap(centerImage: SVGImageElement, image: SVGImageElement) {
-    const centerInfo = queryImagePosition(centerImage)
-    const outerInfo = queryImagePosition(image)
-    setImagePosition(centerImage, outerInfo)
-    sleep(20).then(() => setImagePosition(image, centerInfo))
-}
-
 async function sleep(delay: number) {
     return new Promise((resolve) => setTimeout(resolve, delay))
 }
 
 
-export { hexagons, polygonPath, polygonToPath, translatePath, queryImagePosition, swap, setImagePosition, sleep, type ImagePosition }
+export { hexagons, polygonPath, polygonToPath, translatePath, sleep, type ImagePosition }

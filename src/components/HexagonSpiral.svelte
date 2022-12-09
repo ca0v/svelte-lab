@@ -3,8 +3,6 @@
   import {
     polygonPath,
     polygonToPath,
-    queryImagePosition,
-    setImagePosition,
     translatePath,
     type ImagePosition,
   } from "../data/hexagons"
@@ -77,8 +75,11 @@
 
   function queryImagePositions() {
     // persist image positions
-    const images = document.querySelectorAll(`.${scope} image`)
-    return Array.from(images).map(queryImagePosition)
+    return svgImages.map((i) => ({
+      href: i.href,
+      target: i.target,
+      ...i.getBBox(),
+    }))
   }
 
   function save(): void {
@@ -95,7 +96,7 @@
       positions = positions.filter((p) => {
         const match = hexagons.positions.find((h) => {
           return (
-            h.url === p.url &&
+            h.url === p.href &&
             h.x === p.x &&
             h.y === p.y &&
             h.width === p.width &&
@@ -107,6 +108,7 @@
       })
     }
     localStorage.setItem(`${id}.positions`, JSON.stringify(positions))
+    editmode = false
   }
 
   function loadImagePositions(): Array<ImagePosition> {
@@ -168,7 +170,7 @@
         console.log(svgImages, image)
         break
       }
-      let { x, y, width, height } = queryImagePosition(image)
+      let { x, y, width, height } = svgImage.getBBox()
       switch (e.key) {
         case "Delete":
           addToBlacklist(svgImage.href)
@@ -205,7 +207,7 @@
           const targetImage = svgImages[index]
           if (!targetImage) break
           if (e.shiftKey) {
-            targetImage.thisImage.focus()
+            targetImage.focus()
             handled = true
           } else {
             targetImage.disableAnimations()
@@ -234,19 +236,12 @@
 
   onMount(() => {
     hexagons?.positions.forEach((p) => {
-      const image = queryImage(p.target)
-      if (image) {
-        setImagePosition(image, p)
-      }
+      const target = svgImages.find((i) => i.target === p.target)
+      if (!target) return
+      target.href = p.url
+      target.setBBox(p)
     })
   })
-
-  function getImages() {
-    if (hexagons) {
-      return hexagons.positions.map((location) => location.url)
-    }
-    return sources.filter((url) => !blacklist.has(url))
-  }
 
   function queryImage(index: number | string): SVGImageElement {
     if (typeof index === "string") {
@@ -262,6 +257,15 @@
     i1.setBBox(i2.getBBox())
     i2.href = href
     i2.setBBox({ x, y, width, height })
+  }
+
+  function swapHandler(e) {
+    const targetElement = e.detail.element
+    const targetImage = svgImages.find((i) => i.target === targetElement)
+    if (!targetImage) return
+    const activeImage = svgImages.find((i) => i.active)
+    if (!activeImage) return
+    swap(targetImage, activeImage)
   }
 </script>
 
@@ -286,6 +290,7 @@
         bind:this={svgImages[0]}
         {play}
         {editmode}
+        on:swap={swapHandler}
         target={`i0`}
         hotkey={ID_MAP[0]}
       />
