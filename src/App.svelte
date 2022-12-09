@@ -24,7 +24,7 @@
   <div class="frame">
     <HexagonSpiral
       id="phase-1"
-      duration={0.002}
+      duration={0.2}
       {hexagons}
       sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)}
     />

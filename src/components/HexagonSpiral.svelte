@@ -2,6 +2,7 @@
   import { onMount } from "svelte"
   import { polygonPath, polygonToPath } from "../data/hexagons"
   import PhotoWheel from "./PhotoWheel.svelte"
+  import SvgImage from "./SvgImage.svelte"
   export let id = "default"
   export let sources: Array<string> = []
   export let hexagons: {
@@ -32,7 +33,7 @@
         const t = `translate(${size / 2 - i}em,-12vh)`
         return `transform: ${t} !important;opacity(0);`
       })
-      .map((t, i) => `.${scope} .play .i${i} { ${t} }`)
+      .map((t, i) => `.${scope} .play.i${i} { ${t} }`)
       .join("\n")
   }
 
@@ -76,7 +77,6 @@
     const images = document.querySelectorAll(`.${scope} image`)
     images.forEach((image: SVGImageElement, i) => {
       image.setAttribute("tabindex", "0")
-
       /* register drag-and-drop callback using mouse events */
       image.addEventListener(
         "mousedown",
@@ -287,16 +287,6 @@
     })
   })
 
-  function setPosition(
-    image: Element,
-    position: { x: number; y: number; width: number; height: number }
-  ) {
-    image.setAttribute("x", position.x + "px")
-    image.setAttribute("y", position.y + "px")
-    image.setAttribute("width", position.width + "px")
-    image.setAttribute("height", position.height + "px")
-  }
-
   function setImagePosition(image: SVGImageElement, position: ImagePosition) {
     image.setAttribute("href", position.url)
     image.setAttribute("x", position.x + "px")
@@ -345,7 +335,6 @@
 
 <div class={scope} on:keydown={handleShortcutKeys}>
   <section
-    class:play
     on:dragenter={() => {
       console.log("dragenter")
     }}
@@ -354,105 +343,36 @@
       <clipPath id="clip">
         <path d={polygonToPath(polygonPath(6, 21, 30))} />
       </clipPath>
-      <image
-        on:dragenter={(e) => {
-          console.log("dragenter i0")
-        }}
-        on:dragover={(e) => {
-          console.log("dragover i0")
-          e.preventDefault()
-          e.dataTransfer.dropEffect = "copy"
-        }}
-        on:dragleave={(e) => {
-          console.log("dragleave i0")
-        }}
-        on:drop={(e) => {
-          console.log("drop i0")
-          const url = e.dataTransfer.getData("text/plain")
-          console.log({ url })
-          e.currentTarget.setAttribute("href", url)
-          e.currentTarget.setAttribute("x", "-25")
-          e.currentTarget.setAttribute("y", "-25")
-          e.currentTarget.setAttribute("width", "50")
-          e.currentTarget.setAttribute("height", "50")
-          e.preventDefault()
-        }}
-        class="i0"
-        data-target="center"
-        href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
-        width="50"
-        height="50"
-        x="-25"
-        y="-25"
-        clip-path="url(#clip)"
-      />
-      <text class="selector if-focus" textLength="1">{ID_MAP[0]}</text>
+      <SvgImage {play} target={`i0`} hotkey={ID_MAP[0]} />
       {#each Array(6).fill(0) as _, i}
-        <image
-          class={`i${i + 1}`}
-          data-target={`i${i + 1}`}
-          href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
-          width="50"
-          height="50"
-          x="-25"
-          y="-25"
-          clip-path="url(#clip)"
+        <SvgImage
+          {play}
+          target={`i${i + 1}`}
+          hotkey={ID_MAP[i + 1]}
           style={`transform: rotate(${i * 60}deg) translate(40px, 0) rotate(${
             -i * 60
           }deg)`}
         />
-        <text
-          class="selector if-focus"
-          textLength="1"
-          style={`transform: rotate(${i * 60}deg) translate(40px, 0) rotate(${
-            -i * 60
-          }deg)`}>{ID_MAP[i + 1]}</text
-        >
       {/each}
       {#each Array(6).fill(0) as _, i}
-        <image
-          class={`i${i + 7}`}
-          data-target={`i${i + 7}`}
-          href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
-          width="50"
-          height="50"
-          x="-25"
-          y="-25"
-          clip-path="url(#clip)"
+        <SvgImage
+          {play}
+          target={`i${i + 7}`}
+          hotkey={ID_MAP[i + 7]}
           style={`transform: rotate(${i * 60}deg) translate(80px, 0) rotate(-${
             i * 60
           }deg) `}
         />
-        <text
-          class="selector if-focus"
-          textLength="1"
-          style={`transform: rotate(${i * 60}deg) translate(80px, 0) rotate(-${
-            i * 60
-          }deg) `}>{ID_MAP[i + 7]}</text
-        >
       {/each}
       {#each Array(6).fill(0) as _, i}
-        <image
-          class={`i${i + 13}`}
-          data-target={`i${i + 13}`}
-          href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
-          width="50"
-          height="50"
-          x="-25"
-          y="-25"
-          clip-path="url(#clip)"
+        <SvgImage
+          {play}
+          target={`i${i + 13}`}
+          hotkey={ID_MAP[i + 13]}
           style={`transform: rotate(${
             30 + i * 60
           }deg) translate(69.5px, 0) rotate(-${30 + i * 60}deg)`}
         />
-        <text
-          class="selector if-focus"
-          textLength="1"
-          style={`transform: rotate(${
-            30 + i * 60
-          }deg) translate(69.5px, 0) rotate(-${30 + i * 60}deg)`}
-          >{ID_MAP[i + 13]}</text
-        >
       {/each}
     </svg>
     <div class="toolbar">
@@ -513,49 +433,6 @@
     grid-auto-flow: row;
     grid-template-columns: 70cqmin;
     justify-content: center;
-  }
-
-  image {
-    transition-timing-function: ease-out;
-    opacity: 1;
-  }
-
-  .play image {
-    opacity: 0;
-  }
-
-  section image:focus {
-    outline: none;
-  }
-
-  /*
-  get the text element that is a sibling to the focused image
-  */
-  section image:focus + text {
-    stroke: #0f0;
-  }
-
-  section image.dropping + text {
-    stroke: #0f0;
-  }
-
-  svg text {
-    stroke-width: 0.25px;
-    stroke: #fff;
-    translate: 0 12px;
-    /* prevent selection */
-    user-select: none;
-  }
-
-  section:focus-within image {
-    transition-duration: 0ms;
-  }
-
-  .selector {
-    font-size: 0.5em;
-    text-anchor: middle;
-    fill: #fff;
-    text-shadow: 0 0 1em black;
   }
 
   .if-focus {
