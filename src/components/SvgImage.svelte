@@ -8,8 +8,7 @@
   export let style = ""
   export let hotkey = ""
   export let play = false
-  export let href =
-    "http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
+  export let href = "./assets/default.jpg"
 
   let thisImage: SVGImageElement
   export let fast = false
