@@ -9,6 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist",
+    "start-image-server": "dotnet run --project ~/code/tmp/dotnet-lab/ImageRipper/ImageRipper.csproj",
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {

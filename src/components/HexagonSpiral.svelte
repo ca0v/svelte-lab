@@ -62,7 +62,7 @@
   setTimeout(() => (play = false), 1000)
 
   // assign images to each image element
-  function assignImages(urls: string[]) {
+  function autoAssignImages(urls: string[]) {
     const images = document.querySelectorAll(`.${scope} image`)
     images.forEach((image, i) => {
       const url = urls[i % urls.length]
@@ -216,15 +216,10 @@
 
   onMount(() => {
     assignTabIndex()
-    const images = getImages()
-    assignImages(images)
-    const positions = loadImagePositions()
-    positions.forEach((position) => {
-      const image = document.querySelector(
-        `image[href="${position.url}"]`
-      ) as SVGImageElement
+    hexagons?.positions.forEach((p) => {
+      const image = queryImage(p.target)
       if (image) {
-        setImagePosition(image, position)
+        setImagePosition(image, p)
       }
     })
   })
@@ -265,6 +260,13 @@
       `[data-shortcut="${key.toUpperCase()}"]`
     ) as HTMLElement
     element?.click()
+  }
+
+  function queryImage(index: number | string): SVGImageElement {
+    if (typeof index === "string") {
+      return document.querySelector(`.${scope} image[data-target="${index}"]`)
+    }
+    return document.querySelector(`.${scope} image.i${index}`)
   }
 </script>
 
@@ -381,9 +383,7 @@
           const { key } = data.detail
           const index = ID_MAP.indexOf(key.toLocaleUpperCase())
           if (index < 0) return
-          const targetImage = document.querySelector(
-            `.${scope} image.i${index}`
-          )
+          const targetImage = queryImage(index)
           targetImage?.focus()
         }}
         on:keydown={(data) => {
@@ -398,6 +398,11 @@
           }
         }}
       />
+      <button
+        on:click={() => {
+          autoAssignImages(sources.filter((url) => !blacklist.has(url)))
+        }}>Auto Assign</button
+      >
     </div>
   </section>
 </div>
