@@ -14,7 +14,6 @@
     const response = await fetch(`${PHOTOS}/list`)
     if (response.ok) {
       const data = (await response.json()) as Array<Photo>
-      console.log(data)
       photos = data
     }
   })()

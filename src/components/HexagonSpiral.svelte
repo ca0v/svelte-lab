@@ -17,6 +17,7 @@
     height: number
   }
 
+  const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
   const scope = `hexagon_spiral_${id}`
 
   // function for producing a polygon path
@@ -96,6 +97,11 @@
     images.forEach((image: SVGImageElement, i) => {
       image.setAttribute("tabindex", "0")
       image.addEventListener("keydown", async (e: KeyboardEvent) => {
+        if (e.shiftKey) return
+        if (e.ctrlKey) return
+        if (e.altKey) return
+        if (e.metaKey) return
+
         let x = parseInt(image.getAttribute("x"))
         let y = parseInt(image.getAttribute("y"))
         let width = parseInt(image.getAttribute("width"))
@@ -133,14 +139,17 @@
             const centerImage = document.querySelector(
               `.${scope} image.i0`
             ) as SVGImageElement
-            const centerInfo = queryImagePosition(centerImage)
-            const outerInfo = queryImagePosition(image)
-            setImagePosition(centerImage, outerInfo)
-            sleep(20).then(() => setImagePosition(image, centerInfo))
+            swap(centerImage, image)
             break
           }
           default:
-            return
+            if (!ID_MAP.includes(e.key.toLocaleUpperCase())) return
+            const index = ID_MAP.indexOf(e.key.toLocaleUpperCase())
+            const targetImage = document.querySelector(
+              `.${scope} image.i${index}`
+            ) as SVGImageElement
+            swap(targetImage, image)
+            break
         }
 
         image.setAttribute("x", x + "px")
@@ -254,9 +263,28 @@
   async function sleep(delay: number) {
     return new Promise((resolve) => setTimeout(resolve, delay))
   }
+
+  function swap(centerImage: SVGImageElement, image: SVGImageElement) {
+    const centerInfo = queryImagePosition(centerImage)
+    const outerInfo = queryImagePosition(image)
+    setImagePosition(centerImage, outerInfo)
+    sleep(20).then(() => setImagePosition(image, centerInfo))
+  }
+
+  function handleShortcutKeys(
+    event: KeyboardEvent & { currentTarget: EventTarget & HTMLDivElement }
+  ) {
+    if (!event.altKey) return
+    const key = event.key
+    // get any element that has this key as a data-shortcut value
+    const element = event.currentTarget.querySelector(
+      `[data-shortcut="${key.toUpperCase()}"]`
+    ) as HTMLElement
+    element?.click()
+  }
 </script>
 
-<div class={scope}>
+<div class={scope} on:keydown={handleShortcutKeys}>
   <section class:play>
     <svg
       viewBox="-100 -100 200 200"
@@ -278,6 +306,7 @@
         y="-25"
         clip-path="url(#clip)"
       />
+      <text class="selector if-focus" textLength="1">{ID_MAP[0]}</text>
       {#each Array(6).fill(0) as _, i}
         <image
           class={`i${i + 1}`}
@@ -292,6 +321,13 @@
             -i * 60
           }deg)`}
         />
+        <text
+          class="selector if-focus"
+          textLength="1"
+          style={`transform: rotate(${i * 60}deg) translate(40px, 0) rotate(${
+            -i * 60
+          }deg)`}>{ID_MAP[i + 1]}</text
+        >
       {/each}
       {#each Array(6).fill(0) as _, i}
         <image
@@ -307,6 +343,13 @@
             i * 60
           }deg) `}
         />
+        <text
+          class="selector if-focus"
+          textLength="1"
+          style={`transform: rotate(${i * 60}deg) translate(80px, 0) rotate(-${
+            i * 60
+          }deg) `}>{ID_MAP[i + 7]}</text
+        >
       {/each}
       {#each Array(6).fill(0) as _, i}
         <image
@@ -322,18 +365,32 @@
             30 + i * 60
           }deg) translate(69.5px, 0) rotate(-${30 + i * 60}deg)`}
         />
+        <text
+          class="selector if-focus"
+          textLength="1"
+          style={`transform: rotate(${
+            30 + i * 60
+          }deg) translate(69.5px, 0) rotate(-${30 + i * 60}deg)`}
+          >{ID_MAP[i + 13]}</text
+        >
       {/each}
     </svg>
+    <button class="if-focus" data-shortcut="S" on:click={() => save()}
+      ><u>S</u>ave</button
+    >
+    <button class="if-focus" on:click={() => (play = !play)}
+      >{play ? "Play" : "Unplay"}</button
+    >
+    <button
+      class="if-focus"
+      data-shortcut="C"
+      title="Copy settings to clipboard"
+      on:click={() => {
+        const settings = { id, positions: queryImagePositions() }
+        navigator.clipboard.writeText(JSON.stringify(settings))
+      }}><u>C</u>opy</button
+    >
   </section>
-  <button on:click={() => save()}>Save</button>
-  <button on:click={() => (play = !play)}>{play ? "Play" : "Unplay"}</button>
-  <button
-    title="Copy settings to clipboard"
-    on:click={() => {
-      const settings = { id, positions: queryImagePositions() }
-      navigator.clipboard.writeText(JSON.stringify(settings))
-    }}>Copy</button
-  >
 </div>
 
 <style>
@@ -356,13 +413,26 @@
   }
 
   image:focus {
-    outline: 1pt solid white;
+    outline: 1pt solid #ddd;
     opacity: 1;
-    outline-width: 0.25em;
-    border-radius: 20%;
   }
 
   section:focus-within image {
     transition-duration: 0ms;
+  }
+
+  .selector {
+    font-size: 0.5em;
+    text-anchor: middle;
+    fill: #fff;
+    text-shadow: 0 0 1em black;
+  }
+
+  .if-focus {
+    visibility: hidden;
+  }
+
+  section:focus-within .if-focus {
+    visibility: visible;
   }
 </style>
