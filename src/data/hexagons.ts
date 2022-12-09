@@ -1,3 +1,12 @@
+type ImagePosition = {
+    target: string
+    url: string
+    x: number
+    y: number
+    width: number
+    height: number
+}
+
 const hexagons =
 {
     "id": "phase-1", "positions": [{ "target": "center", "url": "http://localhost:5000/Photo/get?id=PXL_20220628_022815898.jpg", "x": -82, "y": -61, "width": 140, "height": 140 }, { "target": "i1", "url": "http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg", "x": -25, "y": -25, "width": 50, "height": 50 },
@@ -36,4 +45,35 @@ function polygonToPath(points: Array<[number, number]>) {
     )
 }
 
-export { hexagons, polygonPath, polygonToPath, translatePath }
+function queryImagePosition(image: HTMLElement | SVGElement): ImagePosition {
+    return {
+        target: image.dataset.target,
+        url: image.getAttribute("href"),
+        x: parseInt(image.getAttribute("x")),
+        y: parseInt(image.getAttribute("y")),
+        width: parseInt(image.getAttribute("width")),
+        height: parseInt(image.getAttribute("height")),
+    }
+}
+
+function setImagePosition(image: SVGImageElement, position: ImagePosition) {
+    image.setAttribute("href", position.url)
+    image.setAttribute("x", position.x + "px")
+    image.setAttribute("y", position.y + "px")
+    image.setAttribute("width", position.width + "px")
+    image.setAttribute("height", position.height + "px")
+}
+
+function swap(centerImage: SVGImageElement, image: SVGImageElement) {
+    const centerInfo = queryImagePosition(centerImage)
+    const outerInfo = queryImagePosition(image)
+    setImagePosition(centerImage, outerInfo)
+    sleep(20).then(() => setImagePosition(image, centerInfo))
+}
+
+async function sleep(delay: number) {
+    return new Promise((resolve) => setTimeout(resolve, delay))
+}
+
+
+export { hexagons, polygonPath, polygonToPath, translatePath, queryImagePosition, swap, setImagePosition, sleep, type ImagePosition }

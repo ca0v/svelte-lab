@@ -1,6 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { polygonPath, polygonToPath } from "../data/hexagons"
+  import {
+    polygonPath,
+    polygonToPath,
+    queryImagePosition,
+    setImagePosition,
+    swap,
+    type ImagePosition,
+  } from "../data/hexagons"
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
   export let id = "default"
@@ -11,17 +18,7 @@
   }
   export let duration = 0.1
 
-  type ImagePosition = {
-    target: string
-    url: string
-    x: number
-    y: number
-    width: number
-    height: number
-  }
-
   let photoWheelComponent: PhotoWheel
-  let cloneElement: HTMLElement
 
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
   const scope = `hexagon_spiral_${id}`
@@ -74,70 +71,9 @@
 
   // assign tabindex and keydown event to all images
   function assignTabIndex() {
+    // HEREIAM: move to SvgImage and use one event listener!
     const images = document.querySelectorAll(`.${scope} image`)
     images.forEach((image: SVGImageElement, i) => {
-      image.setAttribute("tabindex", "0")
-      /* register drag-and-drop callback using mouse events */
-      image.addEventListener(
-        "mousedown",
-        (e: MouseEvent & { layerX: number; layerY: number }) => {
-          const { url } = queryImagePosition(image)
-          const startX = e.screenX
-          const startY = e.screenY
-          console.log({ e })
-
-          // get the width of the svg element
-          const svg = document.querySelector(`.${scope} svg`) as SVGSVGElement
-
-          const width = cloneElement.offsetWidth
-          const height = cloneElement.offsetHeight
-          cloneElement.style.width = width + "px"
-          cloneElement.style.height = height + "px"
-
-          let [x, y] = [e.pageX - width / 2, e.pageY - height / 2]
-
-          cloneElement.style.top = y + "px"
-          cloneElement.style.left = x + "px"
-          cloneElement.style.backgroundImage = `url(${url})`
-
-          const onMouseMove = (e: MouseEvent) => {
-            cloneElement.classList.add("dragging")
-            const scale = 1 //svgDeclaredWidth / svgActualWidth // not sure why this is needed, depends on screen size and size of the hive (grid-template-column: 70cqmin)
-            const dx = scale * (e.screenX - startX)
-            const dy = scale * (e.screenY - startY)
-            cloneElement.style.top = y + dy + "px"
-            cloneElement.style.left = x + dx + "px"
-
-            images.forEach((i) => i.classList.remove("dropping"))
-            document.elementsFromPoint(e.clientX, e.clientY).forEach((el) => {
-              if (el instanceof SVGImageElement) {
-                el.classList.add("dropping")
-              }
-            })
-          }
-
-          const onMouseUp = (e: MouseEvent) => {
-            cloneElement.classList.remove("dragging")
-            cloneElement.style.top = "-1000px"
-            cloneElement.style.left = "-1000px"
-            document.removeEventListener("mousemove", onMouseMove)
-            document.removeEventListener("mouseup", onMouseUp)
-            // find image under the mouse
-            const x = e.clientX
-            const y = e.clientY
-            const element = document.elementFromPoint(x, y)
-            if (element instanceof SVGImageElement) {
-              element.classList.remove("dropping")
-              swap(image, element)
-              element.focus()
-            }
-          }
-
-          document.addEventListener("mousemove", onMouseMove)
-          document.addEventListener("mouseup", onMouseUp)
-        }
-      )
-
       image.addEventListener("keydown", async (e: KeyboardEvent) => {
         if (e.ctrlKey) return
         if (e.altKey) return
@@ -220,17 +156,6 @@
     return Array.from(images).map(queryImagePosition)
   }
 
-  function queryImagePosition(image: HTMLElement | SVGElement): ImagePosition {
-    return {
-      target: image.dataset.target,
-      url: image.getAttribute("href"),
-      x: parseInt(image.getAttribute("x")),
-      y: parseInt(image.getAttribute("y")),
-      width: parseInt(image.getAttribute("width")),
-      height: parseInt(image.getAttribute("height")),
-    }
-  }
-
   function save(): void {
     // persist blacklist
     localStorage.setItem(
@@ -287,30 +212,11 @@
     })
   })
 
-  function setImagePosition(image: SVGImageElement, position: ImagePosition) {
-    image.setAttribute("href", position.url)
-    image.setAttribute("x", position.x + "px")
-    image.setAttribute("y", position.y + "px")
-    image.setAttribute("width", position.width + "px")
-    image.setAttribute("height", position.height + "px")
-  }
-
   function getImages() {
     if (hexagons) {
       return hexagons.positions.map((location) => location.url)
     }
     return sources.filter((url) => !blacklist.has(url))
-  }
-
-  async function sleep(delay: number) {
-    return new Promise((resolve) => setTimeout(resolve, delay))
-  }
-
-  function swap(centerImage: SVGImageElement, image: SVGImageElement) {
-    const centerInfo = queryImagePosition(centerImage)
-    const outerInfo = queryImagePosition(image)
-    setImagePosition(centerImage, outerInfo)
-    sleep(20).then(() => setImagePosition(image, centerInfo))
   }
 
   function handleShortcutKeys(
@@ -420,7 +326,6 @@
     </div>
   </section>
 </div>
-<div bind:this={cloneElement} class="clone">Clone Here</div>
 
 <style>
   svg {
@@ -440,29 +345,6 @@
   }
 
   section:focus-within .if-focus {
-    visibility: visible;
-  }
-
-  .clone {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 96px;
-    width: 96px;
-    border: 1px solid #fff;
-    border-radius: 50%;
-    background-size: cover;
-    opacity: 0.2;
-    /* center text vertically */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* prevent selection */
-    user-select: none;
-    visibility: hidden;
-  }
-
-  .clone.dragging {
     visibility: visible;
   }
 </style>

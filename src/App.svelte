@@ -19,6 +19,8 @@
   })()
 </script>
 
+<div class="clone dragging">Clone Here</div>
+
 <main>
   <h1>Photos</h1>
   <div class="frame">
@@ -71,5 +73,28 @@
 
   .photo:focus {
     opacity: 1;
+  }
+
+  .clone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 96px;
+    width: 96px;
+    border: 1px solid #fff;
+    border-radius: 50%;
+    background-size: cover;
+    opacity: 0.2;
+    /* center text vertically */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* prevent selection */
+    user-select: none;
+    visibility: hidden;
+  }
+
+  .clone.dragging {
+    visibility: visible;
   }
 </style>
