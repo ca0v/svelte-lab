@@ -96,7 +96,7 @@
       positions = positions.filter((p) => {
         const match = hexagons.positions.find((h) => {
           return (
-            h.url === p.href &&
+            h.href === p.href &&
             h.x === p.x &&
             h.y === p.y &&
             h.width === p.width &&
@@ -112,14 +112,8 @@
   }
 
   function loadImagePositions(): Array<ImagePosition> {
-    if (hexagons) {
-      return hexagons.positions
-    }
     const positions = localStorage.getItem(`${id}.positions`)
-    if (positions) {
-      return JSON.parse(positions)
-    }
-    return []
+    return JSON.parse(positions || "[]")
   }
 
   function getBlacklist(): Set<string> {
@@ -247,7 +241,17 @@
     hexagons?.positions.forEach((p) => {
       const target = svgImages.find((i) => i.target === p.target)
       if (!target) return
-      target.href = p.url
+      console.log(`loading hexagon ${p.target}`)
+      target.href = p.href
+      target.setBBox(p)
+    })
+
+    const savedPositions = loadImagePositions()
+    savedPositions.forEach((p) => {
+      const target = svgImages.find((i) => i.target === p.target)
+      if (!target) return
+      console.log(`loading ${p.target}`)
+      target.href = p.href
       target.setBBox(p)
     })
   })

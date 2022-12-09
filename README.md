@@ -13,10 +13,23 @@ The "HexagonSpiral" is both an editor and a display component.
 It accepts a list of images and allows for editing the layout.
 It can also accept an initial state.
 
+### Commands
+
 | Command | Description |
-| - | - |
-| " " | Swap with center |
+| -       | -            |
+| " "     | Toggle the image picker |
 | Arrow Keys | Move the image |
 | + and - | Zoom the image |
+| [A..Z]    | Swap with current cell |
+| Alt+S   | Save edits to local storage|
+|Alt+C    |Copy state to clipboard|
+|Shift+[A..Z]| Focus names cell|
 
-Up next: "0..9" and "A..Z" to swap with another cell
+### Other Commands
+
+* From the picker, [A..Z] will copy into that cell
+
+## What is next?
+
+* FTR: allow audio to be recorded and saved to local storage or service
+* BUG: apply saved state

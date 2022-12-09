@@ -1,6 +1,6 @@
 type ImagePosition = {
     target: string
-    url: string
+    href: string
     x: number
     y: number
     width: number
