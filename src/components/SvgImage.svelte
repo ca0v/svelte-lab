@@ -15,6 +15,23 @@
   export let editmode = true
   let active = false
 
+  export function getBBox() {
+    const { x, y, width, height } = thisImage.getBBox()
+    return { x, y, width, height }
+  }
+
+  export function setBBox(box: {
+    x: number
+    y: number
+    width: number
+    height: number
+  }) {
+    thisImage.setAttribute("x", box.x + "px")
+    thisImage.setAttribute("y", box.y + "px")
+    thisImage.setAttribute("width", box.width + "px")
+    thisImage.setAttribute("height", box.height + "px")
+  }
+
   export function disableAnimations() {
     fast = true
   }
@@ -95,11 +112,11 @@
   on:drop={(e) => {
     console.log("drop", target)
     const url = e.dataTransfer.getData("text/plain")
-    e.currentTarget.setAttribute("href", url)
-    e.currentTarget.setAttribute("x", "-25")
-    e.currentTarget.setAttribute("y", "-25")
-    e.currentTarget.setAttribute("width", "50")
-    e.currentTarget.setAttribute("height", "50")
+    href = url
+    thisImage.setAttribute("x", "-25")
+    thisImage.setAttribute("y", "-25")
+    thisImage.setAttribute("width", "50")
+    thisImage.setAttribute("height", "50")
     e.preventDefault()
   }}
   class={target}

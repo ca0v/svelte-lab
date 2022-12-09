@@ -5,7 +5,6 @@
     polygonToPath,
     queryImagePosition,
     setImagePosition,
-    swap,
     translatePath,
     type ImagePosition,
   } from "../data/hexagons"
@@ -127,6 +126,9 @@
   }
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
+    console.log("keydown", e.key)
+    let handled = false
+
     if (e.ctrlKey) return
     if (e.metaKey) return
 
@@ -138,76 +140,94 @@
       ) as HTMLElement
       if (element) {
         element.click()
-        e.preventDefault()
+        handled = true
       }
-      return
     }
 
-    // get the image that is currently focused
-    const image = document.activeElement as SVGImageElement
-    // get the svgImage from this
-    const svgImage = svgImages.find((i) => i.thisImage === image)
-    if (!svgImage) return
-
-    let { x, y, width, height } = queryImagePosition(image)
-    switch (e.key) {
-      case "ArrowUp":
-        y -= 1
-        break
-      case "ArrowDown":
-        y += 1
-        break
-      case "ArrowLeft":
-        x -= 1
-        break
-      case "ArrowRight":
-        x += 1
-        break
-      case "+":
-        width += 2
-        height += 2
-        x -= 1
-        y -= 1
-        break
-      case "-":
-        width -= 2
-        height -= 2
-        x += 1
-        y += 1
-        break
-      case "Delete":
-        addToBlacklist(image.getAttribute("href"))
-        image.setAttribute("href", "")
-        break
-      case "?":
-        editmode = !editmode
-        break
-      case " ":
-        // set focus to the photo wheel
-        photoWheelComponent.focus()
-        break
-
-      default:
-        if (!ID_MAP.includes(e.key.toLocaleUpperCase())) return
-        const index = ID_MAP.indexOf(e.key.toLocaleUpperCase())
-        const targetImage = svgImages[index]
-        if (!targetImage) return
-        if (e.shiftKey) {
-          targetImage.thisImage.focus()
-        } else {
-          targetImage.disableAnimations()
-          swap(targetImage.thisImage, image)
-        }
-        break
+    if (!handled) {
+      switch (e.key) {
+        case "/":
+          editmode = !editmode
+          handled = true
+          break
+        case " ":
+          // set focus to the photo wheel
+          photoWheelComponent.focus()
+          handled = true
+          break
+      }
     }
 
-    image.setAttribute("x", x + "px")
-    image.setAttribute("y", y + "px")
-    image.setAttribute("width", width + "px")
-    image.setAttribute("height", height + "px")
+    while (!handled) {
+      // get the image that is currently focused
+      const image = document.activeElement as SVGImageElement
+      if (!image) break
+      // get the svgImage from this
+      const svgImage = svgImages.find((i) => i.target === image.dataset.target)
+      if (!svgImage) {
+        console.log(svgImages, image)
+        break
+      }
+      let { x, y, width, height } = queryImagePosition(image)
+      switch (e.key) {
+        case "Delete":
+          addToBlacklist(svgImage.href)
+          svgImage.href = ""
+          handled = true
+          break
+        case "ArrowUp":
+          y -= 1
+          break
+        case "ArrowDown":
+          y += 1
+          break
+        case "ArrowLeft":
+          x -= 1
+          break
+        case "ArrowRight":
+          x += 1
+          break
+        case "+":
+          width += 2
+          height += 2
+          x -= 1
+          y -= 1
+          break
+        case "-":
+          width -= 2
+          height -= 2
+          x += 1
+          y += 1
+          break
+        default:
+          if (!ID_MAP.includes(e.key.toLocaleUpperCase())) break
+          const index = ID_MAP.indexOf(e.key.toLocaleUpperCase())
+          const targetImage = svgImages[index]
+          if (!targetImage) break
+          if (e.shiftKey) {
+            targetImage.thisImage.focus()
+            handled = true
+          } else {
+            targetImage.disableAnimations()
+            swap(targetImage, svgImage)
+            handled = true
+          }
+          break
+      }
 
-    e.stopPropagation()
-    e.preventDefault()
+      image.setAttribute("x", x + "px")
+      image.setAttribute("y", y + "px")
+      image.setAttribute("width", width + "px")
+      image.setAttribute("height", height + "px")
+      handled = true
+      break
+    }
+
+    if (handled) {
+      console.log("handled")
+      e.stopPropagation()
+      e.preventDefault()
+    }
   }
 
   let blacklist = getBlacklist()
@@ -233,6 +253,15 @@
       return document.querySelector(`.${scope} image[data-target="${index}"]`)
     }
     return document.querySelector(`.${scope} image.i${index}`)
+  }
+
+  function swap(i1: SvgImage, i2: SvgImage) {
+    const href = i1.href
+    const { x, y, width, height } = i1.getBBox()
+    i1.href = i2.href
+    i1.setBBox(i2.getBBox())
+    i2.href = href
+    i2.setBBox({ x, y, width, height })
   }
 </script>
 
@@ -329,7 +358,7 @@
           if (index < 0) return
           const targetImage = svgImages[index]
           if (targetImage) {
-            targetImage.thisImage.href = source
+            targetImage.href = source
           }
         }}
       />
