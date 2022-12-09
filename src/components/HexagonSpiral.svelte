@@ -344,12 +344,39 @@
 </script>
 
 <div class={scope} on:keydown={handleShortcutKeys}>
-  <section class:play>
+  <section
+    class:play
+    on:dragenter={() => {
+      console.log("dragenter")
+    }}
+  >
     <svg viewBox="-100 -100 200 200" stroke-width="0" fill="#000">
       <clipPath id="clip">
         <path d={polygonToPath(polygonPath(6, 21, 30))} />
       </clipPath>
       <image
+        on:dragenter={(e) => {
+          console.log("dragenter i0")
+        }}
+        on:dragover={(e) => {
+          console.log("dragover i0")
+          e.preventDefault()
+          e.dataTransfer.dropEffect = "copy"
+        }}
+        on:dragleave={(e) => {
+          console.log("dragleave i0")
+        }}
+        on:drop={(e) => {
+          console.log("drop i0")
+          const url = e.dataTransfer.getData("text/plain")
+          console.log({ url })
+          e.currentTarget.setAttribute("href", url)
+          e.currentTarget.setAttribute("x", "-25")
+          e.currentTarget.setAttribute("y", "-25")
+          e.currentTarget.setAttribute("width", "50")
+          e.currentTarget.setAttribute("height", "50")
+          e.preventDefault()
+        }}
         class="i0"
         data-target="center"
         href="http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
@@ -548,7 +575,7 @@
     border: 1px solid #fff;
     border-radius: 50%;
     background-size: cover;
-    opacity: 0.8;
+    opacity: 0.2;
     /* center text vertically */
     display: flex;
     align-items: center;

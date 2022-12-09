@@ -32,6 +32,14 @@
   </svg>
   {#each sources as source}
     <button
+      draggable="true"
+      on:dragstart={(e) => {
+        console.log("dragstart", e)
+        e.dataTransfer.dropEffect = "copy"
+      }}
+      on:dragend={(e) => {
+        console.log("dragend", e)
+      }}
       on:focus={(event) => {
         // keep track of the last focused element
         lastFocusedElement = event.target
