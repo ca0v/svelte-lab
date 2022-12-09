@@ -19,6 +19,7 @@
   export let duration = 0.1
 
   let photoWheelComponent: PhotoWheel
+  let svgImages: Array<SvgImage> = []
 
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
   const scope = `hexagon_spiral_${id}`
@@ -66,83 +67,6 @@
     images.forEach((image, i) => {
       const url = urls[i % urls.length]
       image.setAttribute("href", url)
-    })
-  }
-
-  // assign tabindex and keydown event to all images
-  function assignTabIndex() {
-    // HEREIAM: move to SvgImage and use one event listener!
-    const images = document.querySelectorAll(`.${scope} image`)
-    images.forEach((image: SVGImageElement, i) => {
-      image.addEventListener("keydown", async (e: KeyboardEvent) => {
-        if (e.ctrlKey) return
-        if (e.altKey) return
-        if (e.metaKey) return
-
-        let { x, y, width, height } = queryImagePosition(image)
-        switch (e.key) {
-          case "ArrowUp":
-            y -= 1
-            break
-          case "ArrowDown":
-            y += 1
-            break
-          case "ArrowLeft":
-            x -= 1
-            break
-          case "ArrowRight":
-            x += 1
-            break
-          case "+":
-            width += 2
-            height += 2
-            x -= 1
-            y -= 1
-            break
-          case "-":
-            width -= 2
-            height -= 2
-            x += 1
-            y += 1
-            break
-          case "Delete":
-            addToBlacklist(image.getAttribute("href"))
-            break
-          case " ": {
-            // swap this image with the center image
-            const centerImage = document.querySelector(
-              `.${scope} image.i0`
-            ) as SVGImageElement
-            swap(centerImage, image)
-            break
-          }
-          case ".":
-            // set focus to the photo wheel
-            photoWheelComponent.focus()
-            break
-
-          default:
-            if (!ID_MAP.includes(e.key.toLocaleUpperCase())) return
-            const index = ID_MAP.indexOf(e.key.toLocaleUpperCase())
-            const targetImage = document.querySelector(
-              `.${scope} image.i${index}`
-            ) as SVGImageElement
-            if (e.shiftKey) {
-              targetImage?.focus()
-            } else {
-              swap(targetImage, image)
-            }
-            break
-        }
-
-        image.setAttribute("x", x + "px")
-        image.setAttribute("y", y + "px")
-        image.setAttribute("width", width + "px")
-        image.setAttribute("height", height + "px")
-
-        e.stopPropagation()
-        e.preventDefault()
-      })
     })
   }
 
@@ -200,10 +124,89 @@
     return new Set(JSON.parse(blacklist))
   }
 
+  function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
+    if (e.ctrlKey) return
+    if (e.metaKey) return
+
+    if (e.altKey) {
+      const key = e.key
+      // get any element that has this key as a data-shortcut value
+      const element = e.currentTarget.querySelector(
+        `[data-shortcut="${key.toUpperCase()}"]`
+      ) as HTMLElement
+      if (element) {
+        element.click()
+        e.preventDefault()
+      }
+      return
+    }
+
+    // get the image that is currently focused
+    const image = document.activeElement as SVGImageElement
+    // get the svgImage from this
+    const svgImage = svgImages.find((i) => i.test() === image)
+    if (!svgImage) return
+
+    let { x, y, width, height } = queryImagePosition(image)
+    switch (e.key) {
+      case "ArrowUp":
+        y -= 1
+        break
+      case "ArrowDown":
+        y += 1
+        break
+      case "ArrowLeft":
+        x -= 1
+        break
+      case "ArrowRight":
+        x += 1
+        break
+      case "+":
+        width += 2
+        height += 2
+        x -= 1
+        y -= 1
+        break
+      case "-":
+        width -= 2
+        height -= 2
+        x += 1
+        y += 1
+        break
+      case "Delete":
+        addToBlacklist(image.getAttribute("href"))
+        break
+      case " ":
+        // set focus to the photo wheel
+        photoWheelComponent.focus()
+        break
+
+      default:
+        if (!ID_MAP.includes(e.key.toLocaleUpperCase())) return
+        const index = ID_MAP.indexOf(e.key.toLocaleUpperCase())
+        const targetImage = svgImages[index]
+        if (!targetImage) return
+        if (e.shiftKey) {
+          targetImage.test().focus()
+        } else {
+          targetImage.disableAnimations()
+          swap(targetImage.test(), image)
+        }
+        break
+    }
+
+    image.setAttribute("x", x + "px")
+    image.setAttribute("y", y + "px")
+    image.setAttribute("width", width + "px")
+    image.setAttribute("height", height + "px")
+
+    e.stopPropagation()
+    e.preventDefault()
+  }
+
   let blacklist = getBlacklist()
 
   onMount(() => {
-    assignTabIndex()
     hexagons?.positions.forEach((p) => {
       const image = queryImage(p.target)
       if (image) {
@@ -219,18 +222,6 @@
     return sources.filter((url) => !blacklist.has(url))
   }
 
-  function handleShortcutKeys(
-    event: KeyboardEvent & { currentTarget: EventTarget & HTMLDivElement }
-  ) {
-    if (!event.altKey) return
-    const key = event.key
-    // get any element that has this key as a data-shortcut value
-    const element = event.currentTarget.querySelector(
-      `[data-shortcut="${key.toUpperCase()}"]`
-    ) as HTMLElement
-    element?.click()
-  }
-
   function queryImage(index: number | string): SVGImageElement {
     if (typeof index === "string") {
       return document.querySelector(`.${scope} image[data-target="${index}"]`)
@@ -239,7 +230,7 @@
   }
 </script>
 
-<div class={scope} on:keydown={handleShortcutKeys}>
+<div class={scope} on:keydown={keyDownHandler}>
   <section
     on:dragenter={() => {
       console.log("dragenter")
@@ -249,9 +240,15 @@
       <clipPath id="clip">
         <path d={polygonToPath(polygonPath(6, 21, 30))} />
       </clipPath>
-      <SvgImage {play} target={`i0`} hotkey={ID_MAP[0]} />
+      <SvgImage
+        bind:this={svgImages[0]}
+        {play}
+        target={`i0`}
+        hotkey={ID_MAP[0]}
+      />
       {#each Array(6).fill(0) as _, i}
         <SvgImage
+          bind:this={svgImages[i + 1]}
           {play}
           target={`i${i + 1}`}
           hotkey={ID_MAP[i + 1]}
@@ -263,6 +260,7 @@
       {#each Array(6).fill(0) as _, i}
         <SvgImage
           {play}
+          bind:this={svgImages[i + 7]}
           target={`i${i + 7}`}
           hotkey={ID_MAP[i + 7]}
           style={`transform: rotate(${i * 60}deg) translate(80px, 0) rotate(-${
@@ -273,6 +271,7 @@
       {#each Array(6).fill(0) as _, i}
         <SvgImage
           {play}
+          bind:this={svgImages[i + 13]}
           target={`i${i + 13}`}
           hotkey={ID_MAP[i + 13]}
           style={`transform: rotate(${
@@ -310,11 +309,9 @@
           const { key, source } = data.detail
           const index = ID_MAP.indexOf(key.toLocaleUpperCase())
           if (index < 0) return
-          const targetImage = document.querySelector(
-            `.${scope} image.i${index}`
-          )
+          const targetImage = svgImages[index]
           if (targetImage) {
-            targetImage.setAttribute("href", source)
+            targetImage.test().setAttribute("href", source)
           }
         }}
       />

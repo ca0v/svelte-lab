@@ -9,7 +9,15 @@
     "http://localhost:5000/Photo/get?id=PXL_20220626_011400211.jpg"
 
   let thisImage: SVGImageElement
-  let fast = false
+  export let fast = false
+
+  export function disableAnimations() {
+    fast = true
+  }
+
+  export function test() {
+    return thisImage
+  }
 
   function mouseDownHandler(e: MouseEvent) {
     const startX = e.screenX
