@@ -1,5 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte"
+  import { polygonPath, polygonToPath } from "../data/hexagons"
+  import PhotoScreen from "./PhotoScreen.svelte"
+  import PhotoWheel from "./PhotoWheel.svelte"
   export let id = "default"
   export let sources: Array<string> = []
   export let hexagons: {
@@ -19,31 +22,6 @@
 
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
   const scope = `hexagon_spiral_${id}`
-
-  // function for producing a polygon path
-  function polygonPath(
-    sides: number,
-    radius: number = 0.5,
-    rotation: number = 0
-  ) {
-    const points = []
-
-    rotation *= Math.PI / 180
-    for (let i = 0; i < sides; i++) {
-      const angle = (i / sides) * 2 * Math.PI + rotation
-      points.push([radius * Math.cos(angle), radius * Math.sin(angle)])
-    }
-    return points
-  }
-
-  // function to convert a polygon path to an svg path "d"
-  function polygonToPath(points: Array<[number, number]>) {
-    return (
-      points
-        .map(([x, y], i) => (i === 0 ? `M${x},${y}` : `L${x},${y}`))
-        .join(" ") + "Z"
-    )
-  }
 
   function createCssTransforms(size = 20) {
     return Array(size)
@@ -285,6 +263,7 @@
 </script>
 
 <div class={scope} on:keydown={handleShortcutKeys}>
+  <PhotoWheel {sources} />
   <section class:play>
     <svg
       viewBox="-100 -100 200 200"
