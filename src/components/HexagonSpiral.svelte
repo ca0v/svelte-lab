@@ -1,7 +1,8 @@
 <script lang="ts">
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
-
   import { onMount } from "svelte"
+
+  import { photoUrl as PHOTOS } from "../lib/globals"
   import {
     polygonPath,
     polygonToPath,
@@ -87,19 +88,21 @@
 
     // if hexagons then remove the positions that already match the hexagon positions
     if (hexagons) {
-      positions = positions.filter((p) => {
-        const match = hexagons.positions.find((h) => {
-          return (
-            h.href === p.href &&
-            h.x === p.x &&
-            h.y === p.y &&
-            h.width === p.width &&
-            h.height === p.height &&
-            h.target === p.target
-          )
+      positions = positions
+        .map((p) => ({ ...p, href: p.href.replace(`${PHOTOS}/get?id=`, "") }))
+        .filter((p) => {
+          const match = hexagons.positions.find((h) => {
+            return (
+              h.href === p.href &&
+              h.x === p.x &&
+              h.y === p.y &&
+              h.width === p.width &&
+              h.height === p.height &&
+              h.target === p.target
+            )
+          })
+          return !match
         })
-        return !match
-      })
     }
     localStorage.setItem(`${id}.positions`, JSON.stringify(positions))
     editmode = false
@@ -227,7 +230,7 @@
     hexagons?.positions.forEach((p) => {
       const target = svgImages.find((i) => i.target === p.target)
       if (!target) return
-      target.href = p.href
+      target.href = `${PHOTOS}/get?id=${p.href}`
       target.setBBox(p)
     })
 
@@ -289,10 +292,8 @@
       i,
       style: image.style + "",
     }))
-    console.log(JSON.stringify(transforms, null, 2))
+    return transforms
   }
-
-  onMount(() => dumpTransforms())
 </script>
 
 <div class={scope} on:keydown={keyDownHandler}>
@@ -335,7 +336,14 @@
           data-shortcut="C"
           title="Copy settings to clipboard"
           on:click={() => {
-            const settings = { id, positions: queryImagePositions() }
+            const settings = {
+              id,
+              transforms: dumpTransforms(),
+              positions: queryImagePositions().map((v) => ({
+                ...v,
+                href: v.href.replace(`${PHOTOS}/get?id=`, ""),
+              })),
+            }
             navigator.clipboard.writeText(JSON.stringify(settings))
             editmode = false
           }}><u>C</u>opy</button
