@@ -38,39 +38,37 @@
     thisImage.setAttribute("height", box.height + "px")
   }
 
-  export function disableAnimations() {
-    fast = true
-  }
-
   function mouseDownHandler(e: MouseEvent) {
     const startX = e.screenX
     const startY = e.screenY
-    console.log({ e })
     fast = true
+
+    // what is the svelte way of accessing the clone element?
     const cloneElement = document.querySelector(".clone") as HTMLDivElement
 
     const width = cloneElement.offsetWidth
     const height = cloneElement.offsetHeight
-
     let [x, y] = [e.pageX - width / 2, e.pageY - height / 2]
-
     cloneElement.style.backgroundImage = `url(${href})`
+
+    const hoverElements = []
 
     const onMouseMove = (e: MouseEvent) => {
       cloneElement.classList.add("dragging")
-      const scale = 1 //svgDeclaredWidth / svgActualWidth // not sure why this is needed, depends on screen size and size of the hive (grid-template-column: 70cqmin)
-      const dx = scale * (e.screenX - startX)
-      const dy = scale * (e.screenY - startY)
+      const dx = e.screenX - startX
+      const dy = e.screenY - startY
       cloneElement.style.top = y + dy + "px"
       cloneElement.style.left = x + dx + "px"
 
-      thisImage.parentElement.querySelectorAll("image").forEach((el) => {
+      hoverElements.forEach((el) => {
         el.classList.remove("dropping")
       })
+      hoverElements.length = 0
 
       document.elementsFromPoint(e.clientX, e.clientY).forEach((el) => {
         if (el instanceof SVGImageElement) {
           el.classList.add("dropping")
+          hoverElements.push(el)
         }
       })
     }
@@ -116,7 +114,6 @@
 {/if}
 
 {#if !readonly}
-  <div class="clone" />
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <image
     tabindex="0"

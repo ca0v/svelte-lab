@@ -7,7 +7,7 @@
     polygonToPath,
     translatePath,
     type ImagePosition,
-  } from "../data/hexagons"
+  } from "../lib/paths"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
@@ -52,7 +52,7 @@
 
   // inject css into style tag
   function injectCss(id: string, generator: () => string) {
-    if (document.querySelector(`style[id="${id}]`)) return
+    if (document.querySelector(`#${id}`)) return
     const style = document.createElement("style")
     style.id = id
     style.innerHTML = generator()
@@ -199,7 +199,7 @@
             targetImage.focus()
             handled = true
           } else {
-            targetImage.disableAnimations()
+            targetImage.fast = true
             swap(targetImage, svgImage)
             handled = true
           }
@@ -227,7 +227,6 @@
     hexagons?.positions.forEach((p) => {
       const target = svgImages.find((i) => i.target === p.target)
       if (!target) return
-      console.log(`loading hexagon ${p.target}`)
       target.href = p.href
       target.setBBox(p)
     })
@@ -236,7 +235,6 @@
     savedPositions.forEach((p) => {
       const target = svgImages.find((i) => i.target === p.target)
       if (!target) return
-      console.log(`loading ${p.target}`)
       target.href = p.href
       target.setBBox(p)
     })
@@ -285,6 +283,16 @@
         swap(t1, t2)
     }
   }
+
+  function dumpTransforms() {
+    const transforms = svgImages.map((image, i) => ({
+      i,
+      style: image.style + "",
+    }))
+    console.log(JSON.stringify(transforms, null, 2))
+  }
+
+  onMount(() => dumpTransforms())
 </script>
 
 <div class={scope} on:keydown={keyDownHandler}>
@@ -304,55 +312,16 @@
           d={polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64))}
         />
       </clipPath>
-      <SvgImage
-        bind:this={svgImages[0]}
-        {play}
-        {editmode}
-        {readonly}
-        on:swap={swapHandler}
-        target={`i0`}
-        hotkey={ID_MAP[0]}
-      />
-      {#each Array(6).fill(0) as _, i}
+      {#each hexagons.transforms as style}
         <SvgImage
-          bind:this={svgImages[i + 1]}
+          bind:this={svgImages[style.i]}
           {play}
           {editmode}
           {readonly}
           on:swap={swapHandler}
-          target={`i${i + 1}`}
-          hotkey={ID_MAP[i + 1]}
-          style={`transform: rotate(${i * 60}deg) translate(40px, 0) rotate(${
-            -i * 60
-          }deg)`}
-        />
-      {/each}
-      {#each Array(6).fill(0) as _, i}
-        <SvgImage
-          {play}
-          {editmode}
-          {readonly}
-          on:swap={swapHandler}
-          bind:this={svgImages[i + 7]}
-          target={`i${i + 7}`}
-          hotkey={ID_MAP[i + 7]}
-          style={`transform: rotate(${i * 60}deg) translate(80px, 0) rotate(-${
-            i * 60
-          }deg) `}
-        />
-      {/each}
-      {#each Array(6).fill(0) as _, i}
-        <SvgImage
-          {play}
-          {editmode}
-          {readonly}
-          on:swap={swapHandler}
-          bind:this={svgImages[i + 13]}
-          target={`i${i + 13}`}
-          hotkey={ID_MAP[i + 13]}
-          style={`transform: rotate(${
-            30 + i * 60
-          }deg) translate(69.5px, 0) rotate(-${30 + i * 60}deg)`}
+          target={`i${style.i}`}
+          hotkey={ID_MAP[style.i]}
+          style={style.style}
         />
       {/each}
     </svg>
