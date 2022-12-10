@@ -71,7 +71,7 @@ const hexagons =
                     "y": -75,
                     "width": 120,
                     "height": 120,
-                    "transform": "matrix(1, 0, 0, 1, -37.6721, -1.97389)",
+                    "transform": "matrix(1, 0, 0, 1, -40, 4.89859e-15)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -81,7 +81,7 @@ const hexagons =
                     "y": -25,
                     "width": 50,
                     "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, -14.3125, -39.2297)",
+                    "transform": "matrix(1, 0, 0, 1, -20, -34.641)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -91,7 +91,7 @@ const hexagons =
                     "y": -25,
                     "width": 50,
                     "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, 24.5378, -42.9616)",
+                    "transform": "matrix(1, 0, 0, 1, 20, -34.641)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -101,7 +101,7 @@ const hexagons =
                     "y": -24,
                     "width": 50,
                     "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, 75.2093, -17.2645)",
+                    "transform": "matrix(1, 0, 0, 1, 80, 0)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -111,7 +111,7 @@ const hexagons =
                     "y": -36,
                     "width": 78,
                     "height": 78,
-                    "transform": "matrix(1, 0, 0, 1, 38.4465, 33.4337)",
+                    "transform": "matrix(1, 0, 0, 1, 40, 69.282)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -121,7 +121,7 @@ const hexagons =
                     "y": -55,
                     "width": 76,
                     "height": 76,
-                    "transform": "matrix(1, 0, 0, 1, -26.8003, 25.7697)",
+                    "transform": "matrix(1, 0, 0, 1, -40, 69.282)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -131,7 +131,7 @@ const hexagons =
                     "y": -35,
                     "width": 98,
                     "height": 98,
-                    "transform": "matrix(1, 0, 0, 1, -58.076, -31.6035)",
+                    "transform": "matrix(1, 0, 0, 1, -80, 9.79717e-15)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -141,7 +141,7 @@ const hexagons =
                     "y": -56,
                     "width": 140,
                     "height": 140,
-                    "transform": "matrix(1, 0, 0, 1, -32.5767, -83.5217)",
+                    "transform": "matrix(1, 0, 0, 1, -40, -69.282)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -151,7 +151,7 @@ const hexagons =
                     "y": -52,
                     "width": 126,
                     "height": 126,
-                    "transform": "matrix(1, 0, 0, 1, 15.3996, -85.0119)",
+                    "transform": "matrix(1, 0, 0, 1, 40, -69.282)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -161,7 +161,7 @@ const hexagons =
                     "y": -36,
                     "width": 68,
                     "height": 68,
-                    "transform": "matrix(1, 0, 0, 1, 20.0071, -20.9865)",
+                    "transform": "matrix(1, 0, 0, 1, 60.1888, 34.75)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -171,7 +171,7 @@ const hexagons =
                     "y": -29,
                     "width": 58,
                     "height": 58,
-                    "transform": "matrix(1, 0, 0, 1, -25.5199, -4.19667)",
+                    "transform": "matrix(1, 0, 0, 1, 4.25565e-15, 69.5)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -181,7 +181,7 @@ const hexagons =
                     "y": -21,
                     "width": 76,
                     "height": 76,
-                    "transform": "matrix(1, 0, 0, 1, -68.5876, -28.8714)",
+                    "transform": "matrix(1, 0, 0, 1, -60.1888, 34.75)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -191,7 +191,7 @@ const hexagons =
                     "y": -25,
                     "width": 50,
                     "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, -76.2039, -70.7817)",
+                    "transform": "matrix(1, 0, 0, 1, -60.1888, -34.75)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -201,7 +201,7 @@ const hexagons =
                     "y": -33,
                     "width": 64,
                     "height": 64,
-                    "transform": "matrix(1, 0, 0, 1, -52.4988, -90.9776)",
+                    "transform": "matrix(1, 0, 0, 1, -1.27669e-14, -69.5)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
@@ -211,7 +211,7 @@ const hexagons =
                     "y": -54,
                     "width": 120,
                     "height": 120,
-                    "transform": "matrix(1, 0, 0, 1, -31.7806, -74.1252)",
+                    "transform": "matrix(1, 0, 0, 1, 60.1888, -34.75)",
                     "clipPath": "url(#clip_30)"
                 }
             ]
