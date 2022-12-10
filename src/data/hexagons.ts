@@ -9,6 +9,10 @@ export type Hexagon = {
         height: number
         transform: string
         clipPath: string
+        background?: {
+            fill?: string;
+            stroke?: string;
+        }
     }[]
 }
 
@@ -192,7 +196,7 @@ const hexagons: Array<Hexagon> =
                     "width": 50,
                     "height": 50,
                     "transform": "matrix(1, 0, 0, 1, -60.1888, -34.75)",
-                    "clipPath": "url(#clip_30)"
+                    "clipPath": "url(#clip_30)",
                 },
                 {
                     "target": "i17",
@@ -241,21 +245,21 @@ const hexagons: Array<Hexagon> =
                 },
                 {
                     "target": "i2",
-                    "href": "PXL_20220624_151825418.jpg",
-                    "x": -50,
-                    "y": -50,
-                    "width": 100,
-                    "height": 100,
+                    "href": "PXL_20220626_201607540.jpg",
+                    "x": -58,
+                    "y": -81,
+                    "width": 130,
+                    "height": 130,
                     "transform": "matrix(1, 0, 0, 1, 20, 34.641)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
                     "target": "i3",
-                    "href": "PXL_20220625_125912191.jpg",
-                    "x": -46,
-                    "y": -36,
-                    "width": 80,
-                    "height": 80,
+                    "href": "PXL_20220625_102324506.jpg",
+                    "x": -25,
+                    "y": -25,
+                    "width": 50,
+                    "height": 50,
                     "transform": "matrix(1, 0, 0, 1, -20, 34.641)",
                     "clipPath": "url(#clip_30)"
                 },
@@ -271,21 +275,21 @@ const hexagons: Array<Hexagon> =
                 },
                 {
                     "target": "i5",
-                    "href": "PXL_20220624_151825418.jpg",
-                    "x": -50,
+                    "href": "PXL_20220626_013223840.jpg",
+                    "x": -34,
                     "y": -50,
-                    "width": 100,
-                    "height": 100,
+                    "width": 72,
+                    "height": 72,
                     "transform": "matrix(1, 0, 0, 1, -20, -34.641)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
                     "target": "i6",
-                    "href": "PXL_20220624_151825418.jpg",
-                    "x": -50,
-                    "y": -50,
-                    "width": 100,
-                    "height": 100,
+                    "href": "PXL_20220626_215522749.jpg",
+                    "x": -41,
+                    "y": -32,
+                    "width": 64,
+                    "height": 64,
                     "transform": "matrix(1, 0, 0, 1, 20, -34.641)",
                     "clipPath": "url(#clip_30)"
                 },
@@ -302,10 +306,10 @@ const hexagons: Array<Hexagon> =
                 {
                     "target": "i8",
                     "href": "PXL_20220624_151818573.jpg",
-                    "x": -25,
-                    "y": -25,
-                    "width": 50,
-                    "height": 50,
+                    "x": -33,
+                    "y": -37,
+                    "width": 66,
+                    "height": 66,
                     "transform": "matrix(1, 0, 0, 1, 40, 69.282)",
                     "clipPath": "url(#clip_30)"
                 },
@@ -317,7 +321,12 @@ const hexagons: Array<Hexagon> =
                     "width": 62,
                     "height": 62,
                     "transform": "matrix(2.01892e-07, -1, 1, 2.01892e-07, -40, 69.282)",
-                    "clipPath": "url(#clip_0)"
+                    "clipPath": "url(#clip_0)",
+                    background: {
+                        fill: "#999",
+                        stroke: "#ccc",
+                    }
+
                 },
                 {
                     "target": "i10",
@@ -352,10 +361,10 @@ const hexagons: Array<Hexagon> =
                 {
                     "target": "i13",
                     "href": "PXL_20220625_104429130.jpg",
-                    "x": -25,
-                    "y": -25,
-                    "width": 50,
-                    "height": 50,
+                    "x": -41,
+                    "y": -30,
+                    "width": 64,
+                    "height": 64,
                     "transform": "matrix(1, 0, 0, 1, 60.1888, 34.75)",
                     "clipPath": "url(#clip_30)"
                 },
@@ -387,25 +396,29 @@ const hexagons: Array<Hexagon> =
                     "width": 22,
                     "height": 22,
                     "transform": "matrix(1, 0, 0, 1, -60.1888, -34.75)",
-                    "clipPath": "url(#clip_30)"
+                    "clipPath": "url(#clip_30)",
+                    background: {
+                        fill: "#999",
+                        stroke: "#ccc",
+                    }
                 },
                 {
                     "target": "i17",
-                    "href": "PXL_20220626_215522749.jpg",
-                    "x": -41,
-                    "y": -32,
-                    "width": 64,
-                    "height": 64,
+                    "href": "PXL_20220626_013321998.jpg",
+                    "x": -37,
+                    "y": -44,
+                    "width": 80,
+                    "height": 80,
                     "transform": "matrix(1, 0, 0, 1, -1.27669e-14, -69.5)",
                     "clipPath": "url(#clip_30)"
                 },
                 {
                     "target": "i18",
                     "href": "PXL_20220626_011400211.jpg",
-                    "x": -25,
-                    "y": -25,
-                    "width": 50,
-                    "height": 50,
+                    "x": -26,
+                    "y": -24,
+                    "width": 52,
+                    "height": 52,
                     "transform": "matrix(1, 0, 0, 1, 60.1888, -34.75)",
                     "clipPath": "url(#clip_30)"
                 }

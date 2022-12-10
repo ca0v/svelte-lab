@@ -75,10 +75,23 @@
   }
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
-    let handled = false
     if (e.altKey) return
     if (e.ctrlKey) return
     if (e.metaKey) return
+
+    function handled() {
+      e.preventDefault()
+      e.stopPropagation()
+      return true
+    }
+
+    const keymap = {
+      "/": () => {
+        editmode = !editmode
+      },
+    }
+
+    if (keymap[e.key]) return keymap[e.key]() && handled()
 
     // get the image that is currently focused
     const image = document.activeElement as SVGImageElement
@@ -86,10 +99,27 @@
     const svgImage =
       image && svgImages.find((i) => i.target === image.dataset.target)
 
-    while (!handled) {
-      if (!image) break
-      if (!svgImage) break
+    if (svgImage) {
+      let rotation = 0
+      switch (e.key) {
+        case "<":
+        case ",":
+          rotation -= 15
+          break
+        case ">":
+        case ".":
+          rotation += 15
+          break
+      }
+      if (rotation) {
+        const currentStyle = svgImage.getEffectiveTransform()
+        svgImage.style = `${currentStyle} rotate(${rotation}deg)`
 
+        return handled()
+      }
+    }
+
+    if (svgImage && image) {
       let { x: x0, y: y0, width: w0, height: h0 } = svgImage.getBBox()
       let x = 0
       let y = 0
@@ -100,12 +130,10 @@
       switch (e.key) {
         case "Enter":
           image.parentElement.appendChild(image)
-          handled = true
-          break
+          return handled()
         case "Delete":
           svgImage.href = ""
-          handled = true
-          break
+          return handled()
         case "ArrowUp":
           y -= 1
           resize = true
@@ -143,16 +171,15 @@
           if (!targetImage) break
           if (e.shiftKey) {
             targetImage.focus()
-            handled = true
+            return handled()
           } else {
             targetImage.fast = true
             swap(targetImage, svgImage)
-            handled = true
+            return handled()
           }
-          break
       }
 
-      if (!handled && resize) {
+      if (svgImage && image && resize) {
         if (e.shiftKey) {
           svgImage.style = `${svgImage.style} translate(${x}px, ${y}px)`
           svgImage.style = `scale(${1 + width / w0},${1 + height / h0}) ${
@@ -164,49 +191,23 @@
           image.setAttribute("width", w0 + width + "px")
           image.setAttribute("height", h0 + height + "px")
         }
-        handled = true
+        return handled()
       }
-      break
-    }
-
-    if (!handled) {
-      let rotation = 0
-      switch (e.key) {
-        case "<":
-        case ",":
-          rotation -= 15
-          break
-        case ">":
-        case ".":
-          rotation += 15
-          break
-      }
-      if (rotation) {
-        const currentStyle = svgImage.getEffectiveTransform()
-        svgImage.style = `${currentStyle} rotate(${rotation}deg)`
-
-        handled = true
-      }
-    }
-
-    if (handled) {
-      e.stopPropagation()
-      e.preventDefault()
     }
   }
 
-  function applyState(id: string) {
+  async function applyState(id: string) {
     injectCss(`hexagon_spiral_init_${id}`, createInitialCss)
     injectCss(`hexagon_spiral_transitions_${id}`, createCssTransforms)
 
     // HERIIAM: need to wait for svgImages to be set
+    await sleep(100)
     const savedState: Hexagon = getLocalStorage(id)
     if (savedState) {
-      debugger
       savedState.data.forEach((image, i) => {
         const svgImage = svgImages[i]
         if (!svgImage) return
-        svgImage.href = image.href
+        svgImage.href = `${PHOTOS}/get?id=${image.href}`
         svgImage.style = image.transform
         svgImage.clippath = image.clipPath
         svgImage.setBBox({
@@ -351,7 +352,6 @@
         }}>Auto Assign</button
       >
     </div>
-    <div class="clone" class:dragging={false}>Clone Here</div>
   {/if}
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <section>
@@ -363,9 +363,6 @@
       </defs>
       <clipPath id="clip_0">
         <path d={polygonToPath(polygonPath(6, 21, 0))} />
-      </clipPath>
-      <clipPath id="clip_15">
-        <path d={polygonToPath(polygonPath(6, 21, 15))} />
       </clipPath>
       <clipPath id="clip_30">
         <path d={polygonToPath(polygonPath(6, 21, 30))} />
@@ -392,23 +389,31 @@
             target={`${style.target}`}
             hotkey={ID_MAP[i]}
             style={style.transform}
+            background={{
+              stroke: style.background?.stroke || "none",
+              fill: style.background?.fill || "none",
+            }}
           />
         {/each}
       {/if}
     </svg>
   </section>
+  {#if !readonly}
+    <div class="clone" class:dragging={false}>Clone Here</div>
+  {/if}
 </div>
 
 <style>
   svg {
     position: relative;
     overflow: visible;
+    width: min(100%, 30em);
   }
 
   section {
-    display: grid;
+    display: flex;
     grid-auto-flow: row;
-    grid-template-columns: 70cqmin;
+    grid-template-columns: 80cqmin;
     justify-content: center;
   }
 
@@ -439,9 +444,5 @@
     justify-content: center;
     gap: 0.5em;
     margin: 0.5em;
-  }
-
-  .off-screen {
-    opacity: 0.1;
   }
 </style>

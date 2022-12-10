@@ -17,6 +17,7 @@
   export let y: number
   export let width: number
   export let height: number
+  export let background: { fill: string; stroke: string }
 
   let active = false
 
@@ -112,6 +113,7 @@
 
   $: {
     thisImage && setBBox({ x, y, width, height })
+    background && console.log({ background })
   }
 </script>
 
@@ -132,47 +134,62 @@
 {/if}
 
 {#if !readonly}
-  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-  <image
-    {href}
-    bind:this={thisImage}
-    class:active
-    class:editmode
-    class:fast
-    class:play
-    class={target}
-    clip-path={clippath}
-    data-target={target}
-    height="50"
-    style={`transform: ${style}`}
-    tabindex="0"
-    width="50"
-    x="-25"
-    y="-25"
-    on:focus={() => console.log("focus", (active = true))}
-    on:blur={() => (active = false)}
-    on:mousedown={mouseDownHandler}
-    on:dragstart={(e) => {
-      console.log("dragstart never fires")
-      e.preventDefault()
-    }}
-    on:dragover={(e) => {
-      console.log("dragover", target)
-      e.dataTransfer.dropEffect = "copy"
-      e.preventDefault()
-    }}
-    on:drop={(e) => {
-      console.log("drop", target)
-      const url = e.dataTransfer.getData("text/plain")
-      href = url
-      thisImage.setAttribute("x", "-25")
-      thisImage.setAttribute("y", "-25")
-      thisImage.setAttribute("width", "50")
-      thisImage.setAttribute("height", "50")
-      focus()
-      e.preventDefault()
-    }}
-  />
+  <g>
+    <use
+      class="border"
+      class:active
+      cx="0"
+      cy="0"
+      r="21"
+      fill={background.fill}
+      stroke={background.stroke}
+      stroke-width="2"
+      style={`transform: ${style}`}
+      xlink:href="#hexagon"
+    />
+
+    <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+    <image
+      {href}
+      bind:this={thisImage}
+      class:active
+      class:editmode
+      class:fast
+      class:play
+      class={target}
+      clip-path={clippath}
+      data-target={target}
+      height="50"
+      style={`transform: ${style}`}
+      tabindex="0"
+      width="50"
+      x="-25"
+      y="-25"
+      on:focus={() => console.log("focus", (active = true))}
+      on:blur={() => (active = false)}
+      on:mousedown={mouseDownHandler}
+      on:dragstart={(e) => {
+        console.log("dragstart never fires")
+        e.preventDefault()
+      }}
+      on:dragover={(e) => {
+        console.log("dragover", target)
+        e.dataTransfer.dropEffect = "copy"
+        e.preventDefault()
+      }}
+      on:drop={(e) => {
+        console.log("drop", target)
+        const url = e.dataTransfer.getData("text/plain")
+        href = url
+        thisImage.setAttribute("x", "-25")
+        thisImage.setAttribute("y", "-25")
+        thisImage.setAttribute("width", "50")
+        thisImage.setAttribute("height", "50")
+        focus()
+        e.preventDefault()
+      }}
+    />
+  </g>
 
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <text
@@ -182,18 +199,6 @@
     textLength="1"
     style={`transform: ${style}`}>{hotkey}{play ? "." : ""}</text
   >
-
-  <use
-    class="border"
-    class:active
-    cx="0"
-    cy="0"
-    r="21"
-    fill="none"
-    stroke-width="2"
-    style={`transform: ${style}`}
-    xlink:href="#hexagon"
-  />
 {/if}
 
 <style>
@@ -212,20 +217,20 @@
   }
 
   .border {
-    visibility: hidden;
+    stroke: none;
+  }
+
+  /* this works, ignore the warnings 
+  @ts-ignore
+  @csswarn ignore:has
+  */
+  .border:has(+ image:hover:not(.active)) {
+    opacity: 0.5;
     stroke: white;
   }
 
-  /*
-    select the second sibling of image
-  */
-  image:hover:not(.active) + .selector + .border {
-    opacity: 0.5;
-    visibility: visible;
-  }
-
   .border.active {
-    visibility: visible;
+    stroke: white;
   }
 
   image.play {
