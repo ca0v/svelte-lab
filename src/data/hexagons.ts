@@ -218,7 +218,198 @@ const hexagons: Array<Hexagon> =
         },
         {
             "id": "phase-2",
-            "data": []
+            "data": [
+                {
+                    "target": "i0",
+                    "href": "PXL_20220626_191526348.jpg",
+                    "x": -25,
+                    "y": -25,
+                    "width": 50,
+                    "height": 50,
+                    "transform": "",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i1",
+                    "href": "PXL_20220626_160006532.jpg",
+                    "x": -25,
+                    "y": -25,
+                    "width": 50,
+                    "height": 50,
+                    "transform": "matrix(1, 0, 0, 1, 40, 0)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i2",
+                    "href": "PXL_20220624_151825418.jpg",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, 20, 34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i3",
+                    "href": "PXL_20220625_125912191.jpg",
+                    "x": -46,
+                    "y": -36,
+                    "width": 80,
+                    "height": 80,
+                    "transform": "matrix(1, 0, 0, 1, -20, 34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i4",
+                    "href": "PXL_20220625_024140211.jpg",
+                    "x": -25,
+                    "y": -25,
+                    "width": 50,
+                    "height": 50,
+                    "transform": "matrix(1, 0, 0, 1, -40, 4.89859e-15)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i5",
+                    "href": "PXL_20220624_151825418.jpg",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, -20, -34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i6",
+                    "href": "PXL_20220624_151825418.jpg",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, 20, -34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i7",
+                    "href": "PXL_20220626_160809779.jpg",
+                    "x": -25,
+                    "y": -25,
+                    "width": 50,
+                    "height": 50,
+                    "transform": "matrix(1, 0, 0, 1, 80, 0)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i8",
+                    "href": "PXL_20220624_151818573.jpg",
+                    "x": -25,
+                    "y": -25,
+                    "width": 50,
+                    "height": 50,
+                    "transform": "matrix(1, 0, 0, 1, 40, 69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i9",
+                    "href": "PXL_20220625_010308251.jpg",
+                    "x": -32,
+                    "y": -39,
+                    "width": 62,
+                    "height": 62,
+                    "transform": "matrix(2.01892e-07, -1, 1, 2.01892e-07, -40, 69.282)",
+                    "clipPath": "url(#clip_0)"
+                },
+                {
+                    "target": "i10",
+                    "href": "PXL_20220625_200351090.jpg",
+                    "x": -52,
+                    "y": -40,
+                    "width": 84,
+                    "height": 84,
+                    "transform": "matrix(1, 0, 0, 1, -80, 9.79717e-15)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i11",
+                    "href": "PXL_20220625_233200894.jpg",
+                    "x": -63,
+                    "y": -53,
+                    "width": 122,
+                    "height": 122,
+                    "transform": "matrix(1, 0, 0, 1, -40, -69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i12",
+                    "href": "PXL_20220626_215636926.jpg",
+                    "x": -68,
+                    "y": -56,
+                    "width": 114,
+                    "height": 114,
+                    "transform": "matrix(1, 0, 0, 1, 40, -69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i13",
+                    "href": "PXL_20220625_104429130.jpg",
+                    "x": -25,
+                    "y": -25,
+                    "width": 50,
+                    "height": 50,
+                    "transform": "matrix(1, 0, 0, 1, 60.1888, 34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i14",
+                    "href": "PXL_20220624_151825418.jpg",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, 4.25565e-15, 69.5)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i15",
+                    "href": "PXL_20220625_161525273.jpg",
+                    "x": -37,
+                    "y": -31,
+                    "width": 58,
+                    "height": 58,
+                    "transform": "matrix(1, 0, 0, 1, -60.1888, 34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i16",
+                    "href": "PXL_20220625_233124349.jpg",
+                    "x": -12,
+                    "y": -11,
+                    "width": 22,
+                    "height": 22,
+                    "transform": "matrix(1, 0, 0, 1, -60.1888, -34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i17",
+                    "href": "PXL_20220626_215522749.jpg",
+                    "x": -41,
+                    "y": -32,
+                    "width": 64,
+                    "height": 64,
+                    "transform": "matrix(1, 0, 0, 1, -1.27669e-14, -69.5)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i18",
+                    "href": "PXL_20220626_011400211.jpg",
+                    "x": -25,
+                    "y": -25,
+                    "width": 50,
+                    "height": 50,
+                    "transform": "matrix(1, 0, 0, 1, 60.1888, -34.75)",
+                    "clipPath": "url(#clip_30)"
+                }
+            ]
         }
 
     ]

@@ -87,8 +87,8 @@
       <legend>Builder settings for {collageName} on a {transformName}</legend>
       <div>
         <label
-          >Collage Name:
-          <select bind:value={collageName}>
+          ><u>C</u>ollage Name:
+          <select bind:value={collageName} data-shortcut="C">
             {#each collages as collage}
               <option value={collage.id}>{collage.id}</option>
             {/each}
@@ -96,8 +96,8 @@
         >
       </div>
       <label
-        >Transform:
-        <select bind:value={transformName}>
+        ><u>T</u>ransform:
+        <select data-shortcut="T" bind:value={transformName}>
           {#each Object.entries(transforms) as [name]}<option value={name}
               >{name}</option
             >
@@ -106,6 +106,7 @@
       </label>
       <div class="toolbar">
         <button
+          data-shortcut="P"
           on:click={() => {
             const currentDate = new Date(date_filter)
             currentDate.setDate(currentDate.getDate() - 1)
@@ -116,6 +117,7 @@
           >From:
           <input type="date" bind:value={date_filter} /> to {date_filter_to}</label
         ><button
+          data-shortcut="N"
           on:click={() => {
             const currentDate = new Date(date_filter)
             currentDate.setDate(currentDate.getDate() + 1)
@@ -128,7 +130,7 @@
       id={collageName}
       {collageName}
       transform={collages.find((h) => h.id === collageName)}
-      duration={0.2}
+      duration={0.01}
       sources={photos
         .filter(
           (p) =>

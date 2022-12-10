@@ -2,8 +2,17 @@
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
   import { onMount } from "svelte"
 
-  import { photoUrl as PHOTOS } from "../lib/globals"
-  import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
+  import {
+    photoUrl as PHOTOS,
+    setLocalStorage,
+    getLocalStorage,
+  } from "../lib/globals"
+  import {
+    polygonPath,
+    polygonToPath,
+    sleep,
+    translatePath,
+  } from "../lib/paths"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
@@ -67,35 +76,9 @@
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
     let handled = false
-
+    if (e.altKey) return
     if (e.ctrlKey) return
     if (e.metaKey) return
-
-    if (e.altKey) {
-      const key = e.key
-      // get any element that has this key as a data-shortcut value
-      const element = e.currentTarget.querySelector(
-        `[data-shortcut="${key.toUpperCase()}"]`
-      ) as HTMLElement
-      if (element) {
-        element.click()
-        handled = true
-      }
-    }
-
-    if (!handled) {
-      switch (e.key) {
-        case "/":
-          editmode = !editmode
-          handled = true
-          break
-        case " ":
-          // set focus to the photo wheel
-          photoWheelComponent.focus()
-          handled = true
-          break
-      }
-    }
 
     // get the image that is currently focused
     const image = document.activeElement as SVGImageElement
@@ -191,17 +174,17 @@
       switch (e.key) {
         case "<":
         case ",":
-          rotation -= 30
+          rotation -= 15
           break
         case ">":
         case ".":
-          rotation -= 30
+          rotation += 15
           break
       }
       if (rotation) {
         const currentStyle = svgImage.getEffectiveTransform()
         svgImage.style = `${currentStyle} rotate(${rotation}deg)`
-        image.setAttribute("clip-path", "url(#clip_0)")
+
         handled = true
       }
     }
@@ -216,7 +199,25 @@
     injectCss(`hexagon_spiral_init_${id}`, createInitialCss)
     injectCss(`hexagon_spiral_transitions_${id}`, createCssTransforms)
 
-    // svgImages have not yet been created since they depend on this transform...delete this, right?  set it declaritively?
+    // HERIIAM: need to wait for svgImages to be set
+    const savedState: Hexagon = getLocalStorage(id)
+    if (savedState) {
+      debugger
+      savedState.data.forEach((image, i) => {
+        const svgImage = svgImages[i]
+        if (!svgImage) return
+        svgImage.href = image.href
+        svgImage.style = image.transform
+        svgImage.clippath = image.clipPath
+        svgImage.setBBox({
+          x: image.x,
+          y: image.y,
+          width: image.width,
+          height: image.height,
+        })
+      })
+    }
+
     replay()
   }
 
@@ -273,6 +274,21 @@
     applyState(id)
     console.log({ id, collageName, transform })
   }
+
+  function createSettings(): Hexagon {
+    return {
+      id,
+      data: svgImages.map((image) => {
+        return {
+          target: image.target,
+          href: image.href.replace(`${PHOTOS}/get?id=`, ""),
+          ...image.getBBox(),
+          transform: image.getEffectiveTransform(),
+          clipPath: image.getClipPath(),
+        }
+      }),
+    }
+  }
 </script>
 
 <div class={scope} on:keydown={keyDownHandler}>
@@ -299,21 +315,32 @@
     />
     <div class="toolbar">
       <button
+        class="off-screen"
+        data-shortcut="F"
+        on:click={() =>
+          sleep(0).then(() => {
+            photoWheelComponent.focus()
+          })}><u>F</u>ocus</button
+      >
+      <button
+        class="off-screen"
+        data-shortcut="E"
+        on:click={() => (editmode = !editmode)}><u>E</u>dit</button
+      >
+      <button
+        data-shortcut="S"
+        title="Save to local storage"
+        on:click={() => {
+          const settings = createSettings()
+          setLocalStorage(`${id}`, settings)
+          editmode = false
+        }}><u>S</u>ave</button
+      >
+      <button
         data-shortcut="C"
         title="Copy settings to clipboard"
         on:click={() => {
-          const settings = {
-            id,
-            data: svgImages.map((image) => {
-              return {
-                target: image.target,
-                href: image.href.replace(`${PHOTOS}/get?id=`, ""),
-                ...image.getBBox(),
-                transform: image.getEffectiveTransform(),
-                clipPath: image.getClipPath(),
-              }
-            }),
-          }
+          const settings = createSettings()
           navigator.clipboard.writeText(JSON.stringify(settings, null, 2))
           editmode = false
         }}><u>C</u>opy</button
@@ -336,6 +363,9 @@
       </defs>
       <clipPath id="clip_0">
         <path d={polygonToPath(polygonPath(6, 21, 0))} />
+      </clipPath>
+      <clipPath id="clip_15">
+        <path d={polygonToPath(polygonPath(6, 21, 15))} />
       </clipPath>
       <clipPath id="clip_30">
         <path d={polygonToPath(polygonPath(6, 21, 30))} />
@@ -409,5 +439,9 @@
     justify-content: center;
     gap: 0.5em;
     margin: 0.5em;
+  }
+
+  .off-screen {
+    opacity: 0.1;
   }
 </style>

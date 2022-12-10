@@ -1,6 +1,6 @@
 // read data from localstorage
 const getLocalStorage = (key: string) => {
-    const data = localStorage.getItem(key)
+    const data = localStorage.getItem(`svelte_lab.${key}`)
     if (data) {
         return JSON.parse(data)
     }
@@ -9,7 +9,7 @@ const getLocalStorage = (key: string) => {
 
 // write data to localstorage
 const setLocalStorage = (key: string, data: any) => {
-    localStorage.setItem(key, JSON.stringify(data));
+    localStorage.setItem(`svelte_lab.${key}`, JSON.stringify(data));
 }
 
 // prompt user for value
@@ -19,7 +19,7 @@ const promptUser = (message: string) => {
 
 // get the photo url or prompt user for it
 const getPhotoUrl = () => {
-    const photoUrl = getLocalStorage('photoUrl')
+    const photoUrl = getLocalStorage('photoServerUrl')
     if (photoUrl) {
         return photoUrl
     }
@@ -30,4 +30,4 @@ const getPhotoUrl = () => {
 
 const photoUrl = getPhotoUrl()
 
-export { photoUrl }
+export { photoUrl, setLocalStorage, getLocalStorage }
