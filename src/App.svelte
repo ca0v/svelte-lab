@@ -1,98 +1,54 @@
 <script lang="ts">
-  import PhotoScreen from "./components/PhotoScreen.svelte"
+  import { onMount } from "svelte"
   import { photoUrl as PHOTOS } from "./lib/globals"
   import HexagonSpiral from "./components/HexagonSpiral.svelte"
-  import { hexagons } from "./data/hexagons"
   type Photo = {
     id: string
-    href: string
+    filename: string
+    url: string
+    created: string
+    width: number
+    height: number
   }
 
   let photos: Array<Photo> = []
 
-  ;(async () => {
+  async function fetchPhotoList() {
     const response = await fetch(`${PHOTOS}/list`)
     if (response.ok) {
       const data = (await response.json()) as Array<Photo>
       photos = data
     }
-  })()
+  }
+
+  onMount(() => {
+    fetchPhotoList()
+  })
 </script>
 
 <main>
-  <h1>Photos</h1>
+  <h1>Photo Playground</h1>
+
   <div class="frame">
+    <h2>For Editing</h2>
     <HexagonSpiral
       id="phase-1"
       duration={0.2}
-      {hexagons}
-      sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)}
+      sources={photos.map((p) => `${PHOTOS}/get?id=${p.filename}`)}
     />
-    <div class="fit">
-      <PhotoScreen sources={photos.map((p) => `${PHOTOS}/get?id=${p.id}`)} />
-    </div>
-
-    {#each photos as photo}
-      <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-      <img
-        tabindex="0"
-        class="photo"
-        src={`${PHOTOS}/get?id=${photo.id}`}
-        alt={photo.id}
-      />
-    {/each}
   </div>
-  <div class="clone dragging">Clone Here</div>
+
+  <div class="frame">
+    <h2>For Viewing</h2>
+    <HexagonSpiral id="phase-1" duration={0.2} readonly={true} />
+  </div>
 </main>
 
 <style>
-  .fit {
-    width: 95vmin;
-    height: 95vmin;
-    opacity: 0.1;
-  }
   .frame {
     display: grid;
     justify-content: center;
     gap: 3rem;
     width: clamp(20rem, 50vw, 50rem);
-  }
-
-  .photo {
-    --border-color: 255, 0, 0;
-    width: 100%;
-    box-shadow: 0 0 20px rgba(var(--border-color), 1);
-    border-style: solid;
-    border-width: 1rem;
-    border-color: transparent;
-    border-radius: 2rem;
-    background-color: rgba(var(--border-color), 0.5);
-    opacity: 0.5;
-  }
-
-  .photo:focus {
-    opacity: 1;
-  }
-
-  .clone {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 128px;
-    width: 128px;
-    background-size: cover;
-    opacity: 0.5;
-    /* center text vertically */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* prevent selection */
-    user-select: none;
-    visibility: hidden;
-    clip-path: url(#clip2);
-  }
-
-  .clone.dragging {
-    visibility: visible;
   }
 </style>

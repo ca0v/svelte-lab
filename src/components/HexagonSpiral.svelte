@@ -1,4 +1,6 @@
 <script lang="ts">
+  const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
+
   import { onMount } from "svelte"
   import {
     polygonPath,
@@ -6,22 +8,23 @@
     translatePath,
     type ImagePosition,
   } from "../data/hexagons"
+
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
+  import { hexagons as hexagonSources } from "../data/hexagons"
+
   export let id = "default"
   export let sources: Array<string> = []
-  export let hexagons: {
-    id: string
-    positions: Array<ImagePosition>
-  }
   export let duration = 0.1
+  export let readonly = false
+
+  let hexagons = hexagonSources.find((s) => s.id == id)
 
   let photoWheelComponent: PhotoWheel
   let svgImages: Array<SvgImage> = []
 
   let editmode = false
 
-  const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
   const scope = `hexagon_spiral_${id}`
 
   function createCssTransforms(size = 20) {
@@ -48,15 +51,16 @@
   }
 
   // inject css into style tag
-  function injectCss(css: string) {
+  function injectCss(id: string, generator: () => string) {
+    if (document.querySelector(`style[id="${id}]`)) return
     const style = document.createElement("style")
-    style.id = `hexagon_spiral_${id}`
-    style.innerHTML = css
+    style.id = id
+    style.innerHTML = generator()
     document.head.appendChild(style)
   }
 
-  injectCss(createInitialCss())
-  injectCss(createCssTransforms())
+  injectCss(`hexagon_spiral_init_${id}`, createInitialCss)
+  injectCss(`hexagon_spiral_tran_${id}`, createCssTransforms)
 
   let play = true
   setTimeout(() => (play = false), 1000)
@@ -69,10 +73,6 @@
     })
   }
 
-  function addToBlacklist(bannedUrl: string) {
-    blacklist.add(bannedUrl)
-  }
-
   function queryImagePositions() {
     // persist image positions
     return svgImages.map((i) => ({
@@ -83,12 +83,6 @@
   }
 
   function save(): void {
-    // persist blacklist
-    localStorage.setItem(
-      `${id}.blacklist`,
-      JSON.stringify(Array.from(blacklist))
-    )
-
     let positions = queryImagePositions()
 
     // if hexagons then remove the positions that already match the hexagon positions
@@ -114,11 +108,6 @@
   function loadImagePositions(): Array<ImagePosition> {
     const positions = localStorage.getItem(`${id}.positions`)
     return JSON.parse(positions || "[]")
-  }
-
-  function getBlacklist(): Set<string> {
-    const blacklist = localStorage.getItem(`${id}.blacklist`) || "[]"
-    return new Set(JSON.parse(blacklist))
   }
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
@@ -168,7 +157,6 @@
       let resize = false
       switch (e.key) {
         case "Delete":
-          addToBlacklist(svgImage.href)
           svgImage.href = ""
           handled = true
           break
@@ -235,8 +223,6 @@
     }
   }
 
-  let blacklist = getBlacklist()
-
   onMount(() => {
     hexagons?.positions.forEach((p) => {
       const target = svgImages.find((i) => i.target === p.target)
@@ -263,17 +249,22 @@
     return document.querySelector(`.${scope} image.i${index}`)
   }
 
+  function copy(from: SvgImage, into: SvgImage) {
+    into.href = from.href
+    into.setBBox(from.getBBox())
+  }
+
   function swap(i1: SvgImage, i2: SvgImage) {
     const href = i1.href
-    const { x, y, width, height } = i1.getBBox()
+    const bbox = i1.getBBox()
     i1.href = i2.href
     i1.setBBox(i2.getBBox())
     i2.href = href
-    i2.setBBox({ x, y, width, height })
+    i2.setBBox(bbox)
   }
 
   function swapHandler(e) {
-    const { target1, target2 } = e.detail
+    const { mode, target1, target2 } = e.detail
     const t1 = svgImages.find((i) => i.target === target1)
     if (!t1) {
       console.log("no target image")
@@ -285,7 +276,14 @@
       console.log("no active image")
       return
     }
-    swap(t1, t2)
+
+    switch (mode) {
+      case "copy":
+        copy(t2, t1)
+        break
+      default:
+        swap(t1, t2)
+    }
   }
 </script>
 
@@ -310,6 +308,7 @@
         bind:this={svgImages[0]}
         {play}
         {editmode}
+        {readonly}
         on:swap={swapHandler}
         target={`i0`}
         hotkey={ID_MAP[0]}
@@ -319,6 +318,7 @@
           bind:this={svgImages[i + 1]}
           {play}
           {editmode}
+          {readonly}
           on:swap={swapHandler}
           target={`i${i + 1}`}
           hotkey={ID_MAP[i + 1]}
@@ -331,6 +331,7 @@
         <SvgImage
           {play}
           {editmode}
+          {readonly}
           on:swap={swapHandler}
           bind:this={svgImages[i + 7]}
           target={`i${i + 7}`}
@@ -344,6 +345,7 @@
         <SvgImage
           {play}
           {editmode}
+          {readonly}
           on:swap={swapHandler}
           bind:this={svgImages[i + 13]}
           target={`i${i + 13}`}
@@ -354,48 +356,51 @@
         />
       {/each}
     </svg>
-    <div class="toolbar">
-      <button class="if-focus" data-shortcut="S" on:click={() => save()}
-        ><u>S</u>ave</button
-      >
-      <button
-        class="if-focus"
-        data-shortcut="C"
-        title="Copy settings to clipboard"
-        on:click={() => {
-          const settings = { id, positions: queryImagePositions() }
-          navigator.clipboard.writeText(JSON.stringify(settings))
-          editmode = false
-        }}><u>C</u>opy</button
-      >
-    </div>
-    <div class="if-focus">
-      <PhotoWheel
-        {sources}
-        bind:this={photoWheelComponent}
-        on:goto={(data) => {
-          const { key } = data.detail
-          const index = ID_MAP.indexOf(key.toLocaleUpperCase())
-          if (index < 0) return
-          const targetImage = queryImage(index)
-          targetImage?.focus()
-        }}
-        on:keydown={(data) => {
-          const { key, source } = data.detail
-          const index = ID_MAP.indexOf(key.toLocaleUpperCase())
-          if (index < 0) return
-          const targetImage = svgImages[index]
-          if (targetImage) {
-            targetImage.href = source
-          }
-        }}
-      />
-      <button
-        on:click={() => {
-          autoAssignImages(sources.filter((url) => !blacklist.has(url)))
-        }}>Auto Assign</button
-      >
-    </div>
+    {#if !readonly}
+      <div class="toolbar">
+        <button class="if-focus" data-shortcut="S" on:click={() => save()}
+          ><u>S</u>ave</button
+        >
+        <button
+          class="if-focus"
+          data-shortcut="C"
+          title="Copy settings to clipboard"
+          on:click={() => {
+            const settings = { id, positions: queryImagePositions() }
+            navigator.clipboard.writeText(JSON.stringify(settings))
+            editmode = false
+          }}><u>C</u>opy</button
+        >
+      </div>
+      <div class="if-focus">
+        <PhotoWheel
+          {sources}
+          bind:this={photoWheelComponent}
+          on:goto={(data) => {
+            const { key } = data.detail
+            const index = ID_MAP.indexOf(key.toLocaleUpperCase())
+            if (index < 0) return
+            const targetImage = queryImage(index)
+            targetImage?.focus()
+          }}
+          on:keydown={(data) => {
+            const { key, source } = data.detail
+            const index = ID_MAP.indexOf(key.toLocaleUpperCase())
+            if (index < 0) return
+            const targetImage = svgImages[index]
+            if (targetImage) {
+              targetImage.href = source
+            }
+          }}
+        />
+        <button
+          on:click={() => {
+            autoAssignImages(sources)
+          }}>Auto Assign</button
+        >
+      </div>
+      <div class="clone" class:dragging={false}>Clone Here</div>
+    {/if}
   </section>
 </div>
 
@@ -417,6 +422,28 @@
   }
 
   section:focus-within .if-focus {
+    visibility: visible;
+  }
+
+  .clone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 128px;
+    width: 128px;
+    background-size: cover;
+    opacity: 0.5;
+    /* center text vertically */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* prevent selection */
+    user-select: none;
+    visibility: hidden;
+    clip-path: url(#clip2);
+  }
+
+  .clone.dragging {
     visibility: visible;
   }
 </style>

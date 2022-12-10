@@ -8,12 +8,14 @@
   export let style = ""
   export let hotkey = ""
   export let play = false
-  export let href = "./assets/default.jpg"
+  export let href = ""
+  export let fast = false
+  export let editmode = false
+  export let readonly = false
+
+  let active = false
 
   let thisImage: SVGImageElement
-  export let fast = false
-  export let editmode = true
-  let active = false
 
   export function focus() {
     thisImage.focus()
@@ -84,7 +86,11 @@
       if (element instanceof SVGImageElement) {
         element.classList.remove("dropping")
         element.focus()
-        dispatch("swap", { target1: element.dataset.target, target2: target })
+        dispatch("swap", {
+          target1: element.dataset.target,
+          target2: target,
+          mode: e.shiftKey ? "copy" : "swap",
+        })
       }
     }
 
@@ -93,67 +99,87 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<image
-  tabindex="0"
-  class:play
-  class:fast
-  class:editmode
-  class:active
-  bind:this={thisImage}
-  on:focus={() => console.log("focus", (active = true))}
-  on:blur={() => (active = false)}
-  on:mousedown={mouseDownHandler}
-  on:dragstart={(e) => {
-    console.log("dragstart never fires")
-    e.preventDefault()
-  }}
-  on:dragover={(e) => {
-    console.log("dragover", target)
-    e.dataTransfer.dropEffect = "copy"
-    e.preventDefault()
-  }}
-  on:drop={(e) => {
-    console.log("drop", target)
-    const url = e.dataTransfer.getData("text/plain")
-    href = url
-    thisImage.setAttribute("x", "-25")
-    thisImage.setAttribute("y", "-25")
-    thisImage.setAttribute("width", "50")
-    thisImage.setAttribute("height", "50")
-    e.preventDefault()
-  }}
-  class={target}
-  data-target={target}
-  {href}
-  width="50"
-  height="50"
-  x="-25"
-  y="-25"
-  clip-path="url(#clip)"
-  {style}
-/>
+{#if readonly}
+  <image
+    class:play
+    bind:this={thisImage}
+    class={target}
+    data-target={target}
+    {href}
+    width="50"
+    height="50"
+    x="-25"
+    y="-25"
+    clip-path="url(#clip)"
+    {style}
+  />
+{/if}
 
-<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<text
-  class="selector if-focus"
-  class:editmode
-  class:active
-  textLength="1"
-  {style}>{hotkey}{play ? "." : ""}</text
->
+{#if !readonly}
+  <div class="clone" />
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <image
+    tabindex="0"
+    class:play
+    class:fast
+    class:editmode
+    class:active
+    bind:this={thisImage}
+    on:focus={() => console.log("focus", (active = true))}
+    on:blur={() => (active = false)}
+    on:mousedown={mouseDownHandler}
+    on:dragstart={(e) => {
+      console.log("dragstart never fires")
+      e.preventDefault()
+    }}
+    on:dragover={(e) => {
+      console.log("dragover", target)
+      e.dataTransfer.dropEffect = "copy"
+      e.preventDefault()
+    }}
+    on:drop={(e) => {
+      console.log("drop", target)
+      const url = e.dataTransfer.getData("text/plain")
+      href = url
+      thisImage.setAttribute("x", "-25")
+      thisImage.setAttribute("y", "-25")
+      thisImage.setAttribute("width", "50")
+      thisImage.setAttribute("height", "50")
+      focus()
+      e.preventDefault()
+    }}
+    class={target}
+    data-target={target}
+    {href}
+    width="50"
+    height="50"
+    x="-25"
+    y="-25"
+    clip-path="url(#clip)"
+    {style}
+  />
 
-<use
-  class="border"
-  class:active
-  cx="0"
-  cy="0"
-  r="21"
-  fill="none"
-  stroke-width="2"
-  {style}
-  xlink:href="#hexagon"
-/>
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <text
+    class="selector if-focus"
+    class:editmode
+    class:active
+    textLength="1"
+    {style}>{hotkey}{play ? "." : ""}</text
+  >
+
+  <use
+    class="border"
+    class:active
+    cx="0"
+    cy="0"
+    r="21"
+    fill="none"
+    stroke-width="2"
+    {style}
+    xlink:href="#hexagon"
+  />
+{/if}
 
 <style>
   image {
