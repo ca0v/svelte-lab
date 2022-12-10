@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte"
-  import { polygonPath, polygonToPath, translatePath } from "../data/hexagons"
+  import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
   const dispatch = createEventDispatcher()
   export let sources: Array<string> = []
   let container: HTMLElement
