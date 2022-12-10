@@ -12,6 +12,11 @@
   export let fast = false
   export let editmode = false
   export let readonly = false
+  export let clippath = "url(#clip_30)"
+  export let x: number
+  export let y: number
+  export let width: number
+  export let height: number
 
   let active = false
 
@@ -19,6 +24,14 @@
 
   export function focus() {
     thisImage.focus()
+  }
+
+  export function getEffectiveTransform() {
+    return getComputedStyle(thisImage).transform
+  }
+
+  export function getClipPath() {
+    return thisImage.getAttribute("clip-path")
   }
 
   export function getBBox() {
@@ -95,33 +108,46 @@
     document.addEventListener("mousemove", onMouseMove)
     document.addEventListener("mouseup", onMouseUp)
   }
+
+  $: {
+    thisImage && setBBox({ x, y, width, height })
+  }
 </script>
 
 {#if readonly}
   <image
-    class:play
-    bind:this={thisImage}
-    class={target}
-    data-target={target}
     {href}
-    width="50"
+    bind:this={thisImage}
+    class:play
+    class={target}
+    clip-path={clippath}
+    data-target={target}
     height="50"
+    style={`transform: ${style}`}
+    width="50"
     x="-25"
     y="-25"
-    clip-path="url(#clip)"
-    {style}
   />
 {/if}
 
 {#if !readonly}
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <image
-    tabindex="0"
-    class:play
-    class:fast
-    class:editmode
-    class:active
+    {href}
     bind:this={thisImage}
+    class:active
+    class:editmode
+    class:fast
+    class:play
+    class={target}
+    clip-path={clippath}
+    data-target={target}
+    height="50"
+    style={`transform: ${style}`}
+    tabindex="0"
+    width="50"
+    x="-25"
+    y="-25"
     on:focus={() => console.log("focus", (active = true))}
     on:blur={() => (active = false)}
     on:mousedown={mouseDownHandler}
@@ -145,15 +171,6 @@
       focus()
       e.preventDefault()
     }}
-    class={target}
-    data-target={target}
-    {href}
-    width="50"
-    height="50"
-    x="-25"
-    y="-25"
-    clip-path="url(#clip)"
-    {style}
   />
 
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
@@ -162,7 +179,7 @@
     class:editmode
     class:active
     textLength="1"
-    {style}>{hotkey}{play ? "." : ""}</text
+    style={`transform: ${style}`}>{hotkey}{play ? "." : ""}</text
   >
 
   <use
@@ -173,7 +190,7 @@
     r="21"
     fill="none"
     stroke-width="2"
-    {style}
+    style={`transform: ${style}`}
     xlink:href="#hexagon"
   />
 {/if}

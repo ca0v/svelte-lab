@@ -26,10 +26,11 @@
     throw new Error("Failed to fetch photo list")
   }
 
-  let spiralName = "phase-1"
-  let transformName = "spiral-19"
+  let collageName = ""
+  let transformName = ""
   let date_filter = ""
   let date_filter_to = ""
+  let collages = [...hexagons]
   $: {
     if (date_filter) {
       const d = new Date(date_filter)
@@ -37,6 +38,20 @@
       date_filter_to = d.toISOString().split("T")[0]
     } else {
       date_filter_to = ""
+    }
+
+    const transform = transforms[transformName] as Array<{
+      id: string
+      style: string
+    }>
+    if (transform) {
+      const collage = collages.find((h) => h.id === collageName)
+      if (collage) {
+        collage.data.forEach((t, i) => {
+          t.transform = transform[i].style
+        })
+        collages = collages
+      }
     }
     console.log({ date_filter, date_filter_to })
   }
@@ -53,15 +68,17 @@
   <div class="frame">
     <h2>For Editing</h2>
     <fieldset>
-      <legend>Builder settings for {spiralName} on a {transformName}</legend>
-      <label
-        >Collage Name:
-        <select bind:value={spiralName}>
-          {#each hexagons as collage}
-            <option value={collage.id}>{collage.id}</option>
-          {/each}
-        </select></label
-      >
+      <legend>Builder settings for {collageName} on a {transformName}</legend>
+      <div>
+        <label
+          >Collage Name:
+          <select bind:value={collageName}>
+            {#each collages as collage}
+              <option value={collage.id}>{collage.id}</option>
+            {/each}
+          </select></label
+        >
+      </div>
       <label
         >Transform:
         <select bind:value={transformName}>
@@ -71,15 +88,17 @@
           {/each}
         </select>
       </label>
-      <label
-        >From:
-        <input type="date" bind:value={date_filter} /> to {date_filter_to}</label
-      >
+      <div>
+        <label
+          >From:
+          <input type="date" bind:value={date_filter} /> to {date_filter_to}</label
+        >
+      </div>
     </fieldset>
     <HexagonSpiral
-      id={spiralName}
-      collageName={spiralName}
-      transform={transforms[transformName]}
+      id={collageName}
+      {collageName}
+      transform={collages.find((h) => h.id === collageName)}
       duration={0.2}
       sources={photos
         .filter(
@@ -91,20 +110,22 @@
     />
   </div>
 
-  <h2>For Viewing</h2>
-  <div class="frame two-by">
-    {#each hexagons as collage, i}
-      <div>
-        <HexagonSpiral
-          id={`view_${collage.id}`}
-          collageName={collage.id}
-          duration={0.5 + i * 0.1}
-          readonly={true}
-          transform={transforms[collage.transform]}
-        />
-      </div>
-    {/each}
-  </div>
+  {#if false}
+    <h2>For Viewing</h2>
+    <div class="frame two-by">
+      {#each collages as collage, i}
+        <div>
+          <HexagonSpiral
+            id={`view_${collage.id}`}
+            collageName={collage.id}
+            duration={0.5 + i * 0.1}
+            readonly={true}
+            transform={collage}
+          />
+        </div>
+      {/each}
+    </div>
+  {/if}
 </main>
 
 <style>
@@ -115,11 +136,8 @@
 
   fieldset {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  fieldset label {
-    text-align: left;
+    grid-template-columns: repeat(5, 1fr);
+    grid-gap: 1rem;
   }
 
   .frame {

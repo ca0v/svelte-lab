@@ -3,36 +3,24 @@
   import { onMount } from "svelte"
 
   import { photoUrl as PHOTOS } from "../lib/globals"
-  import {
-    polygonPath,
-    polygonToPath,
-    translatePath,
-    type ImagePosition,
-  } from "../lib/paths"
+  import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
-  import { hexagons as hexagonSources } from "../data/hexagons"
+  import type { Hexagon } from "../data/hexagons"
 
-  export let id
-  export let collageName
+  export let id: string
+  export let collageName: string
   export let sources: Array<string> = []
   export let duration = 0.1
   export let readonly = false
-  export let transform: Array<{ i: number; style: string }>
+  export let transform: Hexagon
   let play = true
   let editmode = false
 
   let photoWheelComponent: PhotoWheel
   let svgImages = [] as Array<SvgImage>
-  let hexagons = hexagonSources.find((s) => s.id == collageName)
   let scope = `hexagon_spiral_${id}`
-
-  $: if (collageName || transform) {
-    hexagons = hexagonSources.find((s) => s.id == collageName)
-    replay()
-    applyState(id)
-  }
 
   function createCssTransforms(size = 20) {
     return Array(size)
@@ -81,38 +69,9 @@
     return svgImages.map((i) => ({
       href: i.href,
       target: i.target,
+      transform: i.getEffectiveTransform(),
       ...i.getBBox(),
     }))
-  }
-
-  function save(): void {
-    let positions = queryImagePositions()
-
-    // if hexagons then remove the positions that already match the hexagon positions
-    if (hexagons) {
-      positions = positions
-        .map((p) => ({ ...p, href: p.href.replace(`${PHOTOS}/get?id=`, "") }))
-        .filter((p) => {
-          const match = hexagons.positions.find((h) => {
-            return (
-              h.href === p.href &&
-              h.x === p.x &&
-              h.y === p.y &&
-              h.width === p.width &&
-              h.height === p.height &&
-              h.target === p.target
-            )
-          })
-          return !match
-        })
-    }
-    localStorage.setItem(`${collageName}.positions`, JSON.stringify(positions))
-    editmode = false
-  }
-
-  function loadImagePositions(): Array<ImagePosition> {
-    const positions = localStorage.getItem(`${collageName}.positions`)
-    return JSON.parse(positions || "[]")
   }
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
@@ -147,18 +106,28 @@
       }
     }
 
+    // get the image that is currently focused
+    const image = document.activeElement as SVGImageElement
+    // get the svgImage from this
+    const svgImage =
+      image && svgImages.find((i) => i.target === image.dataset.target)
+
     while (!handled) {
-      // get the image that is currently focused
-      const image = document.activeElement as SVGImageElement
       if (!image) break
-      // get the svgImage from this
-      const svgImage = svgImages.find((i) => i.target === image.dataset.target)
-      if (!svgImage) {
-        break
-      }
-      let { x, y, width, height } = svgImage.getBBox()
+      if (!svgImage) break
+
+      let { x: x0, y: y0, width: w0, height: h0 } = svgImage.getBBox()
+      let x = 0
+      let y = 0
+      let width = 0
+      let height = 0
+
       let resize = false
       switch (e.key) {
+        case "Enter":
+          image.parentElement.appendChild(image)
+          handled = true
+          break
         case "Delete":
           svgImage.href = ""
           handled = true
@@ -210,13 +179,40 @@
       }
 
       if (!handled && resize) {
-        image.setAttribute("x", x + "px")
-        image.setAttribute("y", y + "px")
-        image.setAttribute("width", width + "px")
-        image.setAttribute("height", height + "px")
+        if (e.shiftKey) {
+          svgImage.style = `${svgImage.style} translate(${x}px, ${y}px)`
+          svgImage.style = `scale(${1 + width / w0},${1 + height / h0}) ${
+            svgImage.style
+          }`
+        } else {
+          image.setAttribute("x", x0 + x + "px")
+          image.setAttribute("y", y0 + y + "px")
+          image.setAttribute("width", w0 + width + "px")
+          image.setAttribute("height", h0 + height + "px")
+        }
         handled = true
       }
       break
+    }
+
+    if (!handled) {
+      let rotation = 0
+      switch (e.key) {
+        case "<":
+        case ",":
+          rotation -= 30
+          break
+        case ">":
+        case ".":
+          rotation -= 30
+          break
+      }
+      if (rotation) {
+        const currentStyle = svgImage.getEffectiveTransform()
+        svgImage.style = `${currentStyle} rotate(${rotation}deg)`
+        image.setAttribute("clip-path", "url(#clip_0)")
+        handled = true
+      }
     }
 
     if (handled) {
@@ -226,33 +222,17 @@
   }
 
   function applyState(id: string) {
-    replay()
-
     injectCss(`hexagon_spiral_init_${id}`, createInitialCss)
-    injectCss(`hexagon_spiral_tran_${id}`, createCssTransforms)
+    injectCss(`hexagon_spiral_transitions_${id}`, createCssTransforms)
 
-    hexagons?.positions.forEach((p) => {
-      const target = svgImages.find((i) => i && i.target === p.target)
-      if (!target) return
-      target.href = `${PHOTOS}/get?id=${p.href}`
-      target.setBBox(p)
-    })
-
-    const savedPositions = loadImagePositions()
-    savedPositions.forEach((p) => {
-      const target = svgImages.find((i) => i && i.target === p.target)
-      if (!target) return
-      target.href = `${PHOTOS}/get?id=${p.href}`
-      target.setBBox(p)
-    })
+    // svgImages have not yet been created since they depend on this transform...delete this, right?  set it declaritively?
+    replay()
   }
 
   function replay() {
     play = true
     setTimeout(() => (play = false), 1000)
   }
-
-  onMount(() => applyState(id))
 
   function queryImage(index: number | string): SVGImageElement {
     if (typeof index === "string") {
@@ -298,13 +278,12 @@
     }
   }
 
-  function dumpTransforms() {
-    const transforms = svgImages.map((image, i) => ({
-      i,
-      style: image.style + "",
-    }))
-    return transforms
+  $: if (collageName || transform) {
+    applyState(id)
+    console.log({ id, collageName, transform })
   }
+
+  onMount(() => applyState(id))
 </script>
 
 <div class={scope} on:keydown={keyDownHandler}>
@@ -330,20 +309,23 @@
       }}
     />
     <div class="toolbar">
-      <button data-shortcut="S" on:click={() => save()}><u>S</u>ave</button>
       <button
         data-shortcut="C"
         title="Copy settings to clipboard"
         on:click={() => {
           const settings = {
             id,
-            transform: dumpTransforms(),
-            positions: queryImagePositions().map((v) => ({
-              ...v,
-              href: v.href.replace(`${PHOTOS}/get?id=`, ""),
-            })),
+            data: svgImages.map((image) => {
+              return {
+                target: image.target,
+                href: image.href.replace(`${PHOTOS}/get?id=`, ""),
+                ...image.getBBox(),
+                transform: image.getEffectiveTransform(),
+                clipPath: image.getClipPath(),
+              }
+            }),
           }
-          navigator.clipboard.writeText(JSON.stringify(settings))
+          navigator.clipboard.writeText(JSON.stringify(settings, null, 2))
           editmode = false
         }}><u>C</u>opy</button
       >
@@ -363,7 +345,10 @@
           <path d={polygonToPath(polygonPath(6, 22, 30))} />
         </g>
       </defs>
-      <clipPath id="clip">
+      <clipPath id="clip_0">
+        <path d={polygonToPath(polygonPath(6, 21, 0))} />
+      </clipPath>
+      <clipPath id="clip_30">
         <path d={polygonToPath(polygonPath(6, 21, 30))} />
       </clipPath>
       <clipPath id="clip2">
@@ -371,17 +356,23 @@
           d={polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64))}
         />
       </clipPath>
-      {#if hexagons}
-        {#each transform as style}
+      {#if transform?.data}
+        {#each transform.data as style, i}
           <SvgImage
-            bind:this={svgImages[style.i]}
+            bind:this={svgImages[i]}
             {play}
             {editmode}
             {readonly}
+            href={`${PHOTOS}/get?id=${style.href}`}
+            clippath={style.clipPath}
+            x={style.x}
+            y={style.y}
+            width={style.width}
+            height={style.height}
             on:swap={swapHandler}
-            target={`i${style.i}`}
-            hotkey={ID_MAP[style.i]}
-            style={style.style}
+            target={`${style.target}`}
+            hotkey={ID_MAP[i]}
+            style={style.transform}
           />
         {/each}
       {/if}
