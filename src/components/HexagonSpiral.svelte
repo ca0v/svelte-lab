@@ -1,6 +1,5 @@
 <script lang="ts">
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
-  import { onMount } from "svelte"
 
   import {
     photoUrl as PHOTOS,
@@ -97,7 +96,8 @@
     const image = document.activeElement as SVGImageElement
     // get the svgImage from this
     const svgImage =
-      image && svgImages.find((i) => i.target === image.dataset.target)
+      image &&
+      svgImages.find((i) => i.target === image.parentElement.dataset.target)
 
     if (svgImage) {
       let rotation = 0
@@ -229,9 +229,11 @@
 
   function queryImage(index: number | string): SVGImageElement {
     if (typeof index === "string") {
-      return document.querySelector(`.${scope} image[data-target="${index}"]`)
+      return document.querySelector(
+        `.${scope} .i[data-target="${index}"] > image`
+      )
     }
-    return document.querySelector(`.${scope} image.i${index}`)
+    return document.querySelector(`.${scope} .i${index} > image`)
   }
 
   function copy(from: SvgImage, into: SvgImage) {

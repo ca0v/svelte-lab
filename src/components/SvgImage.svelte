@@ -134,7 +134,12 @@
 {/if}
 
 {#if !readonly}
-  <g>
+  <g
+    class:play
+    class={target}
+    style={`transform: ${style}`}
+    data-target={target}
+  >
     <use
       class="border"
       class:active
@@ -144,7 +149,6 @@
       fill={background.fill}
       stroke={background.stroke}
       stroke-width="2"
-      style={`transform: ${style}`}
       xlink:href="#hexagon"
     />
 
@@ -155,12 +159,8 @@
       class:active
       class:editmode
       class:fast
-      class:play
-      class={target}
       clip-path={clippath}
-      data-target={target}
       height="50"
-      style={`transform: ${style}`}
       tabindex="0"
       width="50"
       x="-25"
@@ -189,16 +189,12 @@
         e.preventDefault()
       }}
     />
-  </g>
 
-  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-  <text
-    class="selector if-focus"
-    class:editmode
-    class:active
-    textLength="1"
-    style={`transform: ${style}`}>{hotkey}{play ? "." : ""}</text
-  >
+    <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+    <text class="selector if-focus" class:editmode class:active textLength="1"
+      >{hotkey}{play ? "." : ""}</text
+    >
+  </g>
 {/if}
 
 <style>
@@ -233,7 +229,7 @@
     stroke: white;
   }
 
-  image.play {
+  .play {
     opacity: 0;
   }
 
