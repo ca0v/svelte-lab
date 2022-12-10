@@ -2,7 +2,7 @@
   import { onMount } from "svelte"
   import { photoUrl as PHOTOS } from "./lib/globals"
   import HexagonSpiral from "./components/HexagonSpiral.svelte"
-  import { transforms, hexagons } from "./data/hexagons"
+  import { transforms, hexagons as collages } from "./data/hexagons"
   type Photo = {
     id: string
     filename: string
@@ -30,7 +30,7 @@
   let transformName = ""
   let date_filter = ""
   let date_filter_to = ""
-  let collages = [...hexagons]
+
   $: {
     if (date_filter) {
       const d = new Date(date_filter)
@@ -41,16 +41,32 @@
     }
 
     const transform = transforms[transformName] as Array<{
-      id: string
+      i: string
       style: string
     }>
     if (transform) {
       const collage = collages.find((h) => h.id === collageName)
       if (collage) {
-        collage.data.forEach((t, i) => {
-          t.transform = transform[i].style
+        // inject transforms not found in collage
+        transform.forEach((t) => {
+          const collageInfo = collage.data.find((c) => c.target === "i" + t.i)
+          if (!collageInfo) {
+            console.log("adding transform:", t.i)
+            collage.data.push({
+              target: "i" + t.i,
+              transform: t.style,
+              clipPath: "url(#clip_30)",
+              height: 100,
+              width: 100,
+              x: -50,
+              y: -50,
+              href: "PXL_20220624_151825418.jpg",
+            })
+          } else {
+            console.log("replacing transform:", t.i)
+            collageInfo.transform = t.style
+          }
         })
-        collages = collages
       }
     }
     console.log({ date_filter, date_filter_to })
@@ -88,10 +104,23 @@
           {/each}
         </select>
       </label>
-      <div>
+      <div class="toolbar">
+        <button
+          on:click={() => {
+            const currentDate = new Date(date_filter)
+            currentDate.setDate(currentDate.getDate() - 1)
+            date_filter = currentDate.toISOString().split("T")[0]
+          }}>&lt;&lt; <u>P</u>rior</button
+        >
         <label
           >From:
           <input type="date" bind:value={date_filter} /> to {date_filter_to}</label
+        ><button
+          on:click={() => {
+            const currentDate = new Date(date_filter)
+            currentDate.setDate(currentDate.getDate() + 1)
+            date_filter = currentDate.toISOString().split("T")[0]
+          }}><u>N</u>ext &gt;&gt;</button
         >
       </div>
     </fieldset>
@@ -110,7 +139,7 @@
     />
   </div>
 
-  {#if false}
+  {#if true}
     <h2>For Viewing</h2>
     <div class="frame two-by">
       {#each collages as collage, i}
@@ -130,18 +159,28 @@
 
 <style>
   .two-by {
-    display: grid;
+    display: flex;
     grid-template-columns: repeat(2, 1fr);
   }
 
   fieldset {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(1, 1fr);
     grid-gap: 1rem;
   }
 
   .frame {
     justify-content: center;
     width: calc(clamp(20rem, 100vw, 100rem) - 2rem);
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 1em;
+  }
+
+  h2,
+  h1 {
+    text-align: center;
   }
 </style>

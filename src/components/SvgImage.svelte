@@ -27,7 +27,8 @@
   }
 
   export function getEffectiveTransform() {
-    return getComputedStyle(thisImage).transform
+    const { transform } = getComputedStyle(thisImage)
+    return transform === "none" ? "" : transform
   }
 
   export function getClipPath() {

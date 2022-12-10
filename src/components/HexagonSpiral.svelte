@@ -59,19 +59,10 @@
   // assign images to each image element
   function autoAssignImages(urls: string[]) {
     svgImages.forEach((image, i) => {
+      if (image.href) return
       const url = urls[i % urls.length]
       image.href = url
     })
-  }
-
-  function queryImagePositions() {
-    // persist image positions
-    return svgImages.map((i) => ({
-      href: i.href,
-      target: i.target,
-      transform: i.getEffectiveTransform(),
-      ...i.getBBox(),
-    }))
   }
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
@@ -282,8 +273,6 @@
     applyState(id)
     console.log({ id, collageName, transform })
   }
-
-  onMount(() => applyState(id))
 </script>
 
 <div class={scope} on:keydown={keyDownHandler}>
