@@ -18,15 +18,20 @@
   export let sources: Array<string> = []
   export let duration = 0.1
   export let readonly = false
-
-  let hexagons = hexagonSources.find((s) => s.id == id)
-
-  let photoWheelComponent: PhotoWheel
-  let svgImages: Array<SvgImage> = []
-
+  let play = true
   let editmode = false
 
-  const scope = `hexagon_spiral_${id}`
+  let photoWheelComponent: PhotoWheel
+  let svgImages = [] as Array<SvgImage>
+  let hexagons = hexagonSources.find((s) => s.id == id)
+  let scope = `hexagon_spiral_${id}`
+
+  $: if (id) {
+    hexagons = hexagonSources.find((s) => s.id == id)
+    replay()
+    applyState(id)
+    console.log({ id, scope, hexagons, svgImages })
+  }
 
   function createCssTransforms(size = 20) {
     return Array(size)
@@ -59,12 +64,6 @@
     style.innerHTML = generator()
     document.head.appendChild(style)
   }
-
-  injectCss(`hexagon_spiral_init_${id}`, createInitialCss)
-  injectCss(`hexagon_spiral_tran_${id}`, createCssTransforms)
-
-  let play = true
-  setTimeout(() => (play = false), 1000)
 
   // assign images to each image element
   function autoAssignImages(urls: string[]) {
@@ -114,7 +113,6 @@
   }
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
-    console.log("keydown", e.key)
     let handled = false
 
     if (e.ctrlKey) return
@@ -220,15 +218,19 @@
     }
 
     if (handled) {
-      console.log("handled")
       e.stopPropagation()
       e.preventDefault()
     }
   }
 
-  onMount(() => {
+  function applyState(id: string) {
+    replay()
+
+    injectCss(`hexagon_spiral_init_${id}`, createInitialCss)
+    injectCss(`hexagon_spiral_tran_${id}`, createCssTransforms)
+
     hexagons?.positions.forEach((p) => {
-      const target = svgImages.find((i) => i.target === p.target)
+      const target = svgImages.find((i) => i && i.target === p.target)
       if (!target) return
       target.href = `${PHOTOS}/get?id=${p.href}`
       target.setBBox(p)
@@ -236,12 +238,19 @@
 
     const savedPositions = loadImagePositions()
     savedPositions.forEach((p) => {
-      const target = svgImages.find((i) => i.target === p.target)
+      const target = svgImages.find((i) => i && i.target === p.target)
       if (!target) return
-      target.href = p.href
+      target.href = `${PHOTOS}/get?id=${p.href}`
       target.setBBox(p)
     })
-  })
+  }
+
+  function replay() {
+    play = true
+    setTimeout(() => (play = false), 1000)
+  }
+
+  onMount(() => applyState(id))
 
   function queryImage(index: number | string): SVGImageElement {
     if (typeof index === "string") {
@@ -313,18 +322,20 @@
           d={polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64))}
         />
       </clipPath>
-      {#each hexagons.transforms as style}
-        <SvgImage
-          bind:this={svgImages[style.i]}
-          {play}
-          {editmode}
-          {readonly}
-          on:swap={swapHandler}
-          target={`i${style.i}`}
-          hotkey={ID_MAP[style.i]}
-          style={style.style}
-        />
-      {/each}
+      {#if hexagons}
+        {#each hexagons.transforms as style}
+          <SvgImage
+            bind:this={svgImages[style.i]}
+            {play}
+            {editmode}
+            {readonly}
+            on:swap={swapHandler}
+            target={`i${style.i}`}
+            hotkey={ID_MAP[style.i]}
+            style={style.style}
+          />
+        {/each}
+      {/if}
     </svg>
     {#if !readonly}
       <div class="toolbar">
@@ -349,7 +360,7 @@
           }}><u>C</u>opy</button
         >
       </div>
-      <div class="if-focus">
+      <div class="x-if-focus">
         <PhotoWheel
           {sources}
           bind:this={photoWheelComponent}

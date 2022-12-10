@@ -24,6 +24,8 @@
   onMount(() => {
     fetchPhotoList()
   })
+
+  let spiral_1 = "phase-1"
 </script>
 
 <main>
@@ -31,8 +33,12 @@
 
   <div class="frame">
     <h2>For Editing</h2>
+    <div>
+      Collage Name:
+      <input type="text" bind:value={spiral_1} />
+    </div>
     <HexagonSpiral
-      id="phase-1"
+      id={spiral_1}
       duration={0.2}
       sources={photos.map((p) => `${PHOTOS}/get?id=${p.filename}`)}
     />
