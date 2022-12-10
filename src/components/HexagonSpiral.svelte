@@ -14,23 +14,24 @@
   import SvgImage from "./SvgImage.svelte"
   import { hexagons as hexagonSources } from "../data/hexagons"
 
-  export let id = "default"
+  export let id
+  export let collageName
   export let sources: Array<string> = []
   export let duration = 0.1
   export let readonly = false
+  export let transform: Array<{ i: number; style: string }>
   let play = true
   let editmode = false
 
   let photoWheelComponent: PhotoWheel
   let svgImages = [] as Array<SvgImage>
-  let hexagons = hexagonSources.find((s) => s.id == id)
+  let hexagons = hexagonSources.find((s) => s.id == collageName)
   let scope = `hexagon_spiral_${id}`
 
-  $: if (id) {
-    hexagons = hexagonSources.find((s) => s.id == id)
+  $: if (collageName || transform) {
+    hexagons = hexagonSources.find((s) => s.id == collageName)
     replay()
     applyState(id)
-    console.log({ id, scope, hexagons, svgImages })
   }
 
   function createCssTransforms(size = 20) {
@@ -58,11 +59,13 @@
 
   // inject css into style tag
   function injectCss(id: string, generator: () => string) {
-    if (document.querySelector(`#${id}`)) return
-    const style = document.createElement("style")
-    style.id = id
+    let style = document.querySelector(`#${id}`)
+    if (!style) {
+      style = document.createElement("style")
+      style.id = id
+      document.head.appendChild(style)
+    }
     style.innerHTML = generator()
-    document.head.appendChild(style)
   }
 
   // assign images to each image element
@@ -103,12 +106,12 @@
           return !match
         })
     }
-    localStorage.setItem(`${id}.positions`, JSON.stringify(positions))
+    localStorage.setItem(`${collageName}.positions`, JSON.stringify(positions))
     editmode = false
   }
 
   function loadImagePositions(): Array<ImagePosition> {
-    const positions = localStorage.getItem(`${id}.positions`)
+    const positions = localStorage.getItem(`${collageName}.positions`)
     return JSON.parse(positions || "[]")
   }
 
@@ -151,7 +154,6 @@
       // get the svgImage from this
       const svgImage = svgImages.find((i) => i.target === image.dataset.target)
       if (!svgImage) {
-        console.log(svgImages, image)
         break
       }
       let { x, y, width, height } = svgImage.getBBox()
@@ -306,6 +308,53 @@
 </script>
 
 <div class={scope} on:keydown={keyDownHandler}>
+  {#if !readonly}
+    <PhotoWheel
+      {sources}
+      bind:this={photoWheelComponent}
+      on:goto={(data) => {
+        const { key } = data.detail
+        const index = ID_MAP.indexOf(key.toLocaleUpperCase())
+        if (index < 0) return
+        const targetImage = queryImage(index)
+        targetImage?.focus()
+      }}
+      on:keydown={(data) => {
+        const { key, source } = data.detail
+        const index = ID_MAP.indexOf(key.toLocaleUpperCase())
+        if (index < 0) return
+        const targetImage = svgImages[index]
+        if (targetImage) {
+          targetImage.href = source
+        }
+      }}
+    />
+    <div class="toolbar">
+      <button data-shortcut="S" on:click={() => save()}><u>S</u>ave</button>
+      <button
+        data-shortcut="C"
+        title="Copy settings to clipboard"
+        on:click={() => {
+          const settings = {
+            id,
+            transform: dumpTransforms(),
+            positions: queryImagePositions().map((v) => ({
+              ...v,
+              href: v.href.replace(`${PHOTOS}/get?id=`, ""),
+            })),
+          }
+          navigator.clipboard.writeText(JSON.stringify(settings))
+          editmode = false
+        }}><u>C</u>opy</button
+      >
+      <button
+        on:click={() => {
+          autoAssignImages(sources)
+        }}>Auto Assign</button
+      >
+    </div>
+    <div class="clone" class:dragging={false}>Clone Here</div>
+  {/if}
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <section>
     <svg viewBox="-100 -100 200 200" stroke-width="0" fill="#000">
@@ -323,7 +372,7 @@
         />
       </clipPath>
       {#if hexagons}
-        {#each hexagons.transforms as style}
+        {#each transform as style}
           <SvgImage
             bind:this={svgImages[style.i]}
             {play}
@@ -337,58 +386,6 @@
         {/each}
       {/if}
     </svg>
-    {#if !readonly}
-      <div class="toolbar">
-        <button class="if-focus" data-shortcut="S" on:click={() => save()}
-          ><u>S</u>ave</button
-        >
-        <button
-          class="if-focus"
-          data-shortcut="C"
-          title="Copy settings to clipboard"
-          on:click={() => {
-            const settings = {
-              id,
-              transforms: dumpTransforms(),
-              positions: queryImagePositions().map((v) => ({
-                ...v,
-                href: v.href.replace(`${PHOTOS}/get?id=`, ""),
-              })),
-            }
-            navigator.clipboard.writeText(JSON.stringify(settings))
-            editmode = false
-          }}><u>C</u>opy</button
-        >
-      </div>
-      <div class="x-if-focus">
-        <PhotoWheel
-          {sources}
-          bind:this={photoWheelComponent}
-          on:goto={(data) => {
-            const { key } = data.detail
-            const index = ID_MAP.indexOf(key.toLocaleUpperCase())
-            if (index < 0) return
-            const targetImage = queryImage(index)
-            targetImage?.focus()
-          }}
-          on:keydown={(data) => {
-            const { key, source } = data.detail
-            const index = ID_MAP.indexOf(key.toLocaleUpperCase())
-            if (index < 0) return
-            const targetImage = svgImages[index]
-            if (targetImage) {
-              targetImage.href = source
-            }
-          }}
-        />
-        <button
-          on:click={() => {
-            autoAssignImages(sources)
-          }}>Auto Assign</button
-        >
-      </div>
-      <div class="clone" class:dragging={false}>Clone Here</div>
-    {/if}
   </section>
 </div>
 
@@ -403,14 +400,6 @@
     grid-auto-flow: row;
     grid-template-columns: 70cqmin;
     justify-content: center;
-  }
-
-  .if-focus {
-    visibility: hidden;
-  }
-
-  section:focus-within .if-focus {
-    visibility: visible;
   }
 
   .clone {
@@ -433,5 +422,12 @@
 
   .clone.dragging {
     visibility: visible;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: center;
+    gap: 0.5em;
+    margin: 0.5em;
   }
 </style>
