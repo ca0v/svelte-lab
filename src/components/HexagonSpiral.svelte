@@ -23,6 +23,8 @@
   export let duration = 0.1
   export let readonly = false
   export let transform: Hexagon
+  export let transformDelay = 0 // to be moved to configuration
+
   let play = true
   let editmode = false
 
@@ -224,7 +226,7 @@
 
   function replay() {
     play = true
-    setTimeout(() => (play = false), 1000)
+    setTimeout(() => (play = false), transformDelay * 1000)
   }
 
   function queryImage(index: number | string): SVGImageElement {
