@@ -209,7 +209,9 @@
       savedState.data.forEach((image, i) => {
         const svgImage = svgImages[i]
         if (!svgImage) return
-        svgImage.href = `${PHOTOS}/get?id=${image.href}`
+        if (image.href) {
+          svgImage.href = `${PHOTOS}/get?id=${image.href}`
+        }
         svgImage.style = image.transform
         svgImage.clippath = image.clipPath
         svgImage.setBBox({
@@ -283,6 +285,7 @@
   function createSettings(): Hexagon {
     return {
       id,
+      title: id,
       data: svgImages.map((image) => {
         return {
           target: image.target,
@@ -383,7 +386,7 @@
             {play}
             {editmode}
             {readonly}
-            href={`${PHOTOS}/get?id=${style.href}`}
+            href={style.href ? `${PHOTOS}/get?id=${style.href}` : ""}
             clippath={style.clipPath}
             x={style.x}
             y={style.y}

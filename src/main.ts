@@ -25,7 +25,7 @@ document.body.addEventListener("keydown", (e: KeyboardEvent & { currentTarget: H
   }
 })
 
-window.addEventListener("onerror", (e: ErrorEvent) => {
+window.addEventListener("error", (e: ErrorEvent) => {
   console.error(e)
   const err = document.createElement("div")
   err.innerText = e.message

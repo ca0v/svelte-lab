@@ -1,5 +1,6 @@
 export type Hexagon = {
     id: string
+    title: string
     data: {
         target: string
         href: string
@@ -24,10 +25,205 @@ const transforms = {
 
 const hexagons: Array<Hexagon> =
     [
-        { id: "phase-5", data: [] },
-
         {
-            "id": "phase-4",
+            "id": "phase-5",
+            "title": "Nebraska",
+            "data": [
+                {
+                    "target": "i0",
+                    "href": "PXL_20220703_001600737.jpg",
+                    "x": -53,
+                    "y": -43,
+                    "width": 114,
+                    "height": 114,
+                    "transform": "",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i1",
+                    "href": "PXL_20220703_012516438.PORTRAIT.jpg",
+                    "x": -25,
+                    "y": -25,
+                    "width": 50,
+                    "height": 50,
+                    "transform": "matrix(1, 0, 0, 1, 40, 0)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i2",
+                    "href": "PXL_20220702_130127607.jpg",
+                    "x": -27,
+                    "y": -30,
+                    "width": 58,
+                    "height": 58,
+                    "transform": "matrix(1, 0, 0, 1, 20, 34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i3",
+                    "href": "PXL_20220702_141016595.jpg",
+                    "x": -73,
+                    "y": -48,
+                    "width": 122,
+                    "height": 122,
+                    "transform": "matrix(1, 0, 0, 1, -20, 34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i4",
+                    "href": "PXL_20220702_155011846.jpg",
+                    "x": -25,
+                    "y": -25,
+                    "width": 44,
+                    "height": 44,
+                    "transform": "matrix(1, 0, 0, 1, -40, 4.89859e-15)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i5",
+                    "href": "PXL_20220702_155118944.jpg",
+                    "x": -43,
+                    "y": -52,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, -20, -34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i6",
+                    "href": "PXL_20220702_170233645.jpg",
+                    "x": -25,
+                    "y": -25,
+                    "width": 50,
+                    "height": 50,
+                    "transform": "matrix(1, 0, 0, 1, 20, -34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i7",
+                    "href": "PXL_20220702_183843487.jpg",
+                    "x": -24,
+                    "y": -24,
+                    "width": 48,
+                    "height": 48,
+                    "transform": "matrix(1, 0, 0, 1, 80, 0)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i8",
+                    "href": "PXL_20220702_143738306.jpg",
+                    "x": -26,
+                    "y": -32,
+                    "width": 52,
+                    "height": 52,
+                    "transform": "matrix(1, 0, 0, 1, 40, 69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i9",
+                    "href": "PXL_20220702_214612617.jpg",
+                    "x": -57,
+                    "y": -43,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, -40, 69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i10",
+                    "href": "PXL_20220702_183839469.jpg",
+                    "x": -24,
+                    "y": -20,
+                    "width": 48,
+                    "height": 48,
+                    "transform": "matrix(1, 0, 0, 1, -80, 9.79717e-15)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i11",
+                    "href": "PXL_20220702_165955047.jpg",
+                    "x": -65,
+                    "y": -42,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, -40, -69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i12",
+                    "href": "PXL_20220702_170643605.jpg",
+                    "x": -32,
+                    "y": -27,
+                    "width": 56,
+                    "height": 56,
+                    "transform": "matrix(1, 0, 0, 1, 40, -69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i13",
+                    "href": "PXL_20220702_192435654.jpg",
+                    "x": -25,
+                    "y": -26,
+                    "width": 50,
+                    "height": 50,
+                    "transform": "matrix(1, 0, 0, 1, 60.1888, 34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i14",
+                    "href": "PXL_20220702_214558211.jpg",
+                    "x": -37,
+                    "y": -29,
+                    "width": 58,
+                    "height": 58,
+                    "transform": "matrix(1, 0, 0, 1, 4.25565e-15, 69.5)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i15",
+                    "href": "PXL_20220702_143717032.jpg",
+                    "x": -31,
+                    "y": -28,
+                    "width": 54,
+                    "height": 54,
+                    "transform": "matrix(1, 0, 0, 1, -60.1888, 34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i16",
+                    "href": "PXL_20220702_165955047.jpg",
+                    "x": -23,
+                    "y": -57,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, -60.1888, -34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i17",
+                    "href": "PXL_20220702_165926970.jpg",
+                    "x": -46,
+                    "y": -44,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, -1.27669e-14, -69.5)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i18",
+                    "href": "PXL_20220702_182456593.jpg",
+                    "x": -61,
+                    "y": -45,
+                    "width": 114,
+                    "height": 114,
+                    "transform": "matrix(1, 0, 0, 1, 60.1888, -34.75)",
+                    "clipPath": "url(#clip_30)"
+                }
+            ]
+        },
+        {
+            id: "phase-4",
+            "title": "Marysville KS",
             "data": [
                 {
                     "target": "i0",
@@ -224,7 +420,8 @@ const hexagons: Array<Hexagon> =
 
 
         {
-            "id": "phase-3",
+            id: "phase-3",
+            "title": "Brief Wichita Visit",
             "data": [
                 {
                     "target": "i0",
@@ -422,7 +619,8 @@ const hexagons: Array<Hexagon> =
 
 
         {
-            "id": "phase-2",
+            id: "phase-2",
+            "title": "Leaving Greenville",
             "data": [
                 {
                     "target": "i0",
@@ -592,7 +790,11 @@ const hexagons: Array<Hexagon> =
                     "width": 22,
                     "height": 22,
                     "transform": "matrix(1, 0, 0, 1, -60.1888, -34.75)",
-                    "clipPath": "url(#clip_30)"
+                    "clipPath": "url(#clip_30)",
+                    background: {
+                        fill: "#666",
+                        stroke: "#000",
+                    }
                 },
                 {
                     "target": "i17",
@@ -618,204 +820,8 @@ const hexagons: Array<Hexagon> =
         },
 
 
-
-
-        {
-            "id": "phase-1",
-            "data": [
-                {
-                    "target": "i0",
-                    "href": "PXL_20220629_140431696.jpg",
-                    "x": -38,
-                    "y": -39,
-                    "width": 82,
-                    "height": 82,
-                    "transform": "",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i1",
-                    "href": "PXL_20220628_190953569.jpg",
-                    "x": -25,
-                    "y": -25,
-                    "width": 50,
-                    "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, 40, 0)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i2",
-                    "href": "PXL_20220628_022815898.jpg",
-                    "x": -84,
-                    "y": -57,
-                    "width": 122,
-                    "height": 122,
-                    "transform": "matrix(1, 0, 0, 1, 20, 34.641)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i3",
-                    "href": "PXL_20220628_022815898.jpg",
-                    "x": -45,
-                    "y": -59,
-                    "width": 122,
-                    "height": 122,
-                    "transform": "matrix(1, 0, 0, 1, -20, 34.641)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i4",
-                    "href": "PXL_20220626_201607540.jpg",
-                    "x": -55,
-                    "y": -75,
-                    "width": 120,
-                    "height": 120,
-                    "transform": "matrix(1, 0, 0, 1, -40, 4.89859e-15)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i5",
-                    "href": "DSC_7331.JPG",
-                    "x": -25,
-                    "y": -25,
-                    "width": 50,
-                    "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, -20, -34.641)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i6",
-                    "href": "PXL_20220626_193024587.jpg",
-                    "x": -25,
-                    "y": -25,
-                    "width": 50,
-                    "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, 20, -34.641)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i7",
-                    "href": "PXL_20220626_011400211.jpg",
-                    "x": -32,
-                    "y": -24,
-                    "width": 50,
-                    "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, 80, 0)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i8",
-                    "href": "PXL_20220626_160809779.jpg",
-                    "x": -48,
-                    "y": -36,
-                    "width": 78,
-                    "height": 78,
-                    "transform": "matrix(1, 0, 0, 1, 40, 69.282)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i9",
-                    "href": "PXL_20220627_201908273.jpg",
-                    "x": -48,
-                    "y": -55,
-                    "width": 76,
-                    "height": 76,
-                    "transform": "matrix(1, 0, 0, 1, -40, 69.282)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i10",
-                    "href": "DSC_7369.JPG",
-                    "x": -46,
-                    "y": -35,
-                    "width": 98,
-                    "height": 98,
-                    "transform": "matrix(1, 0, 0, 1, -80, 9.79717e-15)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i11",
-                    "href": "DSC_7365.JPG",
-                    "x": -50,
-                    "y": -56,
-                    "width": 140,
-                    "height": 140,
-                    "transform": "matrix(1, 0, 0, 1, -40, -69.282)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i12",
-                    "href": "DSC_7365.JPG",
-                    "x": -77,
-                    "y": -52,
-                    "width": 126,
-                    "height": 126,
-                    "transform": "matrix(1, 0, 0, 1, 40, -69.282)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i13",
-                    "href": "DSC_7313.JPG",
-                    "x": -32,
-                    "y": -36,
-                    "width": 68,
-                    "height": 68,
-                    "transform": "matrix(1, 0, 0, 1, 60.1888, 34.75)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i14",
-                    "href": "PXL_20220624_151818573.jpg",
-                    "x": -29,
-                    "y": -29,
-                    "width": 58,
-                    "height": 58,
-                    "transform": "matrix(1, 0, 0, 1, 4.25565e-15, 69.5)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i15",
-                    "href": "PXL_20220627_201908273.jpg",
-                    "x": -31,
-                    "y": -21,
-                    "width": 76,
-                    "height": 76,
-                    "transform": "matrix(1, 0, 0, 1, -60.1888, 34.75)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i16",
-                    "href": "PXL_20220627_165129391.jpg",
-                    "x": -25,
-                    "y": -25,
-                    "width": 50,
-                    "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, -60.1888, -34.75)",
-                    "clipPath": "url(#clip_30)",
-                },
-                {
-                    "target": "i17",
-                    "href": "DSC_7367.JPG",
-                    "x": -34,
-                    "y": -33,
-                    "width": 64,
-                    "height": 64,
-                    "transform": "matrix(1, 0, 0, 1, -1.27669e-14, -69.5)",
-                    "clipPath": "url(#clip_30)"
-                },
-                {
-                    "target": "i18",
-                    "href": "PXL_20220628_231009770.jpg",
-                    "x": -37,
-                    "y": -54,
-                    "width": 120,
-                    "height": 120,
-                    "transform": "matrix(1, 0, 0, 1, 60.1888, -34.75)",
-                    "clipPath": "url(#clip_30)"
-                }
-            ]
-        },
-
     ]
+
+hexagons.push({ id: "next", title: "next", data: [] })
 
 export { transforms, hexagons }

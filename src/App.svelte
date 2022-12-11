@@ -141,18 +141,18 @@
   </div>
 
   {#if true}
-    <h2>For Viewing</h2>
+    <h2>Preview</h2>
     <div class="frame three-by">
       {#each collages.reverse().filter((c) => c.data.length) as collage, i}
-        <div>
-          <h3>{collage.id}</h3>
+        <div class="border">
+          <p>{collage.title}</p>
           <HexagonSpiral
             id={`view_${collage.id}`}
             collageName={collage.id}
-            duration={0.3 + Math.log10(1 + i)}
+            duration={[0.2, 0.3, 0.4][i] || 1}
             readonly={true}
             transform={collage}
-            transformDelay={2 * i + Math.log2(1 + i)}
+            transformDelay={[0.2, 1, 2][i] || 0}
           />
         </div>
       {/each}
@@ -163,7 +163,9 @@
 <style>
   .three-by {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 20vw);
+    grid-template-rows: repeat(3, 1fr);
+    row-gap: 2rem;
   }
 
   fieldset {
@@ -182,9 +184,18 @@
     gap: 1em;
   }
 
+  p,
   h3,
   h2,
   h1 {
     text-align: center;
+  }
+
+  .border {
+    border: 1px solid rgba(200, 200, 200, 0.5);
+  }
+
+  main {
+    margin-bottom: 5rem;
   }
 </style>

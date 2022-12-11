@@ -118,19 +118,33 @@
 </script>
 
 {#if readonly}
-  <image
-    {href}
-    bind:this={thisImage}
+  <g
     class:play
     class={target}
-    clip-path={clippath}
-    data-target={target}
-    height="50"
     style={`transform: ${style}`}
-    width="50"
-    x="-25"
-    y="-25"
-  />
+    data-target={target}
+  >
+    <use
+      class="border"
+      class:active
+      cx="0"
+      cy="0"
+      r="21"
+      fill={background.fill}
+      stroke={background.stroke}
+      stroke-width="2"
+      xlink:href="#hexagon"
+    />
+    <image
+      {href}
+      bind:this={thisImage}
+      clip-path={clippath}
+      height="50"
+      width="50"
+      x="-25"
+      y="-25"
+    />
+  </g>
 {/if}
 
 {#if !readonly}
