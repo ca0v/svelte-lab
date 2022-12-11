@@ -12,7 +12,7 @@
   export let fast = false
   export let editmode = false
   export let readonly = false
-  export let clippath = "url(#clip_30)"
+  export let clipPath = "url(#clip_30)"
   export let x: number
   export let y: number
   export let width: number
@@ -137,7 +137,7 @@
     <image
       {href}
       bind:this={thisImage}
-      clip-path={clippath}
+      clip-path={clipPath}
       height="50"
       width="50"
       x="-25"
@@ -172,7 +172,7 @@
       class:active
       class:editmode
       class:fast
-      clip-path={clippath}
+      clip-path={clipPath}
       height="50"
       tabindex="0"
       width="50"

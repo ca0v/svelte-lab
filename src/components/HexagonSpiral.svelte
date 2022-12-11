@@ -211,7 +211,7 @@
         if (!svgImage) return
         svgImage.href = image.id
         svgImage.style = image.transform
-        svgImage.clippath = image.clipPath
+        svgImage.clipPath = image.clipPath
         svgImage.setBBox({
           x: image.x,
           y: image.y,
@@ -385,7 +385,7 @@
             {editmode}
             {readonly}
             href={`${PHOTOS}/get?id=${style.id}`}
-            clippath={style.clipPath}
+            clipPath={style.clipPath}
             x={style.x}
             y={style.y}
             width={style.width}
