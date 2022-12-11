@@ -69,7 +69,7 @@
     overflow-x: scroll;
     padding: 1rem;
     align-items: top;
-    height: 160px;
+    height: 12vh;
   }
 
   container button {
@@ -82,7 +82,7 @@
 
   container img {
     width: 100%;
-    max-height: 132px;
+    max-height: 10vh;
     object-fit: contain;
     border-radius: 3px;
   }

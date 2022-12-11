@@ -28,7 +28,7 @@
   }
 
   export function getEffectiveTransform() {
-    const { transform } = getComputedStyle(thisImage)
+    const { transform } = getComputedStyle(thisImage.parentElement)
     return transform === "none" ? "" : transform
   }
 
@@ -100,7 +100,7 @@
         element.classList.remove("dropping")
         element.focus()
         dispatch("swap", {
-          target1: element.dataset.target,
+          target1: element.parentElement.dataset.target,
           target2: target,
           mode: e.shiftKey ? "copy" : "swap",
         })

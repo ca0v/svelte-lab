@@ -60,7 +60,7 @@
               width: 100,
               x: -50,
               y: -50,
-              href: "PXL_20220624_151825418.jpg",
+              href: "",
             })
           } else {
             console.log("replacing transform:", t.i)
@@ -69,7 +69,6 @@
         })
       }
     }
-    console.log({ date_filter, date_filter_to })
   }
 
   onMount(async () => {

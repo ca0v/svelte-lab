@@ -24,3 +24,10 @@ document.body.addEventListener("keydown", (e: KeyboardEvent & { currentTarget: H
     }
   }
 })
+
+window.addEventListener("onerror", (e: ErrorEvent) => {
+  console.error(e)
+  const err = document.createElement("div")
+  err.innerText = e.message
+  document.body.insertBefore(err, document.body.firstChild)
+})
