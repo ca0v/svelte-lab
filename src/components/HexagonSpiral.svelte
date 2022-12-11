@@ -209,9 +209,7 @@
       savedState.data.forEach((image, i) => {
         const svgImage = svgImages[i]
         if (!svgImage) return
-        if (image.href) {
-          svgImage.href = `${PHOTOS}/get?id=${image.href}`
-        }
+        svgImage.href = image.id
         svgImage.style = image.transform
         svgImage.clippath = image.clipPath
         svgImage.setBBox({
@@ -289,7 +287,7 @@
       data: svgImages.map((image) => {
         return {
           target: image.target,
-          href: image.href.replace(`${PHOTOS}/get?id=`, ""),
+          id: image.href,
           ...image.getBBox(),
           transform: image.getEffectiveTransform(),
           clipPath: image.getClipPath(),
@@ -386,7 +384,7 @@
             {play}
             {editmode}
             {readonly}
-            href={style.href ? `${PHOTOS}/get?id=${style.href}` : ""}
+            href={`${PHOTOS}/get?id=${style.id}`}
             clippath={style.clipPath}
             x={style.x}
             y={style.y}

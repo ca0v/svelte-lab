@@ -35,3 +35,4 @@ It can also accept an initial state.
 * FIX: apply saved state
 * D4N: cell transforms belong in configuration
 * D4N: drag-drop should be handled by HexagonSpiral not SvgImage
+* FIX: "clippath" and "clipPath"

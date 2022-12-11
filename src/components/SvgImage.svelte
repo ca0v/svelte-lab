@@ -113,7 +113,6 @@
 
   $: {
     thisImage && setBBox({ x, y, width, height })
-    background && console.log({ background })
   }
 </script>
 

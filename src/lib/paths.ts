@@ -41,5 +41,4 @@ async function sleep(delay: number) {
     return new Promise((resolve) => setTimeout(resolve, delay))
 }
 
-
 export { polygonPath, polygonToPath, translatePath, sleep, type ImagePosition }

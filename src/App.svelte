@@ -2,15 +2,12 @@
   import { onMount } from "svelte"
   import { photoUrl as PHOTOS } from "./lib/globals"
   import HexagonSpiral from "./components/HexagonSpiral.svelte"
-  import { transforms, hexagons as collages } from "./data/hexagons"
-  type Photo = {
-    id: string
-    filename: string
-    url: string
-    created: string
-    width: number
-    height: number
-  }
+  import {
+    transforms,
+    collages,
+    type Photo,
+    type Hexagon,
+  } from "./data/hexagons"
 
   let photos: Array<Photo> = []
 
@@ -20,7 +17,6 @@
       const data = (await response.json()) as Array<Photo>
       return data.map((d) => ({
         ...d,
-        created: new Date(d.created).toISOString().split("T")[0],
       }))
     }
     throw new Error("Failed to fetch photo list")
@@ -60,7 +56,7 @@
               width: 100,
               x: -50,
               y: -50,
-              href: "",
+              id: "",
             })
           } else {
             console.log("replacing transform:", t.i)
@@ -72,6 +68,7 @@
   }
 
   onMount(async () => {
+    console.log("onMount")
     photos = await fetchPhotoList()
     date_filter = photos[0]?.created || ""
   })
@@ -89,7 +86,7 @@
           ><u>C</u>ollage Name:
           <select bind:value={collageName} data-shortcut="C">
             {#each collages as collage}
-              <option value={collage.id}>{collage.id}</option>
+              <option value={collage.id}>{collage.title}</option>
             {/each}
           </select></label
         >
@@ -136,7 +133,7 @@
             !date_filter ||
             (date_filter <= p.created && p.created <= date_filter_to)
         )
-        .map((p) => `${PHOTOS}/get?id=${p.filename}`)}
+        .map((p) => `${PHOTOS}/get?id=${p.id}`)}
     />
   </div>
 
@@ -185,7 +182,6 @@
   }
 
   p,
-  h3,
   h2,
   h1 {
     text-align: center;
