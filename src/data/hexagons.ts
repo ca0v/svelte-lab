@@ -825,7 +825,7 @@ const hexagons: Array<Hexagon> =
             "title": "next",
             "data": []
         }
-    ]
+    ].sort((a, b) => a.id.localeCompare(b.id))
 
 hexagons.push({ id: "next", title: "next", data: [] })
 

@@ -24,12 +24,12 @@
 
   let collageName = ""
   let transformName = ""
-  let date_filter = `${new Date().toISOString().split("T")[0]}`
+  let date_filter = ""
   let date_filter_to = ""
 
   $: {
     date_filter_to = addDays(date_filter, 1)
-
+    date_filter && localStorage.setItem("date_filter", date_filter)
     const transform = transforms[transformName] as Array<{
       i: string
       style: string
@@ -62,10 +62,9 @@
   }
 
   onMount(async () => {
-    console.log("onMount")
+    date_filter = localStorage.getItem("date_filter") || ""
     photos = await fetchPhotoList()
-    date_filter = photos[0]?.created.split("T")[0] || ""
-    console.log({ photos })
+    date_filter = date_filter || photos[0]?.created.split("T")[0] || ""
   })
 
   function addDays(date_filter: string, arg1: number): string {
@@ -119,8 +118,7 @@
             data-shortcut="N"
             on:click={() => {
               date_filter = addDays(date_filter, 1)
-            }}
-            >{new Date(addDays(date_filter, 1)).toDateString()} &gt;&gt;</button
+            }}>{new Date(date_filter_to).toDateString()} &gt;&gt;</button
           >
         {/if}
       </div>
@@ -143,7 +141,7 @@
   {#if true}
     <h2>Preview</h2>
     <div class="frame three-by">
-      {#each collages.reverse().filter((c) => c.data.length) as collage, i}
+      {#each collages.filter((c) => c.data.length) as collage, i}
         <div class="border">
           <p>{collage.title}</p>
           <HexagonSpiral
