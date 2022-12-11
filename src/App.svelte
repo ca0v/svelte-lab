@@ -24,17 +24,11 @@
 
   let collageName = ""
   let transformName = ""
-  let date_filter = ""
+  let date_filter = `${new Date().toISOString().split("T")[0]}`
   let date_filter_to = ""
 
   $: {
-    if (date_filter) {
-      const d = new Date(date_filter)
-      d.setDate(d.getDate() + 0)
-      date_filter_to = d.toISOString().split("T")[0]
-    } else {
-      date_filter_to = ""
-    }
+    date_filter_to = addDays(date_filter, 1)
 
     const transform = transforms[transformName] as Array<{
       i: string
@@ -70,8 +64,16 @@
   onMount(async () => {
     console.log("onMount")
     photos = await fetchPhotoList()
-    date_filter = photos[0]?.created || ""
+    date_filter = photos[0]?.created.split("T")[0] || ""
+    console.log({ photos })
   })
+
+  function addDays(date_filter: string, arg1: number): string {
+    if (!date_filter) return date_filter
+    const currentDate = new Date(date_filter)
+    currentDate.setDate(currentDate.getDate() + arg1)
+    return currentDate.toISOString().split("T")[0]
+  }
 </script>
 
 <main>
@@ -101,25 +103,26 @@
         </select>
       </label>
       <div class="toolbar">
-        <button
-          data-shortcut="P"
-          on:click={() => {
-            const currentDate = new Date(date_filter)
-            currentDate.setDate(currentDate.getDate() - 1)
-            date_filter = currentDate.toISOString().split("T")[0]
-          }}>&lt;&lt; <u>P</u>rior</button
-        >
-        <label
-          >From:
-          <input type="date" bind:value={date_filter} /> to {date_filter_to}</label
-        ><button
-          data-shortcut="N"
-          on:click={() => {
-            const currentDate = new Date(date_filter)
-            currentDate.setDate(currentDate.getDate() + 1)
-            date_filter = currentDate.toISOString().split("T")[0]
-          }}><u>N</u>ext &gt;&gt;</button
-        >
+        {#if date_filter}
+          <button
+            data-shortcut="P"
+            on:click={() => {
+              date_filter = addDays(date_filter, -1)
+            }}
+            >&lt;&lt; {new Date(
+              addDays(date_filter, -1)
+            ).toDateString()}</button
+          >{/if}
+        <label> <input type="date" bind:value={date_filter} /></label>
+        {#if date_filter}
+          <button
+            data-shortcut="N"
+            on:click={() => {
+              date_filter = addDays(date_filter, 1)
+            }}
+            >{new Date(addDays(date_filter, 1)).toDateString()} &gt;&gt;</button
+          >
+        {/if}
       </div>
     </fieldset>
     <HexagonSpiral
