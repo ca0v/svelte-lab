@@ -9,23 +9,25 @@ export type Photo = {
     height: number
 }
 
+export type HexagonData = {
+    id: string
+    target: string
+    x: number
+    y: number
+    width: number
+    height: number
+    transform: string
+    clipPath: string
+    background?: {
+        fill?: string;
+        stroke?: string;
+    }
+}
+
 export type Hexagon = {
     id: string
     title: string
-    data: {
-        id: string
-        target: string
-        x: number
-        y: number
-        width: number
-        height: number
-        transform: string
-        clipPath: string
-        background?: {
-            fill?: string;
-            stroke?: string;
-        }
-    }[]
+    data: Array<HexagonData>
 }
 
 function range(size: number) {
@@ -36,7 +38,14 @@ const clipPaths = {
     "7x5": injectClipPath("test", `<rect x="-35" y="-25" width="70" height="50" />`)
 }
 
-const transforms = {
+const transforms: Record<string, Array<{
+    i: number,
+    style: string,
+    clipPath?: string,
+    bbox?: {
+        x: number, y: number, width: number, height: number
+    }
+}>> = {
     "flower-6": [
         { "i": 0, "style": "", clipPath: "url(#poly5_36)" },
         ...[1, 2, 3, 4, 5].map((i) => ({
@@ -57,7 +66,7 @@ const transforms = {
             clipPath: "url(#clip_box)", bbox: { x: -40, y: -40, width: 80, height: 80 }
         }))
     ).flat(),
-    "7x5-1": range(3).map(i => ({
+    "7x5-3": range(3).map(i => ({
         "i": i,
         "style": `translate(${-50 + i * 35}px, ${-50 + i * 55}px)`,
         clipPath: clipPaths["7x5"],
@@ -69,9 +78,9 @@ const transforms = {
 const hexagons: Array<Hexagon> =
     [
         {
-            id: "7x5-1",
-            title: "7x5-1",
-            data: transforms["7x5-1"].map((t, i) => {
+            id: "7x5-3",
+            title: "7x5-3",
+            data: transforms["7x5-3"].map((t, i) => {
                 return {
                     target: `i${t.i}`,
                     id: `AIk5ERFrV7YxvPBqVg3prtWxO1iGmqxFd0or1PI65r6t69FZGQWHC2Z0so4NT0XQhaOJnOKu3ihhEtEMR4wRt_Frw0ookSwA9g`,

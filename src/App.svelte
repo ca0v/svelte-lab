@@ -39,35 +39,21 @@
     activeCollage =
       collageName && collages && collages.find((h) => h.id === collageName)
 
-    const transform = transforms[transformName] as Array<{
-      i: string
-      style: string
-    }>
-    if (transform) {
-      if (activeCollage) {
-        // inject transforms not found in collage
-        transform.forEach((t) => {
-          const collageInfo = activeCollage.data.find(
-            (c) => c.target === "i" + t.i
-          )
-          if (!collageInfo) {
-            console.log("adding transform:", t.i)
-            activeCollage.data.push({
-              target: "i" + t.i,
-              transform: t.style,
-              clipPath: "url(#clip_30)",
-              height: 100,
-              width: 100,
-              x: -50,
-              y: -50,
-              id: "",
-            })
-          } else {
-            console.log("replacing transform:", t.i)
-            collageInfo.transform = t.style
-          }
-        })
-      }
+    const transform = transforms[transformName]
+    if (transform && activeCollage) {
+      // capture existing images
+      const ids = activeCollage?.data.map((d) => d.id).filter((v) => !!v)
+      // replace transform
+      activeCollage.data = transform.map((t, i) => ({
+        id: ids[i] || "",
+        target: "i" + t.i,
+        transform: t.style,
+        clipPath: t.clipPath,
+        height: t.bbox?.height || 100,
+        width: t.bbox?.width || 100,
+        x: t.bbox?.x || -50,
+        y: t.bbox?.y || -50,
+      }))
     }
   }
 
