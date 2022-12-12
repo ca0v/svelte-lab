@@ -29,7 +29,7 @@ export type Hexagon = {
 const transforms = {
     "test": [
         { "i": 0, "style": "" },
-        ...[1, 2, 3, 4, 5].map((i) => ({ "i": i, "style": `rotate(${36 + i * 72}deg) translate(${90}px, 0) rotate(${-0 + -i * 72}deg)` }))],
+        ...[1, 2, 3, 4, 5].map((i) => ({ "i": i, "style": `rotate(${16 + i * 72}deg) translate(${65}px, 0) rotate(${-16 + -i * 72}deg)` }))],
     "spiral-19": [{ "i": 0, "style": "" }, { "i": 1, "style": "rotate(0deg) translate(40px, 0) rotate(0deg)" }, { "i": 2, "style": "rotate(60deg) translate(40px, 0) rotate(-60deg)" }, { "i": 3, "style": "rotate(120deg) translate(40px, 0) rotate(-120deg)" }, { "i": 4, "style": "rotate(180deg) translate(40px, 0) rotate(-180deg)" }, { "i": 5, "style": "rotate(240deg) translate(40px, 0) rotate(-240deg)" }, { "i": 6, "style": "rotate(300deg) translate(40px, 0) rotate(-300deg)" }, { "i": 7, "style": "rotate(0deg) translate(80px, 0) rotate(-0deg) " }, { "i": 8, "style": "rotate(60deg) translate(80px, 0) rotate(-60deg) " }, { "i": 9, "style": "rotate(120deg) translate(80px, 0) rotate(-120deg) " }, { "i": 10, "style": "rotate(180deg) translate(80px, 0) rotate(-180deg) " }, { "i": 11, "style": "rotate(240deg) translate(80px, 0) rotate(-240deg) " }, { "i": 12, "style": "rotate(300deg) translate(80px, 0) rotate(-300deg) " }, { "i": 13, "style": "rotate(30deg) translate(69.5px, 0) rotate(-30deg)" }, { "i": 14, "style": "rotate(90deg) translate(69.5px, 0) rotate(-90deg)" }, { "i": 15, "style": "rotate(150deg) translate(69.5px, 0) rotate(-150deg)" }, { "i": 16, "style": "rotate(210deg) translate(69.5px, 0) rotate(-210deg)" }, { "i": 17, "style": "rotate(270deg) translate(69.5px, 0) rotate(-270deg)" }, { "i": 18, "style": "rotate(330deg) translate(69.5px, 0) rotate(-330deg)" }],
 }
 
@@ -47,9 +47,76 @@ const hexagons: Array<Hexagon> =
                     width: 280,
                     height: 280,
                     transform: t.style,
-                    clipPath: "url(#poly5)"
+                    clipPath: ["url(#poly5_36)", "url(#poly5_36_1)"][i > 0 ? 1 : 0]
                 }
             })
+        },
+
+        {
+            "id": "2022-07-10",
+            "title": "Baybeach Was Really Fun!",
+            "data": [
+                {
+                    "target": "i0",
+                    "id": "AIk5ERFErl7AepzDmfkTv5YuKj-tYPiY86lxv-FkR2wRyK_nGNRgZg4v_ixJMN64Kdwu08fR36VtWa8tq0a5dhj90XNCyZ5MvA",
+                    "x": -65,
+                    "y": -55,
+                    "width": 112,
+                    "height": 112,
+                    "transform": "matrix(1.07336, 0, 0, 1.07336, -4.44089e-16, -4.44089e-16)",
+                    "clipPath": "url(#poly5_36)"
+                },
+                {
+                    "target": "i1",
+                    "id": "AIk5ERFAapXwJBiC6_aMW0ae4LB_FWe6EG0HaR_rJ0BTdobh1RTQ8yw_zOgUGnFWCz1dhOSrN3OvRu37lUQVzXT3h47CjNOIcQ",
+                    "x": -39,
+                    "y": -40,
+                    "width": 86,
+                    "height": 86,
+                    "transform": "matrix(1.1746, 0, 0, 1.1746, 2.66454, 69.2548)",
+                    "clipPath": "url(#poly5_36_1)"
+                },
+                {
+                    "target": "i2",
+                    "id": "AIk5ERGQ_Jyrc7kib0pT3WQ8lvtdsQ-L1uIwW3QQC04YU91HM5IPPKRsrawRonaVO1Ean2XGsmC-8qYdUOuN0Oj1TmKCMBpLTA",
+                    "x": -33,
+                    "y": -44,
+                    "width": 110,
+                    "height": 110,
+                    "transform": "matrix(1, 0, 0, 1, -62.08, 18.2313)",
+                    "clipPath": "url(#poly5_36_1)"
+                },
+                {
+                    "target": "i3",
+                    "id": "AIk5ERG_hrkbq61lmhGQcUv06uDMuPHPM3ZhwPLeWr6_ks0OXaONOGnzrKFbcxa86CJgAZPZORdXliyXUQVSVBJPXfMskrjczg",
+                    "x": -55,
+                    "y": -53,
+                    "width": 102,
+                    "height": 102,
+                    "transform": "matrix(1, 0, 0, 1, -37.018, -53.2207)",
+                    "clipPath": "url(#poly5_36_1)"
+                },
+                {
+                    "target": "i4",
+                    "id": "AIk5EREtand-5zfHuLAJyKCsReKztoz6_V7ziaRYgjCpz3VPwpnkBGgwp0kGSzr9g-q2yiNgE_IyBeGDbDrY1CzRWw4XP1elGg",
+                    "x": -45,
+                    "y": -82,
+                    "width": 158,
+                    "height": 158,
+                    "transform": "matrix(1, 0, 0, 1, 33.3475, -55.8874)",
+                    "clipPath": "url(#poly5_36_1)"
+                },
+                {
+                    "target": "i5",
+                    "id": "AIk5ERFiE4k44tDytB82SdkdMEmL-40yYpBj9FcwqMq9Myhqhu9bRJrYnIDLQWP1GRN9-dN3sOg2rXmlOdPue9fqOv5DXRDCUg",
+                    "x": -43,
+                    "y": -41,
+                    "width": 88,
+                    "height": 88,
+                    "transform": "matrix(1, 0, 0, 1, 63.482, 13.9164)",
+                    "clipPath": "url(#poly5_36_1)"
+                }
+            ]
         },
         {
             "id": "2022-07-10",
