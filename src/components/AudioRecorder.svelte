@@ -23,7 +23,6 @@
     mediaRecorder.start()
     console.log(mediaRecorder.state)
     console.log("recorder started")
-    record.style.background = "red"
     stop.disabled = false
     record.disabled = true
   }
@@ -32,8 +31,6 @@
     mediaRecorder.stop()
     console.log(mediaRecorder.state)
     console.log("recorder stopped")
-    record.style.background = ""
-    record.style.color = ""
     // mediaRecorder.requestData();
     stop.disabled = true
     record.disabled = false
@@ -42,16 +39,16 @@
   function stopMediaRecorderHandler() {
     console.log("data available after MediaRecorder.stop() called.")
 
-    recordings = [
-      {
-        id: Date.now().toString(),
-        title: `Recording ${timeSinceAppStarted()}`,
-        blob: new Blob(chunks_1, { type: "audio/ogg; codecs=opus" }),
-      },
-      ...recordings,
-    ]
+    const recording = {
+      id: Date.now().toString(),
+      title: `Recording ${timeSinceAppStarted()}`,
+      blob: new Blob(chunks_1, { type: "audio/ogg; codecs=opus" }),
+    }
+
+    recordings = [recording, ...recordings]
 
     chunks_1.length = 0
+    saveRecording(recording)
   }
 
   async function demo() {
@@ -113,26 +110,22 @@
   <div class="wrapper">
     <section bind:this={mainSection} class="main-controls">
       <div id="buttons">
-        <button bind:this={record} class="record" on:click={recordClickHandler}
-          >Record</button
-        >
-        <button bind:this={stop} class="stop" on:click={stopClickHandler}
-          >Stop</button
-        >
+        <button
+          bind:this={record}
+          class="record"
+          on:click={recordClickHandler}
+        />
+        <button bind:this={stop} class="stop" on:click={stopClickHandler} />
       </div>
     </section>
 
     <section bind:this={soundClips} class="sound-clips">
       <audio bind:this={audioPlayer} />
       {#each recordings as recording, i}
-        <article class="clip">
-          <h3>{recording.title}</h3>
+        <article>
           <input type="text" bind:value={recording.title} />
-          <button class="delete" on:click={() => deleteRecording(recording)}
-            >Delete</button
-          >
-          <button on:click={() => saveRecording(recording)}>Save</button>
-          <button on:click={() => playRecording(recording)}>Play</button>
+          <button class="play" on:click={() => playRecording(recording)} />
+          <button class="delete" on:click={() => deleteRecording(recording)} />
         </article>
       {/each}
     </section>
@@ -150,5 +143,57 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+  }
+
+  /* css for a delete button  */
+  .delete {
+    background-color: red;
+    color: white;
+  }
+
+  .delete:before {
+    content: "✖";
+  }
+  .play:before {
+    content: "▶";
+  }
+  .stop:before {
+    content: "■";
+  }
+  .record:before {
+    content: "●";
+  }
+
+  /* css for a play button  */
+  .play {
+    background-color: green;
+    color: white;
+  }
+
+  /* css for a stop button  */
+  .record:not(:disabled) {
+    background-color: white;
+    color: red;
+  }
+
+  .stop:not(:disabled) {
+    background-color: red;
+    color: white;
+  }
+
+  /* css for a record button  */
+  button {
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+  }
+
+  article {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 </style>

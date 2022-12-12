@@ -39,7 +39,7 @@ function deleteAudioRecording(recording: AudioRecording) {
     const allRecordings = getItem<AudioRecording>('audio.recordings') || {};
     const recordingToDelete = allRecordings[recording.id]
     if (!recordingToDelete) {
-        throw 'Recording not found';
+        throw `Recording not found: ${recording.id}`;
     }
     delete allRecordings[recording.id]
     setItem('audio.recordings', allRecordings);
@@ -56,7 +56,7 @@ function getAllAudioRecordings() {
         }
         const data = new Uint8Array(recordingBlobString.split(',').map(v => parseInt(v, 10)));
         const blob = new Blob([data], { type });
-        return { title, blob } as AudioRecording;
+        return { id, title, blob } as AudioRecording;
     });
 }
 

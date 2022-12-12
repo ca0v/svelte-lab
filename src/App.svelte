@@ -107,6 +107,8 @@
           >
         {/each}
       </select>
+      <p>Audio Recordings</p>
+      <AudioRecorder />
       <p>Date Filter</p>
       <div class="toolbar">
         {#if date_filter}
@@ -126,8 +128,6 @@
           >
         {/if}
       </div>
-      <p>Audio Recordings</p>
-      <AudioRecorder />
     </div>
     <HexagonSpiral
       id={collageName}
@@ -207,5 +207,10 @@
 
   main {
     margin-bottom: 5rem;
+  }
+
+  input[type="date"] {
+    width: 100%;
+    height: 28px;
   }
 </style>
