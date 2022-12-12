@@ -12,9 +12,12 @@
   let soundClips: HTMLElement
   let mainSection: HTMLElement
   let mediaRecorder: MediaRecorder
+
+  let audioPlayer: HTMLAudioElement
+
   const chunks_1 = []
 
-  let recordings: Array<{ title: string; blob: any }> = []
+  let recordings: Array<AudioRecording> = []
 
   function recordClickHandler() {
     mediaRecorder.start()
@@ -41,11 +44,14 @@
 
     recordings = [
       {
-        title: `Recording ${recordings.length + 1}`,
+        id: Date.now().toString(),
+        title: `Recording ${timeSinceAppStarted()}`,
         blob: new Blob(chunks_1, { type: "audio/ogg; codecs=opus" }),
       },
       ...recordings,
     ]
+
+    chunks_1.length = 0
   }
 
   async function demo() {
@@ -83,8 +89,23 @@
     deleteAudioRecording(recording)
   }
 
+  function playRecording(recording: AudioRecording) {
+    audioPlayer.src = URL.createObjectURL(recording.blob)
+    audioPlayer.play()
+  }
+
   async function saveRecording(recording: AudioRecording) {
     saveAudioRecording(recording)
+  }
+
+  const appStartTime = Date.now()
+  function timeSinceAppStarted() {
+    const currentTime = Date.now()
+    const secondsSinceAppStarted = (currentTime - appStartTime) / 1000
+    const mm = Math.floor(secondsSinceAppStarted / 60) + ""
+    const ss = Math.floor(secondsSinceAppStarted % 60) + ""
+
+    return `${mm.padStart(2, "0")}:${ss.padStart(2, "0")}`
   }
 </script>
 
@@ -102,14 +123,16 @@
     </section>
 
     <section bind:this={soundClips} class="sound-clips">
+      <audio bind:this={audioPlayer} />
       {#each recordings as recording, i}
         <article class="clip">
-          <audio controls src={URL.createObjectURL(recording.blob)} />
-          <p>{recording.title}</p>
+          <h3>{recording.title}</h3>
+          <input type="text" bind:value={recording.title} />
           <button class="delete" on:click={() => deleteRecording(recording)}
             >Delete</button
           >
           <button on:click={() => saveRecording(recording)}>Save</button>
+          <button on:click={() => playRecording(recording)}>Play</button>
         </article>
       {/each}
     </section>

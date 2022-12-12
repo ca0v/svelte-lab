@@ -1,7 +1,10 @@
 type AudioRecording = {
+    id: string;
     title: string
     blob: Blob
 }
+
+type AudioRecordings = Record<string, { id: string, title: string, type: string }>;
 
 function getItem<T>(key: string): T | null {
     const item = localStorage.getItem(key);
@@ -17,15 +20,10 @@ function setItem<T>(key: string, item: T) {
 
 async function saveAudioRecording(recording: AudioRecording) {
     // save to local storage
-    const { title, blob } = recording;
-    const index = getItem<Array<{ id: string; title: string, type: string }>>('audio.recordings') || [];
+    let { id, title, blob } = recording;
+    const recordings = getItem<AudioRecordings>('audio.recordings') || {};
 
-    let id = index.find(v => v.title === title)?.id;
-    if (!id) {
-        id = index.length + 1 + '';
-        index.push({ id, title, type: blob.type });
-    }
-
+    recordings[id] = { id, title, type: blob.type };
 
     const reader = new FileReader();
     reader.readAsArrayBuffer(blob);
@@ -33,33 +31,33 @@ async function saveAudioRecording(recording: AudioRecording) {
         // convert data to base64 string
         const data = new Uint8Array(reader.result as ArrayBuffer).join(",");
         setItem(`audio.recordings.${id}`, data);
-        setItem('audio.recordings', index);
+        setItem('audio.recordings', recordings);
     };
 }
 
 function deleteAudioRecording(recording: AudioRecording) {
-    const allRecordings = getItem<Array<{ id: string; title: string }>>('audio.recordings') || [];
-    const recordingIndex = allRecordings.findIndex(v => v.title === recording.title);
-    if (recordingIndex < 0) {
+    const allRecordings = getItem<AudioRecording>('audio.recordings') || {};
+    const recordingToDelete = allRecordings[recording.id]
+    if (!recordingToDelete) {
         throw 'Recording not found';
     }
-    const recordingToDelete = allRecordings[recordingIndex];
-    allRecordings.splice(recordingIndex, 1);
+    delete allRecordings[recording.id]
     setItem('audio.recordings', allRecordings);
     localStorage.removeItem(`audio.recordings.${recordingToDelete.id}`);
 }
 
 function getAllAudioRecordings() {
-    const allRecordings = getItem<Array<{ id: string; title: string; type: string }>>('audio.recordings') || [];
-    return allRecordings.map((recording) => {
-        const recordingBlobString = getItem<string>(`audio.recordings.${recording.id}`) || null;
+    const allRecordings = getItem<AudioRecordings>('audio.recordings') || {};
+    return Object.keys(allRecordings).map((id) => {
+        const { title, type } = allRecordings[id];
+        const recordingBlobString = getItem<string>(`audio.recordings.${id}`) || null;
         if (!recordingBlobString) {
-            throw 'Recording not found';
+            throw `Recording not found: ${id}`;
         }
         const data = new Uint8Array(recordingBlobString.split(',').map(v => parseInt(v, 10)));
-        const blob = new Blob([data], { type: recording.type });
-        return { title: recording.title, blob } as AudioRecording;
+        const blob = new Blob([data], { type });
+        return { title, blob } as AudioRecording;
     });
 }
 
-export { type AudioRecording, saveAudioRecording, deleteAudioRecording, getAllAudioRecordings };
+export { type AudioRecording, type AudioRecordings, saveAudioRecording, deleteAudioRecording, getAllAudioRecordings };
