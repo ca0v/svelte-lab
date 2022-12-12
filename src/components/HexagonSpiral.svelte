@@ -312,6 +312,60 @@
 </script>
 
 <div class={scope} on:keydown={keyDownHandler}>
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <section>
+    <svg viewBox="-100 -100 200 200" stroke-width="0" fill="#000">
+      <defs>
+        <g id="hexagon">
+          <path d={polygonToPath(polygonPath(6, 22, 30))} />
+        </g>
+      </defs>
+      <clipPath id="clip_0">
+        <path d={polygonToPath(polygonPath(6, 21, 0))} />
+      </clipPath>
+      <clipPath id="poly5_0">
+        <path d={polygonToPath(polygonPath(5, 51, 0))} />
+      </clipPath>
+      <clipPath id="poly5_36">
+        <path d={polygonToPath(polygonPath(5, 36, 52))} />
+      </clipPath>
+      <clipPath id="poly5_36_1">
+        <path d={polygonToPath(polygonPath(5, 36, 52 + 36 + 0))} />
+      </clipPath>
+      <clipPath id="clip_30">
+        <path d={polygonToPath(polygonPath(6, 21, 30))} />
+      </clipPath>
+      <clipPath id="clip2">
+        <path
+          d={polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64))}
+        />
+      </clipPath>
+      {#if transform?.data}
+        {#each transform.data as style, i}
+          <SvgImage
+            bind:this={svgImages[i]}
+            {play}
+            {editmode}
+            {readonly}
+            href={style.id ? `${PHOTOS}/get?id=${style.id}` : ""}
+            clipPath={style.clipPath}
+            x={style.x}
+            y={style.y}
+            width={style.width}
+            height={style.height}
+            on:swap={swapHandler}
+            target={`${style.target}`}
+            hotkey={ID_MAP[i]}
+            style={style.transform}
+            background={{
+              stroke: style.background?.stroke || "none",
+              fill: style.background?.fill || "none",
+            }}
+          />
+        {/each}
+      {/if}
+    </svg>
+  </section>
   {#if !readonly}
     <PhotoWheel
       {sources}
@@ -377,60 +431,6 @@
       >
     </div>
   {/if}
-  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-  <section>
-    <svg viewBox="-100 -100 200 200" stroke-width="0" fill="#000">
-      <defs>
-        <g id="hexagon">
-          <path d={polygonToPath(polygonPath(6, 22, 30))} />
-        </g>
-      </defs>
-      <clipPath id="clip_0">
-        <path d={polygonToPath(polygonPath(6, 21, 0))} />
-      </clipPath>
-      <clipPath id="poly5_0">
-        <path d={polygonToPath(polygonPath(5, 51, 0))} />
-      </clipPath>
-      <clipPath id="poly5_36">
-        <path d={polygonToPath(polygonPath(5, 36, 52))} />
-      </clipPath>
-      <clipPath id="poly5_36_1">
-        <path d={polygonToPath(polygonPath(5, 36, 52 + 36 + 0))} />
-      </clipPath>
-      <clipPath id="clip_30">
-        <path d={polygonToPath(polygonPath(6, 21, 30))} />
-      </clipPath>
-      <clipPath id="clip2">
-        <path
-          d={polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64))}
-        />
-      </clipPath>
-      {#if transform?.data}
-        {#each transform.data as style, i}
-          <SvgImage
-            bind:this={svgImages[i]}
-            {play}
-            {editmode}
-            {readonly}
-            href={style.id ? `${PHOTOS}/get?id=${style.id}` : ""}
-            clipPath={style.clipPath}
-            x={style.x}
-            y={style.y}
-            width={style.width}
-            height={style.height}
-            on:swap={swapHandler}
-            target={`${style.target}`}
-            hotkey={ID_MAP[i]}
-            style={style.transform}
-            background={{
-              stroke: style.background?.stroke || "none",
-              fill: style.background?.fill || "none",
-            }}
-          />
-        {/each}
-      {/if}
-    </svg>
-  </section>
   {#if !readonly}
     <div class="clone" class:dragging={false}>Clone Here</div>
   {/if}

@@ -149,7 +149,7 @@
     <div class="frame three-by">
       {#each collages.filter((c) => c.data.length) as collage, i}
         <div class="border">
-          <h3>{collage.title}</h3>
+          <h3 class="fit">{collage.title}</h3>
           <HexagonSpiral
             id={`view_${collage.id}`}
             collageName={collage.id}
@@ -201,6 +201,14 @@
     text-align: center;
   }
 
+  h1 {
+    font-size: clamp(8px, 2cqw, 24px);
+  }
+
+  h2 {
+    font-size: clamp(8px, 1.8cqw, 20px);
+  }
+
   .border {
     border: 1px solid rgba(200, 200, 200, 0.5);
   }
@@ -212,5 +220,16 @@
   input[type="date"] {
     width: 100%;
     height: 28px;
+  }
+
+  .fit {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  * {
+    font-size: clamp(8px, 1cqw, 16px);
   }
 </style>
