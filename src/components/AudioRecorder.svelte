@@ -19,7 +19,8 @@
 
   let recordings: Array<AudioRecording> = []
 
-  function recordClickHandler() {
+  async function recordClickHandler() {
+    await startListening()
     mediaRecorder.start()
     console.log(mediaRecorder.state)
     console.log("recorder started")
@@ -49,16 +50,20 @@
 
     chunks_1.length = 0
     saveRecording(recording)
+
+    stopListening()
   }
 
-  async function demo() {
+  let stream: MediaStream
+
+  async function startListening() {
     stop.disabled = true
 
     //main block for doing the audio recording
     if (navigator.mediaDevices.getUserMedia) {
       const constraints = { audio: true }
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      stream = await navigator.mediaDevices.getUserMedia(constraints)
       {
         mediaRecorder = new MediaRecorder(stream, {
           mimeType: "audio/webm; codecs=opus",
@@ -74,8 +79,14 @@
     }
   }
 
+  function stopListening() {
+    if (mediaRecorder?.state === "recording") {
+      mediaRecorder.stop()
+    }
+    stream?.getTracks().forEach((track) => track.stop())
+  }
+
   onMount(() => {
-    demo()
     recordings = getAllAudioRecordings()
   })
 
