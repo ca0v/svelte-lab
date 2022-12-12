@@ -126,7 +126,12 @@
           class="record"
           on:click={recordClickHandler}
         />
-        <button bind:this={stop} class="stop" on:click={stopClickHandler} />
+        <button
+          bind:this={stop}
+          class="stop"
+          on:click={stopClickHandler}
+          disabled
+        />
       </div>
     </section>
 

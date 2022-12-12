@@ -26,19 +26,71 @@ export type Hexagon = {
     }[]
 }
 
+function range(size: number) {
+    return new Array(size).fill(0).map((_, i) => i);
+}
+
 const transforms = {
-    "test": [
-        { "i": 0, "style": "" },
-        ...[1, 2, 3, 4, 5].map((i) => ({ "i": i, "style": `rotate(${16 + i * 72}deg) translate(${65}px, 0) rotate(${-16 + -i * 72}deg)` }))],
-    "spiral-19": [{ "i": 0, "style": "" }, { "i": 1, "style": "rotate(0deg) translate(40px, 0) rotate(0deg)" }, { "i": 2, "style": "rotate(60deg) translate(40px, 0) rotate(-60deg)" }, { "i": 3, "style": "rotate(120deg) translate(40px, 0) rotate(-120deg)" }, { "i": 4, "style": "rotate(180deg) translate(40px, 0) rotate(-180deg)" }, { "i": 5, "style": "rotate(240deg) translate(40px, 0) rotate(-240deg)" }, { "i": 6, "style": "rotate(300deg) translate(40px, 0) rotate(-300deg)" }, { "i": 7, "style": "rotate(0deg) translate(80px, 0) rotate(-0deg) " }, { "i": 8, "style": "rotate(60deg) translate(80px, 0) rotate(-60deg) " }, { "i": 9, "style": "rotate(120deg) translate(80px, 0) rotate(-120deg) " }, { "i": 10, "style": "rotate(180deg) translate(80px, 0) rotate(-180deg) " }, { "i": 11, "style": "rotate(240deg) translate(80px, 0) rotate(-240deg) " }, { "i": 12, "style": "rotate(300deg) translate(80px, 0) rotate(-300deg) " }, { "i": 13, "style": "rotate(30deg) translate(69.5px, 0) rotate(-30deg)" }, { "i": 14, "style": "rotate(90deg) translate(69.5px, 0) rotate(-90deg)" }, { "i": 15, "style": "rotate(150deg) translate(69.5px, 0) rotate(-150deg)" }, { "i": 16, "style": "rotate(210deg) translate(69.5px, 0) rotate(-210deg)" }, { "i": 17, "style": "rotate(270deg) translate(69.5px, 0) rotate(-270deg)" }, { "i": 18, "style": "rotate(330deg) translate(69.5px, 0) rotate(-330deg)" }],
+    "flower-6": [
+        { "i": 0, "style": "", clipPath: "url(#poly5_36)" },
+        ...[1, 2, 3, 4, 5].map((i) => ({
+            "i": i,
+            "style": `rotate(${16 + i * 72}deg) translate(${65}px, 0) rotate(${-16 + -i * 72}deg)`,
+            clipPath: "url(#poly5_36_1)"
+        }))],
+    "spiral-19": [
+        { "i": 0, "style": "", clipPath: "url(#clip_30)" },
+        ...range(6).map(i => ({ "i": i + 1, "style": `rotate(${60 * i}deg) translate(40px, 0) rotate(-${60 * i}deg)`, clipPath: "url(#clip_30)" })),
+        ...range(6).map(i => ({ "i": i + 7, "style": `rotate(${60 * i}deg) translate(80px, 0) rotate(-${60 * i}deg)`, clipPath: "url(#clip_30)" })),
+        ...range(6).map(i => ({ "i": i + 13, "style": `rotate(${30 + 60 * i}deg) translate(69.5px, 0) rotate(-${30 + 60 * i}deg)`, clipPath: "url(#clip_30)" })),
+    ],
+    "classic": range(4).map(row =>
+        range(4).map(col => ({
+            "i": col + row * 4,
+            "style": `translate(${-75 + col * 51}px, ${-75 + row * 51}px)`,
+            clipPath: "url(#clip_box)", bbox: { x: -40, y: -40, width: 80, height: 80 }
+        }))
+    ).flat()
 }
 
 const hexagons: Array<Hexagon> =
     [
         {
-            id: "test",
-            title: "Test",
-            data: transforms["test"].map((t, i) => {
+            id: "classic",
+            title: "classic",
+            data: transforms["classic"].map((t, i) => {
+                return {
+                    target: `i${t.i}`,
+                    id: `AIk5ERHkVze4l_coT8puVELK7N6oo1IL2Ejp3VSbhZfpYHgMS-AJcs8MFO4w1b1zhu-vQnY_JbVRMQXdmDmJHP0qKcsrqKagMw`,
+                    x: t.bbox.x,
+                    y: t.bbox.y,
+                    width: t.bbox.width,
+                    height: t.bbox.height,
+                    transform: t.style,
+                    clipPath: t.clipPath,
+                }
+            })
+        },
+        {
+            id: "spiral-19",
+            title: "spiral-19",
+            data: transforms["spiral-19"].map((t, i) => {
+                return {
+                    target: `i${t.i}`,
+                    id: `AIk5ERHkVze4l_coT8puVELK7N6oo1IL2Ejp3VSbhZfpYHgMS-AJcs8MFO4w1b1zhu-vQnY_JbVRMQXdmDmJHP0qKcsrqKagMw`,
+                    x: -50,
+                    y: -50,
+                    width: 100,
+                    height: 100,
+                    transform: t.style,
+                    clipPath: t.clipPath,
+                }
+            })
+        },
+        {
+            id: "flower-6",
+            title: "flower-6",
+            data: transforms["flower-6"].map((t, i) => {
                 return {
                     target: `i${t.i}`,
                     id: `AIk5ERHkVze4l_coT8puVELK7N6oo1IL2Ejp3VSbhZfpYHgMS-AJcs8MFO4w1b1zhu-vQnY_JbVRMQXdmDmJHP0qKcsrqKagMw`,
@@ -47,7 +99,7 @@ const hexagons: Array<Hexagon> =
                     width: 280,
                     height: 280,
                     transform: t.style,
-                    clipPath: ["url(#poly5_36)", "url(#poly5_36_1)"][i > 0 ? 1 : 0]
+                    clipPath: t.clipPath,
                 }
             })
         },

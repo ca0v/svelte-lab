@@ -32,6 +32,7 @@ It can also accept an initial state.
 ## What is next?
 
 * FTR: allow audio to be recorded and saved to local storage or service
-* FIX: apply saved state
-* D4N: cell transforms belong in configuration
-* D4N: drag-drop should be handled by HexagonSpiral not SvgImage
+* DGN: cell transforms belong in configuration
+* DGN: drag-drop should be handled by HexagonSpiral not SvgImage
+* DGN: inject svg clipPath programatically
+* FIX: when 'transform' changes it should not have artifacts from prior transform

@@ -24,7 +24,7 @@ const getPhotoUrl = () => {
         return photoUrl
     }
     const newPhotoUrl = promptUser('Please enter your photo url')
-    setLocalStorage('photoUrl', newPhotoUrl)
+    newPhotoUrl && setLocalStorage('photoServerUrl', newPhotoUrl)
     return newPhotoUrl
 }
 

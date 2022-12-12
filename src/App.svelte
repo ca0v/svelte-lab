@@ -179,15 +179,17 @@
     content: "← ";
   }
 
-  input {
+  input[type="date"] {
     text-align: center;
   }
 
   .two-column {
     display: grid;
-    grid-template-columns: 10rem auto;
+    grid-template-columns: 1fr 7fr;
     grid-template-rows: repeat(3, 2rem);
     grid-gap: 1rem;
+    width: clamp(10rem, 90vw, 80rem);
+    margin: 0 auto;
   }
 
   .three-by {

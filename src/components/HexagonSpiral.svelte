@@ -320,6 +320,9 @@
           <path d={polygonToPath(polygonPath(6, 22, 30))} />
         </g>
       </defs>
+      <clipPath id="clip_box">
+        <rect x="-25" y="-25" width="50" height="50" />
+      </clipPath>
       <clipPath id="clip_0">
         <path d={polygonToPath(polygonPath(6, 21, 0))} />
       </clipPath>
