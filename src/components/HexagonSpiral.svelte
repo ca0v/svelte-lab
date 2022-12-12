@@ -315,11 +315,6 @@
       stroke-width="0"
       fill="#000"
     >
-      <defs>
-        <g id="hexagon">
-          <path d={polygonToPath(polygonPath(6, 22, 30))} />
-        </g>
-      </defs>
       {#if transform?.data}
         {#each transform.data as style, i}
           <SvgImage

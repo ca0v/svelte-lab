@@ -1,6 +1,6 @@
 import { writable } from "svelte/store"
 
-export const svgPaths = writable<Array<{ id: string, body: string }>>([])
+export const svgClipPaths = writable<Array<{ id: string, body: string }>>([])
 
 // read data from localstorage
 const getLocalStorage = (key: string) => {

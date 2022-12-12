@@ -132,12 +132,12 @@
       fill={background.fill}
       stroke={background.stroke}
       stroke-width="2"
-      xlink:href="#hexagon"
+      xlink:href={`#hover_${clipPath}`}
     />
     <image
       {href}
       bind:this={thisImage}
-      clip-path={clipPath}
+      clip-path={`url(#clip_${clipPath})`}
       height="50"
       width="50"
       x="-25"
@@ -158,11 +158,11 @@
       class:active
       cx="0"
       cy="0"
-      r="21"
+      r="100"
       fill={background.fill}
       stroke={background.stroke}
       stroke-width="2"
-      xlink:href="#hexagon"
+      xlink:href={`#hover_${clipPath}`}
     />
 
     <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
@@ -172,7 +172,7 @@
       class:active
       class:editmode
       class:fast
-      clip-path={clipPath}
+      clip-path={`url(#clip_${clipPath})`}
       height="50"
       tabindex="0"
       width="50"
