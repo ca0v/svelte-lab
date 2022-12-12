@@ -1,4 +1,5 @@
 import { svgClipPaths } from "../lib/globals"
+import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
 
 export type Photo = {
     id: string
@@ -34,6 +35,21 @@ function range(size: number) {
     return new Array(size).fill(0).map((_, i) => i);
 }
 
+/*
+    Inject clip paths into the global SVG clip path registry
+    I like generating close to where I am using it
+    ...seems unfinished though, maybe injectRect(name,x,y,width,height), etc.
+    or maybe just put it back in ClipPaths.svelte
+ */
+injectClipPath("box", `<rect x="-25" y="-25" width="50" height="50" />`)
+injectClipPath("0", `<path d="${polygonToPath(polygonPath(6, 21, 0))}" />`)
+injectClipPath("poly5_0", `<path d="${polygonToPath(polygonPath(5, 51, 0))}" />`)
+injectClipPath("poly5_36", `<path d="${polygonToPath(polygonPath(5, 36, 52))}" />`)
+injectClipPath("poly5_36_1", `<path d="${polygonToPath(polygonPath(5, 36, 52 + 36 + 0))}" />`)
+injectClipPath("30", `<path d="${polygonToPath(polygonPath(6, 21, 30))}"/>`)
+injectClipPath("2", `<path d="${polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64))}" />`)
+injectClipPath("test", `<rect x="-35" y="-25" width="70" height="50" />`)
+
 const transforms: Record<string, Array<{
     i: number,
     style: string,
@@ -65,7 +81,7 @@ const transforms: Record<string, Array<{
     "7x5-3": range(3).map(i => ({
         "i": i,
         "style": `translate(${-50 + i * 35}px, ${-50 + i * 55}px)`,
-        clipPath: injectClipPath("test", `<rect x="-35" y="-25" width="70" height="50" />`),
+        clipPath: "test",
         bbox: { x: -35, y: -25, width: 70, height: 50 }
     }))
 
