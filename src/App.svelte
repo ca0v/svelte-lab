@@ -30,6 +30,7 @@
   $: {
     date_filter_to = addDays(date_filter, 1)
     date_filter && localStorage.setItem("date_filter", date_filter)
+    collageName && localStorage.setItem("collage_name", collageName)
     const transform = transforms[transformName] as Array<{
       i: string
       style: string
@@ -63,6 +64,7 @@
 
   onMount(async () => {
     date_filter = localStorage.getItem("date_filter") || ""
+    collageName = localStorage.getItem("collage_name") || ""
     photos = await fetchPhotoList()
     date_filter = date_filter || photos[0]?.created.split("T")[0] || ""
   })
@@ -134,7 +136,7 @@
     <div class="frame three-by">
       {#each collages.filter((c) => c.data.length) as collage, i}
         <div class="border">
-          <p>{collage.title}</p>
+          <h3>{collage.title}</h3>
           <HexagonSpiral
             id={`view_${collage.id}`}
             collageName={collage.id}
@@ -180,6 +182,7 @@
     gap: 1em;
   }
 
+  h3,
   h2,
   h1 {
     text-align: center;

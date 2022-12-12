@@ -27,11 +27,423 @@ export type Hexagon = {
 }
 
 const transforms = {
+    "test": [
+        { "i": 0, "style": "" },
+        ...[1, 2, 3, 4, 5].map((i) => ({ "i": i, "style": `rotate(${36 + i * 72}deg) translate(${90}px, 0) rotate(${-0 + -i * 72}deg)` }))],
     "spiral-19": [{ "i": 0, "style": "" }, { "i": 1, "style": "rotate(0deg) translate(40px, 0) rotate(0deg)" }, { "i": 2, "style": "rotate(60deg) translate(40px, 0) rotate(-60deg)" }, { "i": 3, "style": "rotate(120deg) translate(40px, 0) rotate(-120deg)" }, { "i": 4, "style": "rotate(180deg) translate(40px, 0) rotate(-180deg)" }, { "i": 5, "style": "rotate(240deg) translate(40px, 0) rotate(-240deg)" }, { "i": 6, "style": "rotate(300deg) translate(40px, 0) rotate(-300deg)" }, { "i": 7, "style": "rotate(0deg) translate(80px, 0) rotate(-0deg) " }, { "i": 8, "style": "rotate(60deg) translate(80px, 0) rotate(-60deg) " }, { "i": 9, "style": "rotate(120deg) translate(80px, 0) rotate(-120deg) " }, { "i": 10, "style": "rotate(180deg) translate(80px, 0) rotate(-180deg) " }, { "i": 11, "style": "rotate(240deg) translate(80px, 0) rotate(-240deg) " }, { "i": 12, "style": "rotate(300deg) translate(80px, 0) rotate(-300deg) " }, { "i": 13, "style": "rotate(30deg) translate(69.5px, 0) rotate(-30deg)" }, { "i": 14, "style": "rotate(90deg) translate(69.5px, 0) rotate(-90deg)" }, { "i": 15, "style": "rotate(150deg) translate(69.5px, 0) rotate(-150deg)" }, { "i": 16, "style": "rotate(210deg) translate(69.5px, 0) rotate(-210deg)" }, { "i": 17, "style": "rotate(270deg) translate(69.5px, 0) rotate(-270deg)" }, { "i": 18, "style": "rotate(330deg) translate(69.5px, 0) rotate(-330deg)" }],
 }
 
 const hexagons: Array<Hexagon> =
     [
+        {
+            id: "test",
+            title: "Test",
+            data: transforms["test"].map((t, i) => {
+                return {
+                    target: `i${t.i}`,
+                    id: `AIk5ERHkVze4l_coT8puVELK7N6oo1IL2Ejp3VSbhZfpYHgMS-AJcs8MFO4w1b1zhu-vQnY_JbVRMQXdmDmJHP0qKcsrqKagMw`,
+                    x: -140,
+                    y: -140,
+                    width: 280,
+                    height: 280,
+                    transform: t.style,
+                    clipPath: "url(#poly5)"
+                }
+            })
+        },
+        {
+            "id": "2022-07-10",
+            "title": "Lifest Weekend",
+            "data": [
+                {
+                    "target": "i0",
+                    "id": "AIk5EREPzD3KNY6K7wZfkHfLYWfxnnezwaa3WxH8SscuofB-dfsUbU2HHcLxcBUd7Xqsk7Xa-qLni0zreQFaFtGQ-SMRrrY5pw",
+                    "x": -42,
+                    "y": -33,
+                    "width": 82,
+                    "height": 82,
+                    "transform": "matrix(1, 8.85254e-08, -8.85254e-08, 1, 0, 0)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i1",
+                    "id": "AIk5ERGt7kUEnuc1l-tH2ogZNQWcxCmhFOxjT4sNHw7jHBC2yur_hAB0O6G9A1UgCGn93um7J55S0IIHL2Lem5Pu01Dw_QqrRw",
+                    "x": -48,
+                    "y": -29,
+                    "width": 92,
+                    "height": 92,
+                    "transform": "matrix(1, 0, 0, 1, 40, 0)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i2",
+                    "id": "AIk5EREfLm774m9zzsx3iIty_PwMwwX2yPcc5V9-ZFRaaCBBdi7RpLlTSn02fUcg-rUPZ6ROj0aF_ztLLe6gHm3Wp5vUJ74oRg",
+                    "x": -36,
+                    "y": -29,
+                    "width": 58,
+                    "height": 58,
+                    "transform": "matrix(1, 0, 0, 1, 20, 34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i3",
+                    "id": "AIk5ERHkVze4l_coT8puVELK7N6oo1IL2Ejp3VSbhZfpYHgMS-AJcs8MFO4w1b1zhu-vQnY_JbVRMQXdmDmJHP0qKcsrqKagMw",
+                    "x": -100,
+                    "y": -81,
+                    "width": 134,
+                    "height": 134,
+                    "transform": "matrix(1, 0, 0, 1, -20, 34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i4",
+                    "id": "AIk5ERHS1dE15ynZlhxTsn8t9Z8WPlcJpm4DgwhxUwhkVpgL54w1B6JajP0WnAc6nbTqU_LQsW_djH5e_F2KQm2tNlwCvEhmPg",
+                    "x": -81,
+                    "y": -69,
+                    "width": 116,
+                    "height": 116,
+                    "transform": "matrix(1, 0, 0, 1, -40, 4.89859e-15)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i5",
+                    "id": "AIk5ERES7G_qYbTewK-TyJGHU9KF4h15_hJNJLsEuzmJ18fwjI97Ntyz7iDNTmPoBgbtLG7MB7lG5pvtpjvy7qE8BtZuzpAd3g",
+                    "x": -24,
+                    "y": -17,
+                    "width": 46,
+                    "height": 46,
+                    "transform": "matrix(1, 0, 0, 1, -20, -34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i6",
+                    "id": "AIk5ERHYcKQHiYPCr_fN2Fx9pgyBeALfIcAoSFBchfx1Wy317Ls4DrY74UczcZacvPOy4HaiLanOHe3uIxeP3DwcSYgYXMEmbg",
+                    "x": -35,
+                    "y": -36,
+                    "width": 68,
+                    "height": 68,
+                    "transform": "matrix(1, -8.85254e-08, 8.85254e-08, 1, 20, -34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i7",
+                    "id": "AIk5ERHS4AY3tLlhKPt8KvWaMBAbbA9QjP6f5BTrulFvKhzWT4jG3nmDCkE_U3_y44mpH0N2SOppPcug4_tMqBfF0zbri8xCHA",
+                    "x": -51,
+                    "y": -45,
+                    "width": 94,
+                    "height": 94,
+                    "transform": "matrix(1, 0, 0, 1, 80, 0)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i8",
+                    "id": "AIk5EREfLm774m9zzsx3iIty_PwMwwX2yPcc5V9-ZFRaaCBBdi7RpLlTSn02fUcg-rUPZ6ROj0aF_ztLLe6gHm3Wp5vUJ74oRg",
+                    "x": -83,
+                    "y": -65,
+                    "width": 132,
+                    "height": 132,
+                    "transform": "matrix(1, 0, 0, 1, 40, 69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i9",
+                    "id": "AIk5ERFKUL6XQhKZtTKCutRWGEE65uTV5iOH5mK3uA5KkhHqR2YOZ6RsqYyGuUcx9yKboBIcDkpxpxuDE7Q0T8Xz-shXwcqRgA",
+                    "x": -47,
+                    "y": -64,
+                    "width": 122,
+                    "height": 122,
+                    "transform": "matrix(1, 0, 0, 1, -40, 69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i10",
+                    "id": "AIk5ERHs6BjJThDO88YUkTccolhXIUpu_4bP2AbWFpzzhL7ZNlkOnNSntcS40Wc868R_1Ib5AxwoiJneFwXW-rvEi5sSEteInQ",
+                    "x": -37,
+                    "y": -35,
+                    "width": 72,
+                    "height": 72,
+                    "transform": "matrix(1, 0, 0, 1, -80, 9.79717e-15)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i11",
+                    "id": "AIk5EREXhCzmU23mfrSPRsZHln4y5diREiYhDlUCxnLfOwi1Vzshqw5AX5DsmtP9L7UD936qiwLmCR6C14yhaVVWj7obVrZYXQ",
+                    "x": -44,
+                    "y": -35,
+                    "width": 86,
+                    "height": 86,
+                    "transform": "matrix(1, 0, 0, 1, -40, -69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i12",
+                    "id": "AIk5ERF01g3VdO2thLlJAq98KTjDYwWgmvqlr40oiQ6WUusCY-le48fnlfJPedFuRm1g5ZNe-l-Kx6PsCu_Z11AzGDKPedCq_w",
+                    "x": -20,
+                    "y": -26,
+                    "width": 56,
+                    "height": 56,
+                    "transform": "matrix(1, 0, 0, 1, 40, -69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i13",
+                    "id": "AIk5EREfLm774m9zzsx3iIty_PwMwwX2yPcc5V9-ZFRaaCBBdi7RpLlTSn02fUcg-rUPZ6ROj0aF_ztLLe6gHm3Wp5vUJ74oRg",
+                    "x": -51,
+                    "y": -37,
+                    "width": 88,
+                    "height": 88,
+                    "transform": "matrix(1, 0, 0, 1, 60.1888, 34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i14",
+                    "id": "AIk5EREwUEEMDkUZC8ppXK9j7dxzrlErJYrAarowI_GbNw8Rz9OTB3OcmQXx0fT_DSDOQQiABzV5ENSBkMnLai65ImzGtqS2yQ",
+                    "x": -130,
+                    "y": -66,
+                    "width": 184,
+                    "height": 184,
+                    "transform": "matrix(1, 0, 0, 1, 4.25565e-15, 69.5)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i15",
+                    "id": "AIk5ERFKUL6XQhKZtTKCutRWGEE65uTV5iOH5mK3uA5KkhHqR2YOZ6RsqYyGuUcx9yKboBIcDkpxpxuDE7Q0T8Xz-shXwcqRgA",
+                    "x": -93,
+                    "y": -64,
+                    "width": 112,
+                    "height": 112,
+                    "transform": "matrix(1, 0, 0, 1, -60.1888, 34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i16",
+                    "id": "AIk5EREwUEEMDkUZC8ppXK9j7dxzrlErJYrAarowI_GbNw8Rz9OTB3OcmQXx0fT_DSDOQQiABzV5ENSBkMnLai65ImzGtqS2yQ",
+                    "x": -118,
+                    "y": -95,
+                    "width": 182,
+                    "height": 182,
+                    "transform": "matrix(1, 0, 0, 1, -60.1888, -34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i17",
+                    "id": "AIk5EREuaTFWRyW_gJVnBo-Ezx0EyU-RK0_n37eD_wr6qWzUWDr3V1rLyZxDDw1zQERAycBArNq8ZtnzlQjLtk34XnV-bZE6-A",
+                    "x": -46,
+                    "y": -68,
+                    "width": 106,
+                    "height": 106,
+                    "transform": "matrix(1, 0, 0, 1, -1.27669e-14, -69.5)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i18",
+                    "id": "AIk5ERFKUL6XQhKZtTKCutRWGEE65uTV5iOH5mK3uA5KkhHqR2YOZ6RsqYyGuUcx9yKboBIcDkpxpxuDE7Q0T8Xz-shXwcqRgA",
+                    "x": -19,
+                    "y": -31,
+                    "width": 66,
+                    "height": 66,
+                    "transform": "matrix(1, 0, 0, 1, 60.1888, -34.75)",
+                    "clipPath": "url(#clip_30)"
+                }
+            ]
+        },
+        {
+            "id": "2022-06-07",
+            "title": "Getting to Lifest",
+            "data": [
+                {
+                    "target": "i0",
+                    "id": "AIk5ERED0q_zlbV3Hb1_ZseOLxboUaPEhuFk4HEz-xbVGX6r6w2haAyxUu3PnbasUI53XA7O5H5HdMMD0VYU324X6IeWbQDlGw",
+                    "x": -18,
+                    "y": -18,
+                    "width": 36,
+                    "height": 36,
+                    "transform": "matrix(1, 8.85254e-08, -8.85254e-08, 1, 0, 0)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i1",
+                    "id": "AIk5ERHYWZB975JVXK8NvhRRdzW3oRNrosAW7U-LQ7KJQQwq1xYwCwLnD7Oq2u1JaEzWSQgZ1esMcDSlWD1aR-F7oPEPlUn33w",
+                    "x": -93,
+                    "y": -71,
+                    "width": 144,
+                    "height": 144,
+                    "transform": "matrix(1, 0, 0, 1, 40, 0)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i2",
+                    "id": "AIk5EREiE6X6oQc2IwRiQLJLqJT3PCMojcdlcbKWVjiPBezHayJX7-fJUnsd9oDV7yYAe-cnBmCPKy1gzCg_6Y0og56MSM0t8A",
+                    "x": -30,
+                    "y": -28,
+                    "width": 54,
+                    "height": 54,
+                    "transform": "matrix(1, 0, 0, 1, 20, 34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i3",
+                    "id": "AIk5ERFyUYw-3PvxFtwrlY5T4Ry8FB8kpWhHcyI6DQHWE7ovPuNZJ-4y4SIHDz0hlPlqmXr18FCR5GMNw_X5vpNm-ksC4ols8g",
+                    "x": -61,
+                    "y": -57,
+                    "width": 118,
+                    "height": 118,
+                    "transform": "matrix(1, 0, 0, 1, -20, 34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i4",
+                    "id": "AIk5ERGmYVCubF9pW3X6VdbPM9RBoYG_SjPH40QTx2qS4sLUvazkGdfoLgDqaLtys1oKXWyzzc6VqyQ2VUs_4EuXKXN1hP0rAQ",
+                    "x": -105,
+                    "y": -171,
+                    "width": 194,
+                    "height": 194,
+                    "transform": "matrix(1, 0, 0, 1, -40, 4.89859e-15)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i5",
+                    "id": "AIk5ERG0TbHO0etbzWNweZRVaagCZPNFy5EGGZ1DDfjLkaIpgCPsfN7UT_Jk6FG16wuLFhbHn4kpZWcpGZnvLQRa5W7k_wfimQ",
+                    "x": -31,
+                    "y": -28,
+                    "width": 56,
+                    "height": 56,
+                    "transform": "matrix(1, 0, 0, 1, -20, -34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i6",
+                    "id": "AIk5ERHfvRvrtNolpW_RC59H9VE8W1ylLd5UkRRTkkHQm9SEVlZaLJtJyNFasXCe9JlBrItScYmEOhZXVXUZbEzjwps1jqCviA",
+                    "x": -34,
+                    "y": -29,
+                    "width": 64,
+                    "height": 64,
+                    "transform": "matrix(1, -8.85254e-08, 8.85254e-08, 1, 20, -34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i7",
+                    "id": "AIk5ERE5nIiCnpanqVXltcQczI5JJNZRALXRr2lSmTklolb__QWHB23w4I1UAwZ_WV7Jjx4JTKqLxrIG2Xn1m7x9bX1igzMG3g",
+                    "x": -22,
+                    "y": -30,
+                    "width": 58,
+                    "height": 58,
+                    "transform": "matrix(1, 0, 0, 1, 80, 0)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i8",
+                    "id": "AIk5ERHH0drurnkRUl2rD3bZ-YxEiJ7aFH0O2ZDz-D7-hNoq69F473deNVMSp2xAzCUphFgjsuenTQKWTFUNaGYqNg8lqhXwLQ",
+                    "x": -31,
+                    "y": -30,
+                    "width": 62,
+                    "height": 62,
+                    "transform": "matrix(1, 0, 0, 1, 40, 69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i9",
+                    "id": "AIk5ERE6q8sPo8wbSj8-KnGcor2MsiJihIhuCmJ_kFmDEjYe9rWXkniPCzgqM3fmhWFvSxhAVvcKfPQolABCWEuw47fMqJQZtw",
+                    "x": -22,
+                    "y": -29,
+                    "width": 58,
+                    "height": 58,
+                    "transform": "matrix(1, 0, 0, 1, -40, 69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i10",
+                    "id": "AIk5ERHgbP9F48Ac0h1jL0hwnyJ5PjUueVRNVkCLNdKu_UjZIKDOgDbc6kL0G1byx4gW-h6a_Quzw6rjLRlX1--HmuAUez95dw",
+                    "x": -65,
+                    "y": -31,
+                    "width": 176,
+                    "height": 176,
+                    "transform": "matrix(1, 0, 0, 1, -80, 9.79717e-15)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i11",
+                    "id": "AIk5ERElyfQMIUBj7iLPwQZ06K9EXyNMHZ7ZttebkJHDpSHBcR6JuRsdC80vAJyPKdbUB107HyU_4ubOMKaroat-K4jlO1AYew",
+                    "x": -53,
+                    "y": -63,
+                    "width": 144,
+                    "height": 144,
+                    "transform": "matrix(1, 0, 0, 1, -40, -69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i12",
+                    "id": "AIk5EREb23zoS4PAXvlLVD_JoFa3bB29abT2HS9geiJZP1o9GxaeBUphGv9v9uwJbdp0oVTcFAlgE325w_zmTM_fFB_rbGUFxw",
+                    "x": -27,
+                    "y": -27,
+                    "width": 54,
+                    "height": 54,
+                    "transform": "matrix(1, 0, 0, 1, 40, -69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i13",
+                    "id": "AIk5ERHkYMVLALc5CoXLTzLnYvUPVj-8s2aPkV9wOBTPTla7_8kcFvDPv1hc-GhF0t2Jc01bDLOl8Ti_wCu2FNvPHG3NYnnTMw",
+                    "x": -51,
+                    "y": -37,
+                    "width": 88,
+                    "height": 88,
+                    "transform": "matrix(1, 0, 0, 1, 60.1888, 34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i14",
+                    "id": "AIk5ERF0HPnJB7naC8zt9a1X1BTOGBmWG4USBa1hKttyqVEGOBCpIe24fcTiG_H3LkiYZUtQK2conrVevku2dsRorZZtW4-m-Q",
+                    "x": -30,
+                    "y": -27,
+                    "width": 54,
+                    "height": 54,
+                    "transform": "matrix(1, 0, 0, 1, 4.25565e-15, 69.5)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i15",
+                    "id": "AIk5ERF1NJE1dhShWzrohKtmVRXMDdQ8u2XGK-sb8lsczFaRYKtinWmHDO_VcNXU2fXuB-WeKQ6BDNMxzXJbehU789TCwKiPkQ",
+                    "x": -25,
+                    "y": -25,
+                    "width": 50,
+                    "height": 50,
+                    "transform": "matrix(1, 0, 0, 1, -60.1888, 34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i16",
+                    "id": "AIk5ERGmYVCubF9pW3X6VdbPM9RBoYG_SjPH40QTx2qS4sLUvazkGdfoLgDqaLtys1oKXWyzzc6VqyQ2VUs_4EuXKXN1hP0rAQ",
+                    "x": -37,
+                    "y": -19,
+                    "width": 78,
+                    "height": 78,
+                    "transform": "matrix(1, 0, 0, 1, -60.1888, -34.75)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i17",
+                    "id": "AIk5ERGcUXgAsXkl6MZsOTG1yd5wxpyw30W9tOaskAsM-splDPZgn5aq15vdpGGM12z92mubD64idyOgzR5wM4FkQx9Pfm4jEQ",
+                    "x": -95,
+                    "y": -53,
+                    "width": 132,
+                    "height": 132,
+                    "transform": "matrix(1, 0, 0, 1, -1.27669e-14, -69.5)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i18",
+                    "id": "AIk5EREA4k4Tpx8ZhfMKoaXs_jityAA8-U08rdSUGJJVfADRnYZke_MPPmOR6s6gKy3CxufY55wnTj6AKOV0P6IFUwac2BzCSA",
+                    "x": -22,
+                    "y": -27,
+                    "width": 58,
+                    "height": 58,
+                    "transform": "matrix(1, 0, 0, 1, 60.1888, -34.75)",
+                    "clipPath": "url(#clip_30)"
+                }
+            ]
+        }
+        ,
         {
             "id": "2022-07-03",
             "title": "Air Show on the Mississippi",
@@ -622,7 +1034,7 @@ const hexagons: Array<Hexagon> =
         },
         {
             "id": "2022-06-27",
-            "title": "Brief Wichita Visit",
+            "title": "Wichita KS",
             "data": [
                 {
                     "id": "AIk5EREPeKW_EHj6kl6Tu9XnOkOqojz3PfVfzg_hhWxocOlrIvUJUDeCORmwcmllHjbxJLlPMOuP",

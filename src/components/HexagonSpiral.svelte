@@ -67,11 +67,12 @@
   }
 
   // assign images to each image element
-  function autoAssignImages(urls: string[]) {
+  function autoAssignImages(urls: string[], options?: { overwrite: boolean }) {
     let j = 0
     for (let i = 0; i < svgImages.length && j < urls.length; i++) {
       const image = svgImages[i]
       const url = urls[j++]
+      if (options?.overwrite) j %= urls.length
       image.href = url
     }
   }
@@ -361,6 +362,11 @@
           autoAssignImages(sources)
         }}>Auto Assign</button
       >
+      <button
+        on:click={() => {
+          autoAssignImages(sources, { overwrite: true })
+        }}>Overwrite All</button
+      >
     </div>
   {/if}
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
@@ -373,6 +379,9 @@
       </defs>
       <clipPath id="clip_0">
         <path d={polygonToPath(polygonPath(6, 21, 0))} />
+      </clipPath>
+      <clipPath id="poly5">
+        <path d={polygonToPath(polygonPath(5, 51, 0))} />
       </clipPath>
       <clipPath id="clip_30">
         <path d={polygonToPath(polygonPath(6, 21, 30))} />
