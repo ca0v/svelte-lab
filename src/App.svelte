@@ -80,37 +80,28 @@
 
   <div class="frame">
     <h2>For Editing</h2>
-    <fieldset>
-      <legend>Builder settings for {collageName} on a {transformName}</legend>
-      <div>
-        <label
-          ><u>C</u>ollage Name:
-          <select bind:value={collageName} data-shortcut="C">
-            {#each collages as collage}
-              <option value={collage.id}>{collage.title}</option>
-            {/each}
-          </select></label
-        >
-      </div>
-      <label
-        ><u>T</u>ransform:
-        <select data-shortcut="T" bind:value={transformName}>
-          {#each Object.entries(transforms) as [name]}<option value={name}
-              >{name}</option
-            >
-          {/each}
-        </select>
-      </label>
+    <div class="two-column">
+      <p><u>C</u>ollage Name</p>
+      <select bind:value={collageName} data-shortcut="C">
+        {#each collages as collage}
+          <option value={collage.id}>{collage.title} ({collage.id})</option>
+        {/each}
+      </select>
+      <p><u>T</u>ransform</p>
+      <select data-shortcut="T" bind:value={transformName}>
+        {#each Object.entries(transforms) as [name]}<option value={name}
+            >{name}</option
+          >
+        {/each}
+      </select>
+      <p>Date Filter</p>
       <div class="toolbar">
         {#if date_filter}
           <button
             data-shortcut="P"
             on:click={() => {
               date_filter = addDays(date_filter, -1)
-            }}
-            >&lt;&lt; {new Date(
-              addDays(date_filter, -1)
-            ).toDateString()}</button
+            }}>&lt;&lt; {addDays(date_filter, -1)}</button
           >{/if}
         <label> <input type="date" bind:value={date_filter} /></label>
         {#if date_filter}
@@ -118,11 +109,11 @@
             data-shortcut="N"
             on:click={() => {
               date_filter = addDays(date_filter, 1)
-            }}>{new Date(date_filter_to).toDateString()} &gt;&gt;</button
+            }}>{addDays(date_filter, +1)} &gt;&gt;</button
           >
         {/if}
       </div>
-    </fieldset>
+    </div>
     <HexagonSpiral
       id={collageName}
       {collageName}
@@ -159,6 +150,13 @@
 </main>
 
 <style>
+  .two-column {
+    display: grid;
+    grid-template-columns: 10rem auto;
+    grid-template-rows: repeat(3, 2rem);
+    grid-gap: 1rem;
+  }
+
   .three-by {
     display: grid;
     grid-template-columns: repeat(4, 20vw);
@@ -166,10 +164,10 @@
     row-gap: 2rem;
   }
 
-  fieldset {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    grid-gap: 1rem;
+  p {
+    padding: 0;
+    margin: 0;
+    text-align: right;
   }
 
   .frame {
@@ -182,7 +180,6 @@
     gap: 1em;
   }
 
-  p,
   h2,
   h1 {
     text-align: center;

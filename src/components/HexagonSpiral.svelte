@@ -68,11 +68,12 @@
 
   // assign images to each image element
   function autoAssignImages(urls: string[]) {
-    svgImages.forEach((image, i) => {
-      if (image.href) return
-      const url = urls[i % urls.length]
+    let j = 0
+    for (let i = 0; i < svgImages.length && j < urls.length; i++) {
+      const image = svgImages[i]
+      const url = urls[j++]
       image.href = url
-    })
+    }
   }
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
@@ -209,7 +210,7 @@
       savedState.data.forEach((image, i) => {
         const svgImage = svgImages[i]
         if (!svgImage) return
-        svgImage.href = image.id
+        svgImage.href = `${PHOTOS}/get?id=${image.id}`
         svgImage.style = image.transform
         svgImage.clipPath = image.clipPath
         svgImage.setBBox({
@@ -287,13 +288,17 @@
       data: svgImages.map((image) => {
         return {
           target: image.target,
-          id: image.href,
+          id: extractId(image.href),
           ...image.getBBox(),
           transform: image.getEffectiveTransform(),
           clipPath: image.getClipPath(),
         }
       }),
     }
+  }
+
+  function extractId(href: string): string {
+    return href.substring(href.lastIndexOf("id=") + 3)
   }
 </script>
 
@@ -384,7 +389,7 @@
             {play}
             {editmode}
             {readonly}
-            href={`${PHOTOS}/get?id=${style.id}`}
+            href={style.id ? `${PHOTOS}/get?id=${style.id}` : ""}
             clipPath={style.clipPath}
             x={style.x}
             y={style.y}
