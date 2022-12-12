@@ -126,8 +126,9 @@
           >
         {/if}
       </div>
+      <p>Audio Recordings</p>
+      <AudioRecorder />
     </div>
-    <AudioRecorder />
     <HexagonSpiral
       id={collageName}
       {collageName}
