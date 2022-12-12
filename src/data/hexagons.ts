@@ -1,3 +1,5 @@
+import { svgPaths } from "../lib/globals"
+
 export type Photo = {
     id: string
     filename: string
@@ -44,21 +46,44 @@ const transforms = {
         ...range(6).map(i => ({ "i": i + 7, "style": `rotate(${60 * i}deg) translate(80px, 0) rotate(-${60 * i}deg)`, clipPath: "url(#clip_30)" })),
         ...range(6).map(i => ({ "i": i + 13, "style": `rotate(${30 + 60 * i}deg) translate(69.5px, 0) rotate(-${30 + 60 * i}deg)`, clipPath: "url(#clip_30)" })),
     ],
-    "classic": range(4).map(row =>
+    "square-16": range(4).map(row =>
         range(4).map(col => ({
             "i": col + row * 4,
-            "style": `translate(${-75 + col * 51}px, ${-75 + row * 51}px)`,
+            "style": `translate(${-74 + col * 49}px, ${-74 + row * 49}px)`,
             clipPath: "url(#clip_box)", bbox: { x: -40, y: -40, width: 80, height: 80 }
         }))
-    ).flat()
+    ).flat(),
+    "7x5-1": range(3).map(i => ({
+        "i": i,
+        "style": `translate(${-50 + i * 35}px, ${-50 + i * 55}px)`,
+        clipPath: injectClipPath("test", `<rect x="-35" y="-25" width="70" height="50" />`),
+        bbox: { x: -35, y: -25, width: 70, height: 50 }
+    }))
+
 }
 
 const hexagons: Array<Hexagon> =
     [
         {
-            id: "classic",
-            title: "classic",
-            data: transforms["classic"].map((t, i) => {
+            id: "7x5-1",
+            title: "7x5-1",
+            data: transforms["7x5-1"].map((t, i) => {
+                return {
+                    target: `i${t.i}`,
+                    id: `AIk5ERFrV7YxvPBqVg3prtWxO1iGmqxFd0or1PI65r6t69FZGQWHC2Z0so4NT0XQhaOJnOKu3ihhEtEMR4wRt_Frw0ookSwA9g`,
+                    x: t.bbox.x,
+                    y: t.bbox.y,
+                    width: t.bbox.width,
+                    height: t.bbox.height,
+                    transform: t.style,
+                    clipPath: t.clipPath,
+                }
+            })
+        },
+        {
+            id: "square-16",
+            title: "square-16",
+            data: transforms["square-16"].map((t, i) => {
                 return {
                     target: `i${t.i}`,
                     id: `AIk5ERHkVze4l_coT8puVELK7N6oo1IL2Ejp3VSbhZfpYHgMS-AJcs8MFO4w1b1zhu-vQnY_JbVRMQXdmDmJHP0qKcsrqKagMw`,
@@ -1941,3 +1966,10 @@ const hexagons: Array<Hexagon> =
 hexagons.push({ id: "next", title: "next", data: [] })
 
 export { transforms, hexagons as collages }
+
+
+function injectClipPath(id: string, body: string) {
+    svgPaths.push({ id, body })
+    return `url(#${id})`
+}
+

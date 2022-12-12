@@ -265,8 +265,4 @@
   image:focus + .selector {
     stroke: #0f0;
   }
-
-  image.dropping + .selector {
-    stroke: #0f0;
-  }
 </style>

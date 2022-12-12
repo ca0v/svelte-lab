@@ -12,6 +12,7 @@
 
   import AudioRecorder from "./components/AudioRecorder.svelte"
   import Notes from "./components/Notes.svelte"
+  import ClipPaths from "./components/ClipPaths.svelte"
 
   let photos: Array<Photo> = []
 
@@ -80,6 +81,8 @@
 </script>
 
 <main>
+  <ClipPaths />
+
   <h1>Photo Playground</h1>
 
   <div class="frame">

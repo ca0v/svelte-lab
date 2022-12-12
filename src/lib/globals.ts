@@ -1,3 +1,5 @@
+export const svgPaths: Array<{ id: string, body: string }> = [];
+
 // read data from localstorage
 const getLocalStorage = (key: string) => {
     const data = localStorage.getItem(`svelte_lab.${key}`)

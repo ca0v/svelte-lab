@@ -6,12 +6,7 @@
     setLocalStorage,
     getLocalStorage,
   } from "../lib/globals"
-  import {
-    polygonPath,
-    polygonToPath,
-    sleep,
-    translatePath,
-  } from "../lib/paths"
+  import { polygonPath, polygonToPath, sleep } from "../lib/paths"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
@@ -26,7 +21,7 @@
   export let transformDelay = 0 // to be moved to configuration
 
   let play = true
-  let editmode = false
+  let editmode = !readonly
 
   let photoWheelComponent: PhotoWheel
   let svgImages = [] as Array<SvgImage>
@@ -314,35 +309,17 @@
 <div class={scope} on:keydown={keyDownHandler}>
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <section>
-    <svg viewBox="-100 -100 200 200" stroke-width="0" fill="#000">
+    <svg
+      class:border={editmode}
+      viewBox="-100 -100 200 200"
+      stroke-width="0"
+      fill="#000"
+    >
       <defs>
         <g id="hexagon">
           <path d={polygonToPath(polygonPath(6, 22, 30))} />
         </g>
       </defs>
-      <clipPath id="clip_box">
-        <rect x="-25" y="-25" width="50" height="50" />
-      </clipPath>
-      <clipPath id="clip_0">
-        <path d={polygonToPath(polygonPath(6, 21, 0))} />
-      </clipPath>
-      <clipPath id="poly5_0">
-        <path d={polygonToPath(polygonPath(5, 51, 0))} />
-      </clipPath>
-      <clipPath id="poly5_36">
-        <path d={polygonToPath(polygonPath(5, 36, 52))} />
-      </clipPath>
-      <clipPath id="poly5_36_1">
-        <path d={polygonToPath(polygonPath(5, 36, 52 + 36 + 0))} />
-      </clipPath>
-      <clipPath id="clip_30">
-        <path d={polygonToPath(polygonPath(6, 21, 30))} />
-      </clipPath>
-      <clipPath id="clip2">
-        <path
-          d={polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64))}
-        />
-      </clipPath>
       {#if transform?.data}
         {#each transform.data as style, i}
           <SvgImage
@@ -452,6 +429,10 @@
     grid-auto-flow: row;
     grid-template-columns: 80cqmin;
     justify-content: center;
+  }
+
+  svg.border {
+    border: 1px solid red;
   }
 
   .clone {
