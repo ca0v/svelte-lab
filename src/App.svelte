@@ -2,6 +2,7 @@
   import { onMount } from "svelte"
   import { photoUrl as PHOTOS } from "./lib/globals"
   import HexagonSpiral from "./components/HexagonSpiral.svelte"
+  import DateRange from "./components/DateRange.svelte"
   import {
     transforms,
     collages,
@@ -27,13 +28,12 @@
 
   let collageName = ""
   let transformName = ""
-  let date_filter = ""
+  let date_filter_from = ""
   let date_filter_to = ""
   let activeCollage: Hexagon | undefined
 
   $: {
-    date_filter_to = addDays(date_filter, 1)
-    date_filter && localStorage.setItem("date_filter", date_filter)
+    date_filter_from && localStorage.setItem("date_filter", date_filter_from)
     collageName && localStorage.setItem("collage_name", collageName)
     activeCollage =
       collageName && collages && collages.find((h) => h.id === collageName)
@@ -71,18 +71,12 @@
   }
 
   onMount(async () => {
-    date_filter = localStorage.getItem("date_filter") || ""
+    date_filter_from = localStorage.getItem("date_filter") || ""
     collageName = localStorage.getItem("collage_name") || ""
     photos = await fetchPhotoList()
-    date_filter = date_filter || photos[0]?.created.split("T")[0] || ""
+    date_filter_from =
+      date_filter_from || photos[0]?.created.split("T")[0] || ""
   })
-
-  function addDays(date_filter: string, arg1: number): string {
-    if (!date_filter) return date_filter
-    const currentDate = new Date(date_filter)
-    currentDate.setDate(currentDate.getDate() + arg1)
-    return currentDate.toISOString().split("T")[0]
-  }
 </script>
 
 <main>
@@ -121,31 +115,12 @@
       sources={photos
         .filter(
           (p) =>
-            !date_filter ||
-            (date_filter <= p.created && p.created <= date_filter_to)
+            !date_filter_from ||
+            (date_filter_from <= p.created && p.created <= date_filter_to)
         )
         .map((p) => (p.id ? `${PHOTOS}/get?id=${p.id}` : ""))}
     >
-      <div class="toolbar">
-        {#if date_filter}
-          <button
-            class="prev"
-            data-shortcut="P"
-            on:click={() => {
-              date_filter = addDays(date_filter, -1)
-            }}>{addDays(date_filter, -1)}</button
-          >{/if}
-        <input type="date" bind:value={date_filter} />
-        {#if date_filter}
-          <button
-            class="next"
-            data-shortcut="N"
-            on:click={() => {
-              date_filter = addDays(date_filter, 1)
-            }}>{addDays(date_filter, +1)}</button
-          >
-        {/if}
-      </div>
+      <DateRange bind:date_filter_from bind:date_filter_to />
     </HexagonSpiral>
   </div>
 
@@ -170,19 +145,6 @@
 </main>
 
 <style>
-  /* css for move-to-next button */
-  .next::after {
-    content: " →";
-  }
-
-  .prev::before {
-    content: "← ";
-  }
-
-  input[type="date"] {
-    text-align: center;
-  }
-
   .two-column {
     display: grid;
     grid-template-columns: 1fr 7fr;
@@ -208,15 +170,6 @@
   .frame {
     justify-content: center;
     width: calc(clamp(20rem, 100vw, 100rem) - 2rem);
-  }
-
-  .toolbar {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-auto-rows: 1.5rem;
-    gap: 1em;
-    width: clamp(10rem, 50vw, 45rem);
-    margin: 0 auto;
   }
 
   h3,
