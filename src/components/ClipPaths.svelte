@@ -26,7 +26,7 @@
     <clipPath id="clip2">
       <path d={polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64))} />
     </clipPath>
-    {#each svgPaths as path}
+    {#each $svgPaths as path}
       <clipPath id={path.id}>
         {@html path.body}
       </clipPath>

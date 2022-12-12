@@ -32,6 +32,10 @@ function range(size: number) {
     return new Array(size).fill(0).map((_, i) => i);
 }
 
+const clipPaths = {
+    "7x5": injectClipPath("test", `<rect x="-35" y="-25" width="70" height="50" />`)
+}
+
 const transforms = {
     "flower-6": [
         { "i": 0, "style": "", clipPath: "url(#poly5_36)" },
@@ -56,7 +60,7 @@ const transforms = {
     "7x5-1": range(3).map(i => ({
         "i": i,
         "style": `translate(${-50 + i * 35}px, ${-50 + i * 55}px)`,
-        clipPath: injectClipPath("test", `<rect x="-35" y="-25" width="70" height="50" />`),
+        clipPath: clipPaths["7x5"],
         bbox: { x: -35, y: -25, width: 70, height: 50 }
     }))
 
@@ -1969,7 +1973,7 @@ export { transforms, hexagons as collages }
 
 
 function injectClipPath(id: string, body: string) {
-    svgPaths.push({ id, body })
+    svgPaths.update(p => [...p, { id, body }])
     return `url(#${id})`
 }
 
