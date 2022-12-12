@@ -112,25 +112,6 @@
       <AudioRecorder />
       <p>Notes</p>
       <Notes />
-      <p>Date Filter</p>
-      <div class="toolbar">
-        {#if date_filter}
-          <button
-            data-shortcut="P"
-            on:click={() => {
-              date_filter = addDays(date_filter, -1)
-            }}>&lt;&lt; {addDays(date_filter, -1)}</button
-          >{/if}
-        <label> <input type="date" bind:value={date_filter} /></label>
-        {#if date_filter}
-          <button
-            data-shortcut="N"
-            on:click={() => {
-              date_filter = addDays(date_filter, 1)
-            }}>{addDays(date_filter, +1)} &gt;&gt;</button
-          >
-        {/if}
-      </div>
     </div>
     <HexagonSpiral
       id={collageName}
@@ -144,7 +125,28 @@
             (date_filter <= p.created && p.created <= date_filter_to)
         )
         .map((p) => (p.id ? `${PHOTOS}/get?id=${p.id}` : ""))}
-    />
+    >
+      <div class="toolbar">
+        {#if date_filter}
+          <button
+            class="prev"
+            data-shortcut="P"
+            on:click={() => {
+              date_filter = addDays(date_filter, -1)
+            }}>{addDays(date_filter, -1)}</button
+          >{/if}
+        <input type="date" bind:value={date_filter} />
+        {#if date_filter}
+          <button
+            class="next"
+            data-shortcut="N"
+            on:click={() => {
+              date_filter = addDays(date_filter, 1)
+            }}>{addDays(date_filter, +1)}</button
+          >
+        {/if}
+      </div>
+    </HexagonSpiral>
   </div>
 
   {#if true}
@@ -168,6 +170,19 @@
 </main>
 
 <style>
+  /* css for move-to-next button */
+  .next::after {
+    content: " →";
+  }
+
+  .prev::before {
+    content: "← ";
+  }
+
+  input {
+    text-align: center;
+  }
+
   .two-column {
     display: grid;
     grid-template-columns: 10rem auto;
@@ -194,8 +209,12 @@
   }
 
   .toolbar {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-auto-rows: 1.5rem;
     gap: 1em;
+    width: clamp(10rem, 50vw, 45rem);
+    margin: 0 auto;
   }
 
   h3,
@@ -218,11 +237,6 @@
 
   main {
     margin-bottom: 5rem;
-  }
-
-  input[type="date"] {
-    width: 100%;
-    height: 28px;
   }
 
   .fit {

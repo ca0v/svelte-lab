@@ -11,6 +11,5 @@
     font-family: monospace;
     font-size: clamp(8px, 1.5cqmin, 16px);
     padding: 0.2rem;
-    color: rgb(219, 209, 22);
   }
 </style>

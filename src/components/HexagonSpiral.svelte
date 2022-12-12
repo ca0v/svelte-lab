@@ -366,7 +366,7 @@
       {/if}
     </svg>
   </section>
-  {#if !readonly}
+  {#if !readonly && editmode}
     <div class="toolbar">
       <button
         class="off-screen"
@@ -410,6 +410,7 @@
         }}>Clear All</button
       >
     </div>
+    <slot />
     <PhotoWheel
       {sources}
       bind:this={photoWheelComponent}
