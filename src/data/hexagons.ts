@@ -41,14 +41,14 @@ function range(size: number) {
     ...seems unfinished though, maybe injectRect(name,x,y,width,height), etc.
     or maybe just put it back in ClipPaths.svelte
  */
-injectClipPath("box", `<rect x="-25" y="-25" width="50" height="50" />`)
-injectClipPath("0", `<path d="${polygonToPath(polygonPath(6, 21, 0))}" />`)
-injectClipPath("poly5_0", `<path d="${polygonToPath(polygonPath(5, 51, 0))}" />`)
-injectClipPath("poly5_36", `<path d="${polygonToPath(polygonPath(5, 36, 52))}" />`)
-injectClipPath("poly5_36_1", `<path d="${polygonToPath(polygonPath(5, 36, 52 + 36 + 0))}" />`)
-injectClipPath("30", `<path d="${polygonToPath(polygonPath(6, 21, 30))}"/>`)
-injectClipPath("2", `<path d="${polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64))}" />`)
-injectClipPath("test", `<rect x="-35" y="-25" width="70" height="50" />`)
+injectRect("box", -25, -25, 50, 50)
+injectPath("0", polygonToPath(polygonPath(6, 21, 0)))
+injectPath("poly5_0", polygonToPath(polygonPath(5, 51, 0)))
+injectPath("poly5_36", polygonToPath(polygonPath(5, 36, 52)))
+injectPath("poly5_36_1", polygonToPath(polygonPath(5, 36, 52 + 36 + 0)))
+injectPath("30", polygonToPath(polygonPath(6, 21, 30)))
+injectPath("2", polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64)))
+injectRect("test", -35, -25, 70, 70)
 
 const transforms: Record<string, Array<{
     i: number,
@@ -1995,6 +1995,18 @@ export { transforms, hexagons as collages }
 
 function injectClipPath(id: string, body: string) {
     svgClipPaths.update(p => [...p, { id, body }])
+    return id;
+}
+
+function injectRect(id: string, x: number, y: number, width: number, height: number) {
+    const body = `<rect x="${x}" y="${y}" width="${width}" height="${height}"/>`
+    svgClipPaths.update(p => [...p, { id, body }]);
+    return id;
+}
+
+function injectPath(id: string, d: string) {
+    const body = `<path d="${d}"/>`
+    svgClipPaths.update(p => [...p, { id, body }]);
     return id;
 }
 
