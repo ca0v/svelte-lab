@@ -10,6 +10,7 @@
   } from "./data/hexagons"
 
   import AudioRecorder from "./components/AudioRecorder.svelte"
+  import Notes from "./components/Notes.svelte"
 
   let photos: Array<Photo> = []
 
@@ -109,6 +110,8 @@
       </select>
       <p>Audio Recordings</p>
       <AudioRecorder />
+      <p>Notes</p>
+      <Notes />
       <p>Date Filter</p>
       <div class="toolbar">
         {#if date_filter}

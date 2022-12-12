@@ -52,6 +52,203 @@ const hexagons: Array<Hexagon> =
             })
         },
         {
+            "id": "2022-07-17-18",
+            "title": "Lake Itasca",
+            "data": [
+                {
+                    "target": "i0",
+                    "id": "AIk5ERFrV7YxvPBqVg3prtWxO1iGmqxFd0or1PI65r6t69FZGQWHC2Z0so4NT0XQhaOJnOKu3ihhEtEMR4wRt_Frw0ookSwA9g",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(4.65418, 0, 0, 4.65418, -2.30926e-14, -13.9626)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i1",
+                    "id": "AIk5EREUeBm4g7nFvXmqBC3Dn8N-4xYImZ6z7WovvSFco-C1KCL7B88OgOW2J8PQAkODNRhap7pD5Y834T7aeaaqigIg7i6YzQ",
+                    "x": -52,
+                    "y": -63,
+                    "width": 96,
+                    "height": 96,
+                    "transform": "matrix(0.866026, 0.5, -0.5, 0.866026, 40.4019, -13.0359)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i2",
+                    "id": "AIk5EREWJd3syq4t-ZFWCy0rqHqjlHHDq2GmmuzGIbWbYNrM6sEfAOXzIPJlm2Md5h-tz5gj5K_zprX_YE7kqfMGocwIW3z9Mg",
+                    "x": -43,
+                    "y": -35,
+                    "width": 72,
+                    "height": 72,
+                    "transform": "matrix(1.24507, 0, 0, 1.24507, 14.9408, 49.3558)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i3",
+                    "id": "AIk5ERFGF-RITXG_Jc9FXEK81yR2WA9_TZFRgslNCTFC7HKo-Ut_uE69W5W0uQJ2ZJrixtPMHtjshJyCywJJxryCLX4joik68A",
+                    "x": -16,
+                    "y": -25,
+                    "width": 32,
+                    "height": 32,
+                    "transform": "matrix(1, 0, 0, 1, 1, -90.359)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i4",
+                    "id": "",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, -48, -14)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i5",
+                    "id": "",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, -20, -34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i6",
+                    "id": "",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, 20, -34.641)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i7",
+                    "id": "",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, 80, 0)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i8",
+                    "id": "",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, 40, 69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i9",
+                    "id": "AIk5ERFwp5KcYTUlETXWTVaD2yd7yh63D9B03ZGgt_-JCy1F-7H7tNqtMrK3vM0zzxWq-2-FdNdIoAQQMjdmFQldzZFgdMilpg",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, 68, -17.718)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i10",
+                    "id": "",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, -80, 9.79717e-15)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i11",
+                    "id": "",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, -40, -69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i12",
+                    "id": "",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, 40, -69.282)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i13",
+                    "id": "AIk5ERFdl3X9x1hfoKK_5TKnrrAvtf0K2rad9Nc_NG7rIKDYPm1bGC38Rxyafm0bszLChEBtG-GzYlUk2co1rvWDgvK46hn6Rg",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1.17166, 0, 0, 1.17166, 63.4908, 23.1403)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i14",
+                    "id": "",
+                    "x": -22,
+                    "y": -24,
+                    "width": 46,
+                    "height": 46,
+                    "transform": "matrix(1, 0, 0, 1, 4.25565e-15, 61.5)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i15",
+                    "id": "AIk5ERFylCAin2c3AHP2OBLy0yky5bggBGgZt5HCtp1Bg9kBJ1GJ6fsPrOFD_g1H9q6SEKEcoivbUrSqef4RrVNSbK0iOOSwFA",
+                    "x": -27,
+                    "y": -29,
+                    "width": 56,
+                    "height": 56,
+                    "transform": "matrix(1.52363, 0, 0, 1.52363, -56.662, 19.4263)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i16",
+                    "id": "AIk5ERHdbkiegpIrtiiy7S09USeJDnw1YIFz15rkvJwitEaKhn-I6DelNxfDBuBEXzD7rO1ycK_VsWsmjq8nJ5IVwc2-BwSGHQ",
+                    "x": -41,
+                    "y": -40,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1.10408, 0, 0, 1.10408, -64.2451, -50.5117)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i17",
+                    "id": "",
+                    "x": -50,
+                    "y": -50,
+                    "width": 100,
+                    "height": 100,
+                    "transform": "matrix(1, 0, 0, 1, -1.27669e-14, -88.5)",
+                    "clipPath": "url(#clip_30)"
+                },
+                {
+                    "target": "i18",
+                    "id": "AIk5ERFZ8Ppra10Cg3jLZWwbKHRQ2zw6PKIbwhLUFBO2BTBGYgpvESLs_Wi92gE28fVPBdE3nLfUpvEGBEw7yOe-thChAzo76Q",
+                    "x": -28,
+                    "y": -28,
+                    "width": 56,
+                    "height": 56,
+                    "transform": "matrix(0.989822, 0, 0, 0.989822, 66.5049, -52.2131)",
+                    "clipPath": "url(#clip_30)"
+                }
+            ]
+        }
+        ,
+        {
             "id": "2022-07-12-14",
             "title": "Heading West",
             "data": [

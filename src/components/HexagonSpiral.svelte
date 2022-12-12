@@ -219,7 +219,7 @@
       savedState.data.forEach((image, i) => {
         const svgImage = svgImages[i]
         if (!svgImage) return
-        svgImage.href = `${image.id} && ${PHOTOS}/get?id=${image.id}`
+        svgImage.href = image.id ? `${PHOTOS}/get?id=${image.id}` : ""
         svgImage.style = image.transform
         svgImage.clipPath = image.clipPath
         svgImage.setBBox({
@@ -367,26 +367,6 @@
     </svg>
   </section>
   {#if !readonly}
-    <PhotoWheel
-      {sources}
-      bind:this={photoWheelComponent}
-      on:goto={(data) => {
-        const { key } = data.detail
-        const index = ID_MAP.indexOf(key.toLocaleUpperCase())
-        if (index < 0) return
-        const targetImage = queryImage(index)
-        targetImage?.focus()
-      }}
-      on:keydown={(data) => {
-        const { key, source } = data.detail
-        const index = ID_MAP.indexOf(key.toLocaleUpperCase())
-        if (index < 0) return
-        const targetImage = svgImages[index]
-        if (targetImage) {
-          targetImage.href = source
-        }
-      }}
-    />
     <div class="toolbar">
       <button
         class="off-screen"
@@ -430,6 +410,26 @@
         }}>Clear All</button
       >
     </div>
+    <PhotoWheel
+      {sources}
+      bind:this={photoWheelComponent}
+      on:goto={(data) => {
+        const { key } = data.detail
+        const index = ID_MAP.indexOf(key.toLocaleUpperCase())
+        if (index < 0) return
+        const targetImage = queryImage(index)
+        targetImage?.focus()
+      }}
+      on:keydown={(data) => {
+        const { key, source } = data.detail
+        const index = ID_MAP.indexOf(key.toLocaleUpperCase())
+        if (index < 0) return
+        const targetImage = svgImages[index]
+        if (targetImage) {
+          targetImage.href = source
+        }
+      }}
+    />
   {/if}
   {#if !readonly}
     <div class="clone" class:dragging={false}>Clone Here</div>
