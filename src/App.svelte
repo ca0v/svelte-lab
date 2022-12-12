@@ -9,6 +9,8 @@
     type Hexagon,
   } from "./data/hexagons"
 
+  import AudioRecorder from "./components/AudioRecorder.svelte"
+
   let photos: Array<Photo> = []
 
   async function fetchPhotoList() {
@@ -26,24 +28,29 @@
   let transformName = ""
   let date_filter = ""
   let date_filter_to = ""
+  let activeCollage: Hexagon | undefined
 
   $: {
     date_filter_to = addDays(date_filter, 1)
     date_filter && localStorage.setItem("date_filter", date_filter)
     collageName && localStorage.setItem("collage_name", collageName)
+    activeCollage =
+      collageName && collages && collages.find((h) => h.id === collageName)
+
     const transform = transforms[transformName] as Array<{
       i: string
       style: string
     }>
     if (transform) {
-      const collage = collages.find((h) => h.id === collageName)
-      if (collage) {
+      if (activeCollage) {
         // inject transforms not found in collage
         transform.forEach((t) => {
-          const collageInfo = collage.data.find((c) => c.target === "i" + t.i)
+          const collageInfo = activeCollage.data.find(
+            (c) => c.target === "i" + t.i
+          )
           if (!collageInfo) {
             console.log("adding transform:", t.i)
-            collage.data.push({
+            activeCollage.data.push({
               target: "i" + t.i,
               transform: t.style,
               clipPath: "url(#clip_30)",
@@ -89,6 +96,10 @@
           <option value={collage.id}>{collage.title} ({collage.id})</option>
         {/each}
       </select>
+      {#if activeCollage}
+        <p>Title</p>
+        <input type="text" bind:value={activeCollage.title} />
+      {/if}
       <p><u>T</u>ransform</p>
       <select data-shortcut="T" bind:value={transformName}>
         {#each Object.entries(transforms) as [name]}<option value={name}
@@ -116,10 +127,11 @@
         {/if}
       </div>
     </div>
+    <AudioRecorder />
     <HexagonSpiral
       id={collageName}
       {collageName}
-      transform={collages.find((h) => h.id === collageName)}
+      transform={activeCollage}
       duration={0.01}
       sources={photos
         .filter(
@@ -127,7 +139,7 @@
             !date_filter ||
             (date_filter <= p.created && p.created <= date_filter_to)
         )
-        .map((p) => `${PHOTOS}/get?id=${p.id}`)}
+        .map((p) => (p.id ? `${PHOTOS}/get?id=${p.id}` : ""))}
     />
   </div>
 

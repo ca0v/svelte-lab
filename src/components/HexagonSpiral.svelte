@@ -67,13 +67,21 @@
   }
 
   // assign images to each image element
-  function autoAssignImages(urls: string[], options?: { overwrite: boolean }) {
+  function autoAssignImages(urls: string[]) {
     let j = 0
     for (let i = 0; i < svgImages.length && j < urls.length; i++) {
       const image = svgImages[i]
-      const url = urls[j++]
-      if (options?.overwrite) j %= urls.length
-      image.href = url
+      if (!image.href) {
+        const url = urls[j++]
+        image.href = url
+      }
+    }
+  }
+
+  function clearAllImages() {
+    for (let i = 0; i < svgImages.length; i++) {
+      const image = svgImages[i]
+      image.href = ""
     }
   }
 
@@ -211,7 +219,7 @@
       savedState.data.forEach((image, i) => {
         const svgImage = svgImages[i]
         if (!svgImage) return
-        svgImage.href = `${PHOTOS}/get?id=${image.id}`
+        svgImage.href = `${image.id} && ${PHOTOS}/get?id=${image.id}`
         svgImage.style = image.transform
         svgImage.clipPath = image.clipPath
         svgImage.setBBox({
@@ -364,8 +372,8 @@
       >
       <button
         on:click={() => {
-          autoAssignImages(sources, { overwrite: true })
-        }}>Overwrite All</button
+          clearAllImages()
+        }}>Clear All</button
       >
     </div>
   {/if}
@@ -384,7 +392,7 @@
         <path d={polygonToPath(polygonPath(5, 51, 0))} />
       </clipPath>
       <clipPath id="poly5_36">
-        <path d={polygonToPath(polygonPath(5, 40, 52))} />
+        <path d={polygonToPath(polygonPath(5, 36, 52))} />
       </clipPath>
       <clipPath id="poly5_36_1">
         <path d={polygonToPath(polygonPath(5, 36, 52 + 36 + 0))} />
