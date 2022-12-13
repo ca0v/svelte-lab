@@ -11,7 +11,7 @@
     type CollageState,
     type CollageCellState,
   } from "../data/collageTemplates"
-  import { asPhotoServiceUrl } from "../data/collageServices"
+  import { asPhotoServiceUrl, saveCollage } from "../data/collageServices"
 
   export let id: string
   export let sources: Array<string> = []
@@ -402,10 +402,10 @@
       <button
         data-shortcut="S"
         title="Save to local storage"
-        on:click={() => {
+        on:click={async () => {
           const settings = createSettings()
           setLocalStorage(`${id}`, settings)
-          editmode = false
+          await saveCollage(settings)
         }}><u>S</u>ave</button
       >
       <button
@@ -414,7 +414,6 @@
         on:click={() => {
           const settings = createSettings()
           navigator.clipboard.writeText(JSON.stringify(settings, null, 2))
-          editmode = false
         }}><u>C</u>opy</button
       >
       <button
