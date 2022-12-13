@@ -1,5 +1,6 @@
 import { svgClipPaths } from "../lib/globals"
 import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
+import { getAllCollages } from "./collageServices"
 
 export type Photo = {
     id: string
@@ -1399,202 +1400,6 @@ const collages: Array<CollageState> =
             ]
         },
         {
-            "id": "2022-07-01",
-            "title": "Tallgrass Prarie NP and Marysville KS",
-            "data": [
-                {
-                    "id": "AIk5EREmCxbNunvJbnyM-v57SaklYYAKqrdVtJv1xmT9UygLenr1lBm05xzwhgpza-B2bsSEeFxy46c9112cGSVC6uBUa6jlIw",
-                    "target": "i0",
-                    "x": -28,
-                    "y": -28,
-                    "width": 58,
-                    "height": 58,
-                    "transform": "",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5EREx1btL7WbGtLbWV1KOVeog-eHODeKiefqd98STss3xDcDo3_lMKpCvqIQYVT4G9Bw6sZUft7NxdqqYTrX2Kruuc2dsWA",
-                    "target": "i1",
-                    "x": -26,
-                    "y": -27,
-                    "width": 52,
-                    "height": 52,
-                    "transform": "matrix(1, 0, 0, 1, 40, 0)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERGrlWnd3ou1TUkdr89W5FVIpIoZw5nsNgYyzLl7nJFWijmvKf_8bntoEq-6I9VlQNM62lEz",
-                    "target": "i2",
-                    "x": -27,
-                    "y": -30,
-                    "width": 58,
-                    "height": 58,
-                    "transform": "matrix(1, 0, 0, 1, 20, 34.641)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERGiveKRAQOeFeRmpibjZEKcGW78GI6n_Ljgu0ptlPo1S0tUasr26Hj_0FX0vT0B1gipdtnMollgrglCpgcysQrYv6sNsw",
-                    "target": "i3",
-                    "x": -34,
-                    "y": -24,
-                    "width": 66,
-                    "height": 66,
-                    "transform": "matrix(1, 0, 0, 1, -20, 34.641)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERFGgBmy-i7mWenRL5-WPK3Nc-BPW9DGXZdmOYx45qjw5Ya6dHoFbgbGWtM0bzFVklayMNrU",
-                    "target": "i4",
-                    "x": -44,
-                    "y": -54,
-                    "width": 94,
-                    "height": 94,
-                    "transform": "matrix(1, 0, 0, 1, -40, 4.89859e-15)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5EREJUGtPmOa0he3ZDyskMHmPwLJuTUxyKcBoYpimbflBsMf6NhyD4fG4d5DtcYgBtrtcthdo",
-                    "target": "i5",
-                    "x": -57,
-                    "y": -54,
-                    "width": 128,
-                    "height": 128,
-                    "transform": "matrix(1, 0, 0, 1, -20, -34.641)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERH3nqOBJzmt1dzI9YVtGEHQJmmg8h0omceVoSLV2N9o_6djk9MT8PzQ4KcGqferxVTWTSii",
-                    "target": "i6",
-                    "x": -32,
-                    "y": -42,
-                    "width": 76,
-                    "height": 76,
-                    "transform": "matrix(1, 0, 0, 1, 20, -34.641)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5EREGlBZJ3lBjTrC6ND4oTXJ5VrlKBfC1ss_4EcIBK-R5Scs__oeq2coe3L5kOYAXejR-oqoVSaa6NyUY7y4J8T7sjYlb3g",
-                    "target": "i7",
-                    "x": -38,
-                    "y": -44,
-                    "width": 102,
-                    "height": 102,
-                    "transform": "matrix(1, 0, 0, 1, 80, 0)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERFTf0TBMY3rmwjVwg2PNAB3d8bkNsrCwdju4D_s8Es-3_0tdbBkj8nYdn9Pw0QGmaxgvv63",
-                    "target": "i8",
-                    "x": -25,
-                    "y": -25,
-                    "width": 50,
-                    "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, 40, 69.282)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERGJktdvc-kxu63CdPECDmvu7svH_y-OZBEb5wSz_WQnU6QrEet190EQqUxTEoRwD4eA4G1qiAdE4L8l7RStkbnMbgTGZw",
-                    "target": "i9",
-                    "x": -40,
-                    "y": -29,
-                    "width": 72,
-                    "height": 72,
-                    "transform": "matrix(1, 0, 0, 1, -40, 69.282)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERGFKFN82JeCBJ7nnEV6bYgsY3ePm3TEOQuX3RjFE4LIpPfpezxRAzbXvyuAB_DNmGtRV4i_k0N8r9EDEHQxdx3mGfOXqw",
-                    "target": "i10",
-                    "x": -25,
-                    "y": -25,
-                    "width": 50,
-                    "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, -80, 9.79717e-15)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5EREY4l_aR-W9yCA1uVdnT94ULQ1lWBTUstAR-p_eT3PBYdpDQ6iGQS3uyl_kxLagmRbi2M-l",
-                    "target": "i11",
-                    "x": -39,
-                    "y": -31,
-                    "width": 68,
-                    "height": 68,
-                    "transform": "matrix(1, 0, 0, 1, -40, -69.282)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERHyurod9B5VSi8Nv5V4eCd02_G3d2HqWVKMQ8z__Wniwf3YbI_dgvrxhW3iHUVNXMLRp833",
-                    "target": "i12",
-                    "x": -43,
-                    "y": -37,
-                    "width": 72,
-                    "height": 72,
-                    "transform": "matrix(1, 0, 0, 1, 40, -69.282)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERHRJK6Ag_AUqqFiDEu68qgzYEw1IrzRywz8UR5iXm-0-o0fjuPdi5fpLU75vAcB8zdwewuzH8mNnn-NEJdNk-a54hu9iA",
-                    "target": "i13",
-                    "x": -50,
-                    "y": -33,
-                    "width": 80,
-                    "height": 80,
-                    "transform": "matrix(1, 0, 0, 1, 60.1888, 34.75)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERGI3w0qDby2wdkiZRSkoJgSwBUFlVRr3kKDqs7CbXJBKx-y6e9KNdxmOHjr59ApJ3snS13O",
-                    "target": "i14",
-                    "x": -25,
-                    "y": -25,
-                    "width": 50,
-                    "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, 4.25565e-15, 69.5)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERE43ja9ZLaQzx_ihJfXg1z6lcqjGjM7SGbGtal2oDz5mFQfaFkgkob5l8GV8biaiAa4GMBZ",
-                    "target": "i15",
-                    "x": -41,
-                    "y": -90,
-                    "width": 114,
-                    "height": 114,
-                    "transform": "matrix(1, 0, 0, 1, -60.1888, 34.75)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5ERFuVvWUA1G2AaxRvjhjA7LhzVFTIFM9Wj4FYx9r1qiDBx0jgrR0ZT3RZq_g9JmvT6jmlBru",
-                    "target": "i16",
-                    "x": -58,
-                    "y": -75,
-                    "width": 202,
-                    "height": 202,
-                    "transform": "matrix(1, 0, 0, 1, -60.1888, -34.75)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5EREGmytbvPC9-nlYeIdYXIIskXxX9_IKxeRWL564NKsCsgwLH3XiG9uruAvm6Z23DO1c2PZUzwLlYb0gBbzsOxKKQoAYbg",
-                    "target": "i17",
-                    "x": -66,
-                    "y": -61,
-                    "width": 126,
-                    "height": 126,
-                    "transform": "matrix(1, 0, 0, 1, -1.27669e-14, -69.5)",
-                    "clipPath": "30"
-                },
-                {
-                    "id": "AIk5EREbNet03tgRCVqBJV5kBla5G06NG9Xcc5i7Zp6UORVKrNXipPFn9dKEOWffnJCgNRSxh-Cw",
-                    "target": "i18",
-                    "x": -25,
-                    "y": -25,
-                    "width": 50,
-                    "height": 50,
-                    "transform": "matrix(1, 0, 0, 1, 60.1888, -34.75)",
-                    "clipPath": "30"
-                }
-            ]
-        },
-        {
             "id": "2022-06-27",
             "title": "Wichita KS",
             "data": [
@@ -2012,5 +1817,8 @@ function getEffectiveTransform(data: CollageCellState) {
     return transform === "none" ? "" : transform
 }
 
-export { transforms, collages, getEffectiveTransform }
+const stories = await getAllCollages();
+const both = [...stories, ...collages];
+
+export { transforms, both as collages, getEffectiveTransform }
 

@@ -3,7 +3,9 @@ import type { AudioRecording } from "../lib/db"
 import { getPhotoUrl } from "../lib/globals"
 import type { CollageCellState, CollageState, Photo } from "./collageTemplates"
 
-const PHOTOS = getPhotoUrl()
+const PHOTOS = `${getPhotoUrl()}/photo`
+const AUDIO = `${getPhotoUrl()}/audio`
+const STORY = `${getPhotoUrl()}/collage`
 
 export async function fetchPhotoList() {
     const response = await fetch(`${PHOTOS}/list`)
@@ -21,9 +23,18 @@ export function asPhotoServiceUrl(photo: Photo | CollageCellState) {
     return `${PHOTOS}/get?id=${photo.id}`
 }
 
+export async function getAllCollages() {
+    const response = await fetch(`${STORY}/list`)
+    if (response.ok) {
+        const data = (await response.json()) as Array<CollageState>
+        return data;
+    }
+    throw new Error("Failed to fetch collages")
+}
+
 export async function saveCollage(collage: CollageState & { note?: string }) {
     console.log("saveCollage", collage)
-    const response = await fetch(`${PHOTOS}/save?collageId=${collage.id}`, {
+    const response = await fetch(`${STORY}/save?id=${collage.id}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -47,13 +58,13 @@ export async function getAudioRecording(id: string) {
 }
 
 export async function getAllAudioRecordings() {
-    const response = await fetch(`${PHOTOS}/getRecordings`)
+    const response = await fetch(`${AUDIO}/list`)
     if (response.ok) {
         const data = (await response.json()) as Array<{ id: string; title: string }>
         // convert the ids to urls
         return data.map((item) => ({
             ...item,
-            url: `${PHOTOS}/getRecording?id=${item.id}`
+            url: `${AUDIO}/get?id=${item.id}`
         }))
     }
     throw new Error("Failed to fetch audio recordings")
@@ -63,7 +74,7 @@ export async function saveRecording(recording: AudioRecording) {
     const formData = new FormData();
     formData.append("audioFile", recording.blob, "recording.ogg");
 
-    const response = await fetch(`${PHOTOS}/saveRecording?id=${recording.id}`, {
+    const response = await fetch(`${AUDIO}/save?id=${recording.id}`, {
         method: "POST",
         headers: {
             "Accept": "multipart/form-data",
@@ -77,7 +88,7 @@ export async function saveRecording(recording: AudioRecording) {
 }
 
 export async function deleteRecording(recording: AudioRecording) {
-    const response = await fetch(`${PHOTOS}/deleteRecording?id=${recording.id}`)
+    const response = await fetch(`${AUDIO}/delete?id=${recording.id}`)
     if (!response.ok) {
         throw `${response.status}: ${response.statusText}`
     }
