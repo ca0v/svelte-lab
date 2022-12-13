@@ -12,7 +12,12 @@
   import AudioRecorder from "./components/AudioRecorder.svelte"
   import Notes from "./components/Notes.svelte"
   import SvgPaths from "./components/SvgPaths.svelte"
-  import { asPhotoServiceUrl, fetchPhotoList } from "./data/collageServices"
+  import {
+    asPhotoServiceUrl,
+    fetchPhotoList,
+    saveCollage,
+  } from "./data/collageServices"
+  import { setLocalStorage } from "./lib/globals"
 
   let photos: Array<Photo> = []
 
@@ -20,6 +25,7 @@
   let transformName = ""
   let date_filter_from = ""
   let date_filter_to = ""
+  let note = ""
   let activeCollage: CollageState | undefined
 
   $: {
@@ -83,12 +89,17 @@
       <p>Audio Recordings</p>
       <AudioRecorder />
       <p>Notes</p>
-      <Notes />
+      <Notes bind:note />
     </div>
     <CollageView
       id={collageName}
       transforms={activeCollage}
       duration={0.01}
+      on:save={async () => {
+        console.log("save", activeCollage)
+        setLocalStorage(`${activeCollage.id}`, activeCollage)
+        await saveCollage({ ...activeCollage, note })
+      }}
       sources={photos
         .filter(
           (p) =>

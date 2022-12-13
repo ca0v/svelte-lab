@@ -1,7 +1,8 @@
-<textarea
-  >These notes should be attached to the audio recordings and the transform and
-  image data...all of it is one cohesive unit when user clicks "save" or "copy"</textarea
->
+<script lang="ts">
+  export let note = ""
+</script>
+
+<textarea bind:value={note} />
 
 <style>
   textarea {

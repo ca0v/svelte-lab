@@ -1,7 +1,8 @@
 <script lang="ts">
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
-  import { onMount } from "svelte"
-  import { setLocalStorage, getLocalStorage } from "../lib/globals"
+  import { onMount, createEventDispatcher } from "svelte"
+
+  import { getLocalStorage } from "../lib/globals"
   import { sleep } from "../lib/paths"
 
   import PhotoWheel from "./PhotoWheel.svelte"
@@ -11,7 +12,7 @@
     type CollageState,
     type CollageCellState,
   } from "../data/collageTemplates"
-  import { asPhotoServiceUrl, saveCollage } from "../data/collageServices"
+  import { asPhotoServiceUrl } from "../data/collageServices"
 
   export let id: string
   export let sources: Array<string> = []
@@ -20,6 +21,7 @@
   export let transforms: CollageState
   export let transformDelay = 0 // to be moved to configuration
 
+  let dispatch = createEventDispatcher()
   let play = readonly
   let editmode = !readonly
 
@@ -238,7 +240,6 @@
     injectCss(`hexagon_spiral_init_${id}`, createInitialCss)
     injectCss(`hexagon_spiral_transitions_${id}`, createCssTransforms)
 
-    // HERIIAM: need to wait for svgImages to be set
     const savedState: CollageState = getLocalStorage(id)
     if (savedState) {
       savedState.data.forEach((image, i) => {
@@ -313,25 +314,6 @@
     }
   }
 
-  function createSettings(): CollageState {
-    return {
-      id,
-      title: transforms.title,
-      data: transforms.data.map((image) => {
-        return {
-          target: image.target,
-          id: image.id,
-          x: image.x,
-          y: image.y,
-          width: image.width,
-          height: image.height,
-          transform: image.transform,
-          clipPath: image.clipPath,
-        }
-      }),
-    }
-  }
-
   function extractId(href: string): string {
     return href.substring(href.lastIndexOf("id=") + 3)
   }
@@ -402,19 +384,10 @@
       <button
         data-shortcut="S"
         title="Save to local storage"
-        on:click={async () => {
-          const settings = createSettings()
-          setLocalStorage(`${id}`, settings)
-          await saveCollage(settings)
-        }}><u>S</u>ave</button
-      >
-      <button
-        data-shortcut="C"
-        title="Copy settings to clipboard"
         on:click={() => {
-          const settings = createSettings()
-          navigator.clipboard.writeText(JSON.stringify(settings, null, 2))
-        }}><u>C</u>opy</button
+          console.log("save clicked")
+          dispatch("save")
+        }}><u>S</u>ave</button
       >
       <button
         on:click={() => {

@@ -20,7 +20,8 @@ export function asPhotoServiceUrl(photo: Photo | CollageCellState) {
     return `${PHOTOS}/get?id=${photo.id}`
 }
 
-export async function saveCollage(collage: CollageState) {
+export async function saveCollage(collage: CollageState & { note?: string }) {
+    console.log("saveCollage", collage)
     const response = await fetch(`${PHOTOS}/save?collageId=${collage.id}`, {
         method: "POST",
         headers: {
