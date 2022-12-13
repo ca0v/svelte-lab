@@ -284,21 +284,26 @@
     into.y = from.y
     into.width = from.width
     into.height = from.height
+    transform = transform
   }
 
   function swap(i1: HexagonData, i2: HexagonData) {
-    const href = i1.id
-    const { x, y, width, height } = i1
+    const { id, x, y, width, height } = i1
+
     i1.id = i2.id
     i1.x = i2.x
     i1.y = i2.y
     i1.width = i2.width
     i1.height = i2.height
-    i2.id = href
+
+    i2.id = id
     i2.x = x
     i2.y = y
     i2.width = width
     i2.height = height
+
+    // forces a render
+    transform = transform
   }
 
   function swapHandler(e) {
@@ -374,6 +379,11 @@
             width={style.width}
             height={style.height}
             on:swap={swapHandler}
+            on:drop={(e) => {
+              const id = extractId(e.detail.url)
+              style.id = id
+              transform = transform
+            }}
             target={`${style.target}`}
             hotkey={ID_MAP[i]}
             style={style.transform}

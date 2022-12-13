@@ -184,11 +184,7 @@
       on:drop={(e) => {
         console.log("drop", target)
         const url = e.dataTransfer.getData("text/plain")
-        href = url
-        thisImage.setAttribute("x", "-25")
-        thisImage.setAttribute("y", "-25")
-        thisImage.setAttribute("width", "50")
-        thisImage.setAttribute("height", "50")
+        dispatch("drop", { url })
         focus()
         e.preventDefault()
       }}

@@ -50,7 +50,7 @@ injectPath("poly5_36", polygonToPath(polygonPath(5, 36, 52)))
 injectPath("poly5_36_1", polygonToPath(polygonPath(5, 36, 52 + 36 + 0)))
 injectPath("30", polygonToPath(polygonPath(6, 21, 30)))
 injectPath("2", polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64)))
-injectRect("test", -35, -25, 70, 70)
+injectRect("7x5", -35, -25, 70, 50)
 
 const transforms: Record<string, Array<{
     i: number,
@@ -83,7 +83,7 @@ const transforms: Record<string, Array<{
     "7x5-3": range(3).map(i => ({
         "i": i,
         "style": `translate(${-50 + i * 35}px, ${-50 + i * 55}px)`,
-        clipPath: "test",
+        clipPath: "7x5",
         bbox: { x: -35, y: -25, width: 70, height: 50 }
     }))
 
