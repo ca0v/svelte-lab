@@ -72,7 +72,7 @@ export async function getAllAudioRecordings() {
 
 export async function saveRecording(recording: AudioRecording) {
     const formData = new FormData();
-    formData.append("audioFile", recording.blob, "recording.ogg");
+    formData.append("audioFile", recording.blob, recording.title);
 
     const response = await fetch(`${AUDIO}/save?id=${recording.id}`, {
         method: "POST",

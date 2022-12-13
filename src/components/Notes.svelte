@@ -2,7 +2,7 @@
   export let note = ""
 </script>
 
-<textarea bind:value={note} />
+<textarea bind:value={note} spellcheck="true" />
 
 <style>
   textarea {

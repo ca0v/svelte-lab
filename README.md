@@ -35,4 +35,4 @@ It can also accept an initial state.
 * DGN: cell transforms belong in configuration
 * DGN: drag-drop should be handled by CollageView not SvgImage
 * FTR: Can crop and round corners using clip-path: inset() on the svg image (<https://developer.mozilla.org/en-US/docs/Web/CSS/inset>)
-* FTR: save notes, audio, stories/collages to services
+* TDO: add ability to save and update audio track titles

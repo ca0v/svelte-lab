@@ -4,7 +4,7 @@
   import DateRange from "./components/DateRange.svelte"
   import {
     transforms,
-    collages,
+    collages as stories,
     type Photo,
     type CollageState,
   } from "./data/collageTemplates"
@@ -26,6 +26,7 @@
   let recordings: Array<AudioRecording> = []
   let photos: Array<Photo> = []
 
+  let collages = [...stories]
   let collageName = ""
   let transformName = ""
   let date_filter_from = ""
@@ -36,10 +37,17 @@
 
   $: {
     date_filter_from && localStorage.setItem("date_filter", date_filter_from)
+  }
+
+  $: {
     collageName && localStorage.setItem("collage_name", collageName)
     activeCollage =
       collageName && collages && collages.find((h) => h.id === collageName)
 
+    note = activeCollage?.note || note
+  }
+
+  $: {
     const transform = transforms[transformName]
     if (transform && activeCollage) {
       // capture existing images
@@ -87,6 +95,12 @@
       }
     })
   })
+
+  function createUniqueId(): string {
+    return Math.random()
+      .toString(36)
+      .substring(2, 16 + 2)
+  }
 </script>
 
 <main>
@@ -104,11 +118,27 @@
     <h2>For Editing</h2>
     <div class="two-column">
       <p><u>C</u>ollage Name</p>
-      <select bind:value={collageName} data-shortcut="C">
-        {#each collages as collage}
-          <option value={collage.id}>{collage.title} ({collage.id})</option>
-        {/each}
-      </select>
+      <div>
+        <select bind:value={collageName} data-shortcut="C">
+          {#each collages as collage}
+            <option value={collage.id}>{collage.title} ({collage.id})</option>
+          {/each}
+        </select>
+        <button
+          class="add"
+          on:click={() => {
+            collages = [
+              {
+                id: createUniqueId(),
+                title: "New Collage",
+                data: [],
+              },
+              ...collages,
+            ]
+            collageName = collages[0].id
+          }}>Create</button
+        >
+      </div>
       {#if activeCollage}
         <p>Title</p>
         <input type="text" bind:value={activeCollage.title} />
@@ -123,6 +153,11 @@
       <p>Audio Recordings</p>
       <AudioRecorder
         {recordings}
+        on:track-title-change={async (e) => {
+          const recording = e.detail
+          console.log("title change", recording)
+          alert("title change: " + recording.title)
+        }}
         on:delete={async (e) => {
           const recording = e.detail
           await deleteRecording(recording)

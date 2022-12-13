@@ -138,7 +138,11 @@
       <audio bind:this={audioPlayer} />
       {#each recordings as recording}
         <article>
-          <input type="text" bind:value={recording.title} />
+          <input
+            type="text"
+            bind:value={recording.title}
+            on:change={() => dispatch("track-title-change", recording)}
+          />
           <button class="play" on:click={() => playRecording(recording)} />
           <button class="delete" on:click={() => deleteRecording(recording)} />
         </article>

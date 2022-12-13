@@ -28,7 +28,8 @@ export type CollageCellState = {
 
 export type CollageState = {
     id: string
-    title: string
+    title?: string
+    note?: string
     data: Array<CollageCellState>
 }
 
