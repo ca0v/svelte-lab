@@ -31,7 +31,6 @@
   let transformName = ""
   let date_filter_from = ""
   let date_filter_to = ""
-  let note = ""
   let activeCollage: CollageState | undefined
   let errors: Array<string> = []
 
@@ -43,8 +42,6 @@
     collageName && localStorage.setItem("collage_name", collageName)
     activeCollage =
       collageName && collages && collages.find((h) => h.id === collageName)
-
-    note = activeCollage?.note || note
   }
 
   $: {
@@ -169,8 +166,10 @@
           recordings = [recording, ...recordings]
         }}
       />
-      <p>Notes</p>
-      <Notes bind:note />
+      {#if activeCollage}
+        <p>Notes</p>
+        <Notes bind:note={activeCollage.note} />
+      {/if}
     </div>
     <CollageView
       id={collageName}
@@ -179,11 +178,7 @@
       on:save={async () => {
         console.log("save", activeCollage)
         setLocalStorage(`${activeCollage.id}`, activeCollage)
-        await saveCollage({ ...activeCollage, note })
-        if (recordings.length) {
-          await saveRecording(recordings[0])
-          recordings = []
-        }
+        await saveCollage({ ...activeCollage })
       }}
       sources={photos
         .filter(
@@ -200,7 +195,7 @@
   {#if true}
     <h2>Preview</h2>
     <div class="frame three-by">
-      {#each collages.filter((c) => c.data.length) as collage, i}
+      {#each stories.filter((c) => c.data.length) as collage, i}
         <div class="border">
           <h3 class="fit">{collage.title}</h3>
           <CollageView

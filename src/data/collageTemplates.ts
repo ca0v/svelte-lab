@@ -61,10 +61,10 @@ const transforms: Record<string, Array<{
     }
 }>> = {
     "flower-6": [
-        { "i": 0, "style": "", clipPath: "poly5_36" },
+        { "i": 0, "style": "translate(0,0)", clipPath: "poly5_36" },
         ...[1, 2, 3, 4, 5].map((i) => ({
             "i": i,
-            "style": `rotate(${16 + i * 72}deg) translate(${65}px, 0) rotate(${-16 + -i * 72}deg)`,
+            "style": `rotate(${36 + i * 72}deg) translate(${55}px, ${-20}px) rotate(-${36 + i * 72}deg) `,
             clipPath: "poly5_36_1"
         }))],
     "spiral-19": [
@@ -144,10 +144,10 @@ const templates: Array<CollageState> = [{
         return {
             target: `i${t.i}`,
             id: `AIk5ERHkVze4l_coT8puVELK7N6oo1IL2Ejp3VSbhZfpYHgMS-AJcs8MFO4w1b1zhu-vQnY_JbVRMQXdmDmJHP0qKcsrqKagMw`,
-            x: -140,
-            y: -140,
-            width: 280,
-            height: 280,
+            x: -50,
+            y: -50,
+            width: 100,
+            height: 100,
             transform: t.style,
             clipPath: t.clipPath,
         }
