@@ -98,8 +98,7 @@
     </div>
     <HexagonSpiral
       id={collageName}
-      {collageName}
-      transform={activeCollage}
+      transforms={activeCollage}
       duration={0.01}
       sources={photos
         .filter(
@@ -121,11 +120,9 @@
           <h3 class="fit">{collage.title}</h3>
           <HexagonSpiral
             id={`view_${collage.id}`}
-            collageName={collage.id}
             duration={[0.2, 0.3, 0.4][i] || 1}
             readonly={true}
-            transform={collage}
-            transformDelay={[0.2, 1, 2][i] || 0}
+            transforms={collage}
           />
         </div>
       {/each}

@@ -19,13 +19,8 @@
   export let height: number
   export let background: { fill: string; stroke: string }
 
-  let active = false
-
+  let active: boolean
   let thisImage: SVGImageElement
-
-  export function focus() {
-    thisImage.focus()
-  }
 
   export function getBBox() {
     const { x, y, width, height } = thisImage.getBBox()
@@ -102,9 +97,7 @@
     document.addEventListener("mouseup", onMouseUp)
   }
 
-  $: {
-    thisImage && setBBox({ x, y, width, height })
-  }
+  $: thisImage && setBBox({ x, y, width, height })
 </script>
 
 {#if readonly}
@@ -169,7 +162,7 @@
       width="50"
       x="-25"
       y="-25"
-      on:focus={() => console.log("focus", (active = true))}
+      on:focus={() => (active = true)}
       on:blur={() => (active = false)}
       on:mousedown={mouseDownHandler}
       on:dragstart={(e) => {
@@ -185,7 +178,7 @@
         console.log("drop", target)
         const url = e.dataTransfer.getData("text/plain")
         dispatch("drop", { url })
-        focus()
+        active = true
         e.preventDefault()
       }}
     />
@@ -220,10 +213,10 @@
   @ts-ignore
   @csswarn ignore:has
   */
-  .border:has(+ image:hover:not(.active)) {
+  /* .border:has(+ image:hover:not(.active)) {
     opacity: 0.5;
     stroke: white;
-  }
+  } */
 
   .border.active {
     stroke: white;

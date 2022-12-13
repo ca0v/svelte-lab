@@ -35,6 +35,4 @@ It can also accept an initial state.
 * DGN: cell transforms belong in configuration
 * DGN: drag-drop should be handled by HexagonSpiral not SvgImage
 * DGN: refactor...code is everywhere, filenames are misleading
-* FTR: ability to clone a cell (copy/paste, ctrl+D)
-* FIX: Use transform to drive svgImages
 * FTR: Can crop and round corners using clip-path: inset() on the svg image (<https://developer.mozilla.org/en-US/docs/Web/CSS/inset>)

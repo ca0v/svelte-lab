@@ -49,7 +49,7 @@
         dispatch("click", source)
       }}
       on:keydown={(e) => {
-        if (e.shiftKey) {
+        if (e.shiftKey && e.key !== "Shift") {
           dispatch("goto", { key: e.key })
           return
         }

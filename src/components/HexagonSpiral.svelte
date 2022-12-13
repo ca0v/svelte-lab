@@ -1,12 +1,12 @@
 <script lang="ts">
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
-
+  import { onMount } from "svelte"
   import {
     photoUrl as PHOTOS,
     setLocalStorage,
     getLocalStorage,
   } from "../lib/globals"
-  import { polygonPath, polygonToPath, sleep } from "../lib/paths"
+  import { sleep } from "../lib/paths"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
@@ -17,11 +17,10 @@
   } from "../data/hexagons"
 
   export let id: string
-  export let collageName: string
   export let sources: Array<string> = []
   export let duration = 0.1
   export let readonly = false
-  export let transform: Hexagon
+  export let transforms: Hexagon
   export let transformDelay = 0 // to be moved to configuration
 
   let play = readonly
@@ -67,20 +66,16 @@
   // assign images to each image element
   function autoAssignImages(urls: string[]) {
     let j = 0
-    for (let i = 0; i < transform.data.length && j < urls.length; i++) {
-      const image = transform.data[i]
-      if (!image.id) {
-        const url = urls[j++]
-        image.id = url
-      }
-    }
+    transforms.data.some((transform) => {
+      if (j >= urls.length) return true
+      transform.id = transform.id || extractId(urls[j++])
+    })
+    transforms = transforms
   }
 
   function clearAllImages() {
-    for (let i = 0; i < transform.data.length; i++) {
-      const image = transform.data[i]
-      image.id = ""
-    }
+    transforms.data.forEach((t) => (t.id = ""))
+    transforms = transforms
   }
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
@@ -106,23 +101,23 @@
     const target = image.parentElement.dataset.target
     // get the svgImage from this
 
-    const sourceTransformIndex = transform.data.findIndex(
+    const sourceTransformIndex = transforms.data.findIndex(
       (d) => d.target === target
     )
-    const sourceTransform = transform.data[sourceTransformIndex]
+    const sourceTransform = transforms.data[sourceTransformIndex]
 
     if (e.ctrlKey) {
       switch (e.key) {
         case "d":
           // create a duplicate of the svgImage
           if (sourceTransformIndex >= 0) {
-            const newId = transform.data.length + 1
-            let clone = transform.data[sourceTransformIndex]
+            const newId = transforms.data.length + 1
+            let clone = transforms.data[sourceTransformIndex]
             clone = JSON.parse(JSON.stringify(clone))
             clone.target = "i" + newId
             clone.transform = `translate(10px, 10px) ${clone.transform}`
-            transform.data.splice(sourceTransformIndex + 1, 0, clone)
-            transform = transform
+            transforms.data.splice(sourceTransformIndex + 1, 0, clone)
+            transforms = transforms
           }
           return handled()
       }
@@ -197,13 +192,12 @@
         default:
           if (!ID_MAP.includes(e.key.toLocaleUpperCase())) break
           const index = ID_MAP.indexOf(e.key.toLocaleUpperCase())
-          const targetImage = transform.data[index]
+          const targetImage = transforms.data[index]
           if (!targetImage) break
           if (e.shiftKey) {
-            targetImage.focus = true
+            focusTarget(targetImage.target)
             return handled()
           } else {
-            targetImage.fast = true
             swap(targetImage, sourceTransform)
             return handled()
           }
@@ -215,10 +209,10 @@
           const newStyle = `scale(${1 + width / w0},${
             1 + height / h0
           }) ${currentStyle} translate(${x}px, ${y}px)`
-          const currentTransform = transform.data[sourceTransformIndex]
+          const currentTransform = transforms.data[sourceTransformIndex]
           currentTransform.transform = newStyle
-          transform.data[sourceTransformIndex] =
-            transform.data[sourceTransformIndex]
+          transforms.data[sourceTransformIndex] =
+            transforms.data[sourceTransformIndex]
         } else {
           if (sourceTransformIndex < 0) {
             image.setAttribute("x", x0 + x + "px")
@@ -226,13 +220,13 @@
             image.setAttribute("width", w0 + width + "px")
             image.setAttribute("height", h0 + height + "px")
           } else {
-            const currentTransform = transform.data[sourceTransformIndex]
+            const currentTransform = transforms.data[sourceTransformIndex]
             currentTransform.x += x
             currentTransform.y += y
             currentTransform.width += width
             currentTransform.height += height
-            transform.data[sourceTransformIndex] =
-              transform.data[sourceTransformIndex]
+            transforms.data[sourceTransformIndex] =
+              transforms.data[sourceTransformIndex]
           }
         }
         return handled()
@@ -241,23 +235,25 @@
   }
 
   async function applyState(id: string) {
+    if (!id) return
+    if (!transforms) return
+
     injectCss(`hexagon_spiral_init_${id}`, createInitialCss)
     injectCss(`hexagon_spiral_transitions_${id}`, createCssTransforms)
 
     // HERIIAM: need to wait for svgImages to be set
-    await sleep(100)
     const savedState: Hexagon = getLocalStorage(id)
     if (savedState) {
       savedState.data.forEach((image, i) => {
-        const svgImage = transform.data[i]
-        if (!svgImage) return
-        svgImage.id = image.id
-        svgImage.transform = image.transform
-        svgImage.clipPath = image.clipPath
-        svgImage.x = image.x
-        svgImage.y = image.y
-        svgImage.width = image.width
-        svgImage.height = image.height
+        const transform = transforms.data[i]
+        if (!transform) return
+        transform.id = image.id
+        transform.transform = image.transform
+        transform.clipPath = image.clipPath
+        transform.x = image.x
+        transform.y = image.y
+        transform.width = image.width
+        transform.height = image.height
       })
     }
 
@@ -284,7 +280,7 @@
     into.y = from.y
     into.width = from.width
     into.height = from.height
-    transform = transform
+    transforms = transforms
   }
 
   function swap(i1: HexagonData, i2: HexagonData) {
@@ -303,18 +299,18 @@
     i2.height = height
 
     // forces a render
-    transform = transform
+    transforms = transforms
   }
 
   function swapHandler(e) {
     const { mode, target1, target2 } = e.detail
-    const t1 = transform.data.find((i) => i.target === target1)
+    const t1 = transforms.data.find((i) => i.target === target1)
     if (!t1) {
       console.log("no target image")
       return
     }
 
-    const t2 = transform.data.find((i) => i.target === target2)
+    const t2 = transforms.data.find((i) => i.target === target2)
     if (!t2) {
       console.log("no active image")
       return
@@ -332,8 +328,8 @@
   function createSettings(): Hexagon {
     return {
       id,
-      title: transform.title,
-      data: transform.data.map((image) => {
+      title: transforms.title,
+      data: transforms.data.map((image) => {
         return {
           target: image.target,
           id: image.id,
@@ -352,8 +348,12 @@
     return href.substring(href.lastIndexOf("id=") + 3)
   }
 
-  $: if (collageName || transform) {
-    applyState(id)
+  onMount(() => applyState(id))
+
+  function focusTarget(targetName: string) {
+    const target = document.querySelector(`[data-target="${targetName}"] image`)
+    // @ts-ignore
+    target?.focus()
   }
 </script>
 
@@ -366,30 +366,30 @@
       stroke-width="0"
       fill="#000"
     >
-      {#if transform?.data}
-        {#each transform.data as style, i}
+      {#if transforms?.data}
+        {#each transforms.data as transform, i}
           <SvgImage
             {play}
             {editmode}
             {readonly}
-            href={style.id ? `${PHOTOS}/get?id=${style.id}` : ""}
-            clipPath={style.clipPath}
-            x={style.x}
-            y={style.y}
-            width={style.width}
-            height={style.height}
+            href={transform.id ? `${PHOTOS}/get?id=${transform.id}` : ""}
+            clipPath={transform.clipPath}
+            x={transform.x}
+            y={transform.y}
+            width={transform.width}
+            height={transform.height}
             on:swap={swapHandler}
             on:drop={(e) => {
               const id = extractId(e.detail.url)
-              style.id = id
-              transform = transform
+              transform.id = id
+              transforms = transforms
             }}
-            target={`${style.target}`}
+            target={`${transform.target}`}
             hotkey={ID_MAP[i]}
-            style={style.transform}
+            style={transform.transform}
             background={{
-              stroke: style.background?.stroke || "none",
-              fill: style.background?.fill || "none",
+              stroke: transform.background?.stroke || "none",
+              fill: transform.background?.fill || "none",
             }}
           />
         {/each}
@@ -448,14 +448,16 @@
         const { key } = data.detail
         const index = ID_MAP.indexOf(key.toLocaleUpperCase())
         if (index < 0) return
-        const targetImage = queryImage(index)
-        targetImage?.focus()
+        const transform = transforms.data[index]
+        if (transform) {
+          focusTarget(transform.target)
+        }
       }}
       on:keydown={(data) => {
         const { key, source } = data.detail
         const index = ID_MAP.indexOf(key.toLocaleUpperCase())
         if (index < 0) return
-        const targetImage = transform.data[index]
+        const targetImage = transforms.data[index]
         if (targetImage) {
           targetImage.id = source
         }

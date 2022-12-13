@@ -19,8 +19,6 @@ export type HexagonData = {
     height: number
     transform: string
     clipPath: string
-    fast?: boolean
-    focus?: boolean
     background?: {
         fill?: string;
         stroke?: string;
