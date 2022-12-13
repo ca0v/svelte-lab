@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import { photoUrl as PHOTOS } from "./lib/globals"
   import CollageView from "./components/CollageView.svelte"
   import DateRange from "./components/DateRange.svelte"
   import {
@@ -13,19 +12,9 @@
   import AudioRecorder from "./components/AudioRecorder.svelte"
   import Notes from "./components/Notes.svelte"
   import SvgPaths from "./components/SvgPaths.svelte"
+  import { asPhotoServiceUrl, fetchPhotoList } from "./data/collageServices"
 
   let photos: Array<Photo> = []
-
-  async function fetchPhotoList() {
-    const response = await fetch(`${PHOTOS}/list`)
-    if (response.ok) {
-      const data = (await response.json()) as Array<Photo>
-      return data.map((d) => ({
-        ...d,
-      }))
-    }
-    throw new Error("Failed to fetch photo list")
-  }
 
   let collageName = ""
   let transformName = ""
@@ -106,7 +95,7 @@
             !date_filter_from ||
             (date_filter_from <= p.created && p.created <= date_filter_to)
         )
-        .map((p) => (p.id ? `${PHOTOS}/get?id=${p.id}` : ""))}
+        .map(asPhotoServiceUrl)}
     >
       <DateRange bind:date_filter_from bind:date_filter_to />
     </CollageView>

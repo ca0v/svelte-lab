@@ -1,11 +1,7 @@
 <script lang="ts">
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
   import { onMount } from "svelte"
-  import {
-    photoUrl as PHOTOS,
-    setLocalStorage,
-    getLocalStorage,
-  } from "../lib/globals"
+  import { setLocalStorage, getLocalStorage } from "../lib/globals"
   import { sleep } from "../lib/paths"
 
   import PhotoWheel from "./PhotoWheel.svelte"
@@ -15,6 +11,7 @@
     type CollageState,
     type CollageCellState,
   } from "../data/collageTemplates"
+  import { asPhotoServiceUrl } from "../data/collageServices"
 
   export let id: string
   export let sources: Array<string> = []
@@ -363,7 +360,7 @@
             {play}
             {editmode}
             {readonly}
-            href={transform.id ? `${PHOTOS}/get?id=${transform.id}` : ""}
+            href={asPhotoServiceUrl(transform)}
             clipPath={transform.clipPath}
             x={transform.x}
             y={transform.y}

@@ -32,6 +32,4 @@ const getPhotoUrl = () => {
     return newPhotoUrl
 }
 
-const photoUrl = getPhotoUrl()
-
-export { photoUrl, setLocalStorage, getLocalStorage }
+export { setLocalStorage, getLocalStorage, getPhotoUrl }
