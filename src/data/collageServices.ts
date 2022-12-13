@@ -1,4 +1,5 @@
 
+import type { AudioRecording } from "../lib/db"
 import { getPhotoUrl } from "../lib/globals"
 import type { CollageCellState, CollageState, Photo } from "./collageTemplates"
 
@@ -34,4 +35,21 @@ export async function saveCollage(collage: CollageState & { note?: string }) {
         return data
     }
     throw new Error("Failed to save collage")
+}
+
+export async function saveRecording(recording: AudioRecording) {
+    const formData = new FormData();
+    formData.append("audioFile", recording.blob, "recording.ogg");
+
+    const response = await fetch(`${PHOTOS}/saveRecording`, {
+        method: "POST",
+        headers: {
+            "Accept": "multipart/form-data",
+        },
+        body: formData,
+    })
+
+    if (!response.ok) {
+        throw `${response.status}: ${response.statusText}`
+    }
 }

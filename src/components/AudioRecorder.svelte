@@ -7,6 +7,8 @@
     type AudioRecording,
   } from "../lib/db"
 
+  export let recordings: Array<AudioRecording> = []
+
   let stop: HTMLButtonElement
   let record: HTMLButtonElement
   let mediaRecorder: MediaRecorder
@@ -15,15 +17,20 @@
 
   const chunks_1 = []
 
-  let recordings: Array<AudioRecording> = []
-
   async function recordClickHandler() {
-    await startListening()
-    mediaRecorder.start()
-    console.log(mediaRecorder.state)
-    console.log("recorder started")
-    stop.disabled = false
-    record.disabled = true
+    try {
+      await startListening()
+      mediaRecorder.start()
+      console.log(mediaRecorder.state)
+      console.log("recorder started")
+      stop.disabled = false
+      record.disabled = true
+    } catch (e) {
+      // emit this error on the document body
+      // so that it can be caught by the error
+      // boundary
+      window.dispatchEvent(new CustomEvent("error", { detail: e }))
+    }
   }
 
   function stopClickHandler() {
@@ -43,8 +50,6 @@
       title: `Recording ${timeSinceAppStarted()}`,
       blob: new Blob(chunks_1, { type: "audio/ogg; codecs=opus" }),
     }
-
-    recordings = [recording, ...recordings]
 
     chunks_1.length = 0
     saveRecording(recording)
@@ -85,7 +90,7 @@
   }
 
   onMount(() => {
-    recordings = getAllAudioRecordings()
+    recordings = [...getAllAudioRecordings(), ...recordings]
   })
 
   function deleteRecording(recording: AudioRecording): any {
@@ -102,6 +107,7 @@
 
   async function saveRecording(recording: AudioRecording) {
     saveAudioRecording(recording)
+    recordings = [recording, ...recordings]
   }
 
   const appStartTime = Date.now()
@@ -122,7 +128,7 @@
         <button
           bind:this={record}
           class="record"
-          on:click={recordClickHandler}
+          on:click={async () => await recordClickHandler()}
         />
         <button
           bind:this={stop}

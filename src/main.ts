@@ -25,9 +25,12 @@ document.body.addEventListener("keydown", (e: KeyboardEvent & { currentTarget: H
   }
 })
 
-window.addEventListener("error", (e: ErrorEvent) => {
-  console.error(e)
-  const err = document.createElement("div")
-  err.innerText = e.message
-  document.body.insertBefore(err, document.body.firstChild)
-})
+// intercept console.error and emit an event
+const originalConsoleError = console.error
+console.error = (...args: any[]) => {
+  const event = new CustomEvent("console.error", {
+    detail: args,
+  })
+  document.dispatchEvent(event)
+  originalConsoleError(...args)
+}

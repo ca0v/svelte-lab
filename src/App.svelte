@@ -16,9 +16,12 @@
     asPhotoServiceUrl,
     fetchPhotoList,
     saveCollage,
+    saveRecording,
   } from "./data/collageServices"
   import { setLocalStorage } from "./lib/globals"
+  import type { AudioRecording } from "./lib/db"
 
+  let recordings: Array<AudioRecording> = []
   let photos: Array<Photo> = []
 
   let collageName = ""
@@ -27,6 +30,7 @@
   let date_filter_to = ""
   let note = ""
   let activeCollage: CollageState | undefined
+  let errors: Array<string> = []
 
   $: {
     date_filter_from && localStorage.setItem("date_filter", date_filter_from)
@@ -58,11 +62,37 @@
     photos = await fetchPhotoList()
     date_filter_from =
       date_filter_from || photos[0]?.created.split("T")[0] || ""
+
+    document.addEventListener(
+      "console.error",
+      (e: Event & { detail: Array<string> }) => {
+        const message = e.detail.join(",")
+        errors = [message, ...errors]
+      }
+    )
+
+    window.addEventListener("error", (e: ErrorEvent & { detail: any }) => {
+      try {
+        if (e.detail?.message) {
+          errors = [e.detail.message, ...errors]
+        } else {
+          console.log(e)
+        }
+      } catch (e) {
+        console.log(e)
+      }
+    })
   })
 </script>
 
 <main>
   <SvgPaths />
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <errors on:click={() => (errors.length = 0)}>
+    {#each errors as error}
+      <div class="error">{error}</div>
+    {/each}
+  </errors>
 
   <h1>Photo Playground</h1>
 
@@ -87,7 +117,7 @@
         {/each}
       </select>
       <p>Audio Recordings</p>
-      <AudioRecorder />
+      <AudioRecorder bind:recordings />
       <p>Notes</p>
       <Notes bind:note />
     </div>
@@ -99,6 +129,10 @@
         console.log("save", activeCollage)
         setLocalStorage(`${activeCollage.id}`, activeCollage)
         await saveCollage({ ...activeCollage, note })
+        if (recordings.length) {
+          await saveRecording(recordings[0])
+          recordings = []
+        }
       }}
       sources={photos
         .filter(
@@ -189,5 +223,12 @@
 
   * {
     font-size: clamp(8px, 1cqw, 16px);
+  }
+
+  errors {
+    display: grid;
+    grid-template-columns: 1fr;
+    cursor: pointer;
+    color: red;
   }
 </style>

@@ -18,6 +18,18 @@ function setItem<T>(key: string, item: T) {
     localStorage.setItem(key, JSON.stringify(item));
 }
 
+export function blobToArray(blob: Blob) {
+    return new Promise<Uint8Array>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const data = new Uint8Array(reader.result as ArrayBuffer);
+            resolve(data);
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(blob);
+    });
+}
+
 async function saveAudioRecording(recording: AudioRecording) {
     // save to local storage
     let { id, title, blob } = recording;
