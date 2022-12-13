@@ -12,7 +12,7 @@
   export let fast = false
   export let editmode = false
   export let readonly = false
-  export let clipPath = "url(#clip_30)"
+  export let clipPath = ""
   export let x: number
   export let y: number
   export let width: number
@@ -25,15 +25,6 @@
 
   export function focus() {
     thisImage.focus()
-  }
-
-  export function getEffectiveTransform() {
-    const { transform } = getComputedStyle(thisImage.parentElement)
-    return transform === "none" ? "" : transform
-  }
-
-  export function getClipPath() {
-    return thisImage.getAttribute("clip-path")
   }
 
   export function getBBox() {

@@ -19,6 +19,8 @@ export type HexagonData = {
     height: number
     transform: string
     clipPath: string
+    fast?: boolean
+    focus?: boolean
     background?: {
         fill?: string;
         stroke?: string;
@@ -87,7 +89,7 @@ const transforms: Record<string, Array<{
 
 }
 
-const hexagons: Array<Hexagon> =
+const collages: Array<Hexagon> =
     [
         {
             id: "7x5-3",
@@ -1988,9 +1990,7 @@ const hexagons: Array<Hexagon> =
         },
     ].sort((a, b) => a.id.localeCompare(b.id))
 
-hexagons.push({ id: "next", title: "next", data: [] })
-
-export { transforms, hexagons as collages }
+collages.push({ id: "next", title: "next", data: [] })
 
 
 function injectClipPath(id: string, body: string) {
@@ -2009,4 +2009,15 @@ function injectPath(id: string, d: string) {
     svgClipPaths.update(p => [...p, { id, body }]);
     return id;
 }
+
+const dummy = document.createElement("div")
+document.body.appendChild(dummy)
+
+function getEffectiveTransform(data: HexagonData) {
+    dummy.style.transform = data.transform
+    const { transform } = getComputedStyle(dummy)
+    return transform === "none" ? "" : transform
+}
+
+export { transforms, collages, getEffectiveTransform }
 

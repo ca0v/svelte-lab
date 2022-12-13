@@ -10,7 +10,11 @@
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
-  import type { Hexagon } from "../data/hexagons"
+  import {
+    getEffectiveTransform,
+    type Hexagon,
+    type HexagonData,
+  } from "../data/hexagons"
 
   export let id: string
   export let collageName: string
@@ -20,11 +24,10 @@
   export let transform: Hexagon
   export let transformDelay = 0 // to be moved to configuration
 
-  let play = true
+  let play = readonly
   let editmode = !readonly
 
   let photoWheelComponent: PhotoWheel
-  let svgImages = [] as Array<SvgImage>
   let scope = `hexagon_spiral_${id}`
 
   function createCssTransforms(size = 20) {
@@ -64,19 +67,19 @@
   // assign images to each image element
   function autoAssignImages(urls: string[]) {
     let j = 0
-    for (let i = 0; i < svgImages.length && j < urls.length; i++) {
-      const image = svgImages[i]
-      if (!image.href) {
+    for (let i = 0; i < transform.data.length && j < urls.length; i++) {
+      const image = transform.data[i]
+      if (!image.id) {
         const url = urls[j++]
-        image.href = url
+        image.id = url
       }
     }
   }
 
   function clearAllImages() {
-    for (let i = 0; i < svgImages.length; i++) {
-      const image = svgImages[i]
-      image.href = ""
+    for (let i = 0; i < transform.data.length; i++) {
+      const image = transform.data[i]
+      image.id = ""
     }
   }
 
@@ -102,26 +105,31 @@
     const image = document.activeElement as SVGImageElement
     const target = image.parentElement.dataset.target
     // get the svgImage from this
-    const svgImage = image && svgImages.find((i) => i.target === target)
+
+    const sourceTransformIndex = transform.data.findIndex(
+      (d) => d.target === target
+    )
+    const sourceTransform = transform.data[sourceTransformIndex]
 
     if (e.ctrlKey) {
       switch (e.key) {
         case "d":
           // create a duplicate of the svgImage
-          const sourceTransformIndex = transform.data.findIndex(
-            (d) => d.target === target
-          )
           if (sourceTransformIndex >= 0) {
-            const clone = transform.data[sourceTransformIndex]
-            transform.data.splice(sourceTransformIndex, 0, clone)
-            transform.data = transform.data
+            const newId = transform.data.length + 1
+            let clone = transform.data[sourceTransformIndex]
+            clone = JSON.parse(JSON.stringify(clone))
+            clone.target = "i" + newId
+            clone.transform = `translate(10px, 10px) ${clone.transform}`
+            transform.data.splice(sourceTransformIndex + 1, 0, clone)
+            transform = transform
           }
           return handled()
       }
       return
     }
 
-    if (svgImage) {
+    if (sourceTransform) {
       let rotation = 0
       switch (e.key) {
         case "<":
@@ -134,15 +142,15 @@
           break
       }
       if (rotation) {
-        const currentStyle = svgImage.getEffectiveTransform()
-        svgImage.style = `${currentStyle} rotate(${rotation}deg)`
+        const currentStyle = getEffectiveTransform(sourceTransform)
+        sourceTransform.transform = `${currentStyle} rotate(${rotation}deg)`
 
         return handled()
       }
     }
 
-    if (svgImage && image) {
-      let { x: x0, y: y0, width: w0, height: h0 } = svgImage.getBBox()
+    if (sourceTransform && image) {
+      let { x: x0, y: y0, width: w0, height: h0 } = sourceTransform
       let x = 0
       let y = 0
       let width = 0
@@ -154,7 +162,7 @@
           image.parentElement.appendChild(image)
           return handled()
         case "Delete":
-          svgImage.href = ""
+          sourceTransform.id = ""
           return handled()
         case "ArrowUp":
           y -= 1
@@ -189,29 +197,43 @@
         default:
           if (!ID_MAP.includes(e.key.toLocaleUpperCase())) break
           const index = ID_MAP.indexOf(e.key.toLocaleUpperCase())
-          const targetImage = svgImages[index]
+          const targetImage = transform.data[index]
           if (!targetImage) break
           if (e.shiftKey) {
-            targetImage.focus()
+            targetImage.focus = true
             return handled()
           } else {
             targetImage.fast = true
-            swap(targetImage, svgImage)
+            swap(targetImage, sourceTransform)
             return handled()
           }
       }
 
-      if (svgImage && image && resize) {
+      if (sourceTransform && image && resize) {
         if (e.shiftKey) {
-          const currentStyle = svgImage.getEffectiveTransform()
-          svgImage.style = `scale(${1 + width / w0},${
+          const currentStyle = getEffectiveTransform(sourceTransform)
+          const newStyle = `scale(${1 + width / w0},${
             1 + height / h0
           }) ${currentStyle} translate(${x}px, ${y}px)`
+          const currentTransform = transform.data[sourceTransformIndex]
+          currentTransform.transform = newStyle
+          transform.data[sourceTransformIndex] =
+            transform.data[sourceTransformIndex]
         } else {
-          image.setAttribute("x", x0 + x + "px")
-          image.setAttribute("y", y0 + y + "px")
-          image.setAttribute("width", w0 + width + "px")
-          image.setAttribute("height", h0 + height + "px")
+          if (sourceTransformIndex < 0) {
+            image.setAttribute("x", x0 + x + "px")
+            image.setAttribute("y", y0 + y + "px")
+            image.setAttribute("width", w0 + width + "px")
+            image.setAttribute("height", h0 + height + "px")
+          } else {
+            const currentTransform = transform.data[sourceTransformIndex]
+            currentTransform.x += x
+            currentTransform.y += y
+            currentTransform.width += width
+            currentTransform.height += height
+            transform.data[sourceTransformIndex] =
+              transform.data[sourceTransformIndex]
+          }
         }
         return handled()
       }
@@ -227,17 +249,15 @@
     const savedState: Hexagon = getLocalStorage(id)
     if (savedState) {
       savedState.data.forEach((image, i) => {
-        const svgImage = svgImages[i]
+        const svgImage = transform.data[i]
         if (!svgImage) return
-        svgImage.href = image.id ? `${PHOTOS}/get?id=${image.id}` : ""
-        svgImage.style = image.transform
+        svgImage.id = image.id
+        svgImage.transform = image.transform
         svgImage.clipPath = image.clipPath
-        svgImage.setBBox({
-          x: image.x,
-          y: image.y,
-          width: image.width,
-          height: image.height,
-        })
+        svgImage.x = image.x
+        svgImage.y = image.y
+        svgImage.width = image.width
+        svgImage.height = image.height
       })
     }
 
@@ -258,29 +278,38 @@
     return document.querySelector(`.${scope} .i${index} > image`)
   }
 
-  function copy(from: SvgImage, into: SvgImage) {
-    into.href = from.href
-    into.setBBox(from.getBBox())
+  function copy(from: HexagonData, into: HexagonData) {
+    into.id = from.id
+    into.x = from.x
+    into.y = from.y
+    into.width = from.width
+    into.height = from.height
   }
 
-  function swap(i1: SvgImage, i2: SvgImage) {
-    const href = i1.href
-    const bbox = i1.getBBox()
-    i1.href = i2.href
-    i1.setBBox(i2.getBBox())
-    i2.href = href
-    i2.setBBox(bbox)
+  function swap(i1: HexagonData, i2: HexagonData) {
+    const href = i1.id
+    const { x, y, width, height } = i1
+    i1.id = i2.id
+    i1.x = i2.x
+    i1.y = i2.y
+    i1.width = i2.width
+    i1.height = i2.height
+    i2.id = href
+    i2.x = x
+    i2.y = y
+    i2.width = width
+    i2.height = height
   }
 
   function swapHandler(e) {
     const { mode, target1, target2 } = e.detail
-    const t1 = svgImages.find((i) => i.target === target1)
+    const t1 = transform.data.find((i) => i.target === target1)
     if (!t1) {
       console.log("no target image")
       return
     }
 
-    const t2 = svgImages.find((i) => i.target === target2)
+    const t2 = transform.data.find((i) => i.target === target2)
     if (!t2) {
       console.log("no active image")
       return
@@ -295,22 +324,20 @@
     }
   }
 
-  $: if (collageName || transform) {
-    applyState(id)
-    console.log({ id, collageName, transform })
-  }
-
   function createSettings(): Hexagon {
     return {
       id,
       title: transform.title,
-      data: svgImages.map((image) => {
+      data: transform.data.map((image) => {
         return {
           target: image.target,
-          id: extractId(image.href),
-          ...image.getBBox(),
-          transform: image.getEffectiveTransform(),
-          clipPath: image.getClipPath(),
+          id: image.id,
+          x: image.x,
+          y: image.y,
+          width: image.width,
+          height: image.height,
+          transform: image.transform,
+          clipPath: image.clipPath,
         }
       }),
     }
@@ -318,6 +345,10 @@
 
   function extractId(href: string): string {
     return href.substring(href.lastIndexOf("id=") + 3)
+  }
+
+  $: if (collageName || transform) {
+    applyState(id)
   }
 </script>
 
@@ -333,7 +364,6 @@
       {#if transform?.data}
         {#each transform.data as style, i}
           <SvgImage
-            bind:this={svgImages[i]}
             {play}
             {editmode}
             {readonly}
@@ -415,9 +445,9 @@
         const { key, source } = data.detail
         const index = ID_MAP.indexOf(key.toLocaleUpperCase())
         if (index < 0) return
-        const targetImage = svgImages[index]
+        const targetImage = transform.data[index]
         if (targetImage) {
-          targetImage.href = source
+          targetImage.id = source
         }
       }}
     />
