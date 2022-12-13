@@ -14,7 +14,9 @@
   import SvgPaths from "./components/SvgPaths.svelte"
   import {
     asPhotoServiceUrl,
+    deleteRecording,
     fetchPhotoList,
+    getAllAudioRecordings,
     saveCollage,
     saveRecording,
   } from "./data/collageServices"
@@ -62,6 +64,8 @@
     photos = await fetchPhotoList()
     date_filter_from =
       date_filter_from || photos[0]?.created.split("T")[0] || ""
+
+    recordings = await getAllAudioRecordings()
 
     document.addEventListener(
       "console.error",
@@ -117,7 +121,19 @@
         {/each}
       </select>
       <p>Audio Recordings</p>
-      <AudioRecorder bind:recordings />
+      <AudioRecorder
+        {recordings}
+        on:delete={async (e) => {
+          const recording = e.detail
+          await deleteRecording(recording)
+          recordings = recordings.filter((r) => r.id !== recording.id)
+        }}
+        on:save={async (e) => {
+          const recording = e.detail
+          await saveRecording(recording)
+          recordings = [recording, ...recordings]
+        }}
+      />
       <p>Notes</p>
       <Notes bind:note />
     </div>

@@ -1,12 +1,8 @@
 <script lang="ts">
-  import { onMount } from "svelte"
-  import {
-    deleteAudioRecording,
-    getAllAudioRecordings,
-    saveAudioRecording,
-    type AudioRecording,
-  } from "../lib/db"
+  import { onMount, createEventDispatcher } from "svelte"
+  import type { AudioRecording } from "../lib/db"
 
+  const dispatch = createEventDispatcher()
   export let recordings: Array<AudioRecording> = []
 
   let stop: HTMLButtonElement
@@ -90,24 +86,23 @@
   }
 
   onMount(() => {
-    recordings = [...getAllAudioRecordings(), ...recordings]
+    //
   })
 
   function deleteRecording(recording: AudioRecording): any {
-    const index = recordings.indexOf(recording)
-    recordings.splice(index, 1)
-    recordings = recordings
-    deleteAudioRecording(recording)
+    dispatch("delete", { id: recording.id })
   }
 
   function playRecording(recording: AudioRecording) {
-    audioPlayer.src = URL.createObjectURL(recording.blob)
+    if (!recording.url) {
+      recording.url = URL.createObjectURL(recording.blob)
+    }
+    audioPlayer.src = recording.url
     audioPlayer.play()
   }
 
   async function saveRecording(recording: AudioRecording) {
-    saveAudioRecording(recording)
-    recordings = [recording, ...recordings]
+    dispatch("save", recording)
   }
 
   const appStartTime = Date.now()

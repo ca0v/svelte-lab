@@ -1,7 +1,8 @@
 type AudioRecording = {
-    id: string;
-    title: string
-    blob: Blob
+    id: string
+    title?: string
+    url?: string
+    blob?: Blob
 }
 
 type AudioRecordings = Record<string, { id: string, title: string, type: string }>;
