@@ -82,7 +82,6 @@
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
     if (e.altKey) return
-    if (e.ctrlKey) return
     if (e.metaKey) return
 
     function handled() {
@@ -101,10 +100,26 @@
 
     // get the image that is currently focused
     const image = document.activeElement as SVGImageElement
+    const target = image.parentElement.dataset.target
     // get the svgImage from this
-    const svgImage =
-      image &&
-      svgImages.find((i) => i.target === image.parentElement.dataset.target)
+    const svgImage = image && svgImages.find((i) => i.target === target)
+
+    if (e.ctrlKey) {
+      switch (e.key) {
+        case "d":
+          // create a duplicate of the svgImage
+          const sourceTransformIndex = transform.data.findIndex(
+            (d) => d.target === target
+          )
+          if (sourceTransformIndex >= 0) {
+            const clone = transform.data[sourceTransformIndex]
+            transform.data.splice(sourceTransformIndex, 0, clone)
+            transform.data = transform.data
+          }
+          return handled()
+      }
+      return
+    }
 
     if (svgImage) {
       let rotation = 0
