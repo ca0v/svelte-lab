@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import { photoUrl as PHOTOS } from "./lib/globals"
-  import HexagonSpiral from "./components/CollageView.svelte"
+  import CollageView from "./components/CollageView.svelte"
   import DateRange from "./components/DateRange.svelte"
   import {
     transforms,
@@ -12,7 +12,7 @@
 
   import AudioRecorder from "./components/AudioRecorder.svelte"
   import Notes from "./components/Notes.svelte"
-  import ClipPaths from "./components/SvgPaths.svelte"
+  import SvgPaths from "./components/SvgPaths.svelte"
 
   let photos: Array<Photo> = []
 
@@ -67,7 +67,7 @@
 </script>
 
 <main>
-  <ClipPaths />
+  <SvgPaths />
 
   <h1>Photo Playground</h1>
 
@@ -96,7 +96,7 @@
       <p>Notes</p>
       <Notes />
     </div>
-    <HexagonSpiral
+    <CollageView
       id={collageName}
       transforms={activeCollage}
       duration={0.01}
@@ -109,7 +109,7 @@
         .map((p) => (p.id ? `${PHOTOS}/get?id=${p.id}` : ""))}
     >
       <DateRange bind:date_filter_from bind:date_filter_to />
-    </HexagonSpiral>
+    </CollageView>
   </div>
 
   {#if true}
@@ -118,7 +118,7 @@
       {#each collages.filter((c) => c.data.length) as collage, i}
         <div class="border">
           <h3 class="fit">{collage.title}</h3>
-          <HexagonSpiral
+          <CollageView
             id={`view_${collage.id}`}
             duration={[0.2, 0.3, 0.4][i] || 1}
             readonly={true}
