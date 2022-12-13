@@ -12,15 +12,15 @@
   import SvgImage from "./SvgImage.svelte"
   import {
     getEffectiveTransform,
-    type Hexagon,
-    type HexagonData,
-  } from "../data/hexagons"
+    type CollageState,
+    type CollageCellState,
+  } from "../data/collageTemplates"
 
   export let id: string
   export let sources: Array<string> = []
   export let duration = 0.1
   export let readonly = false
-  export let transforms: Hexagon
+  export let transforms: CollageState
   export let transformDelay = 0 // to be moved to configuration
 
   let play = readonly
@@ -242,7 +242,7 @@
     injectCss(`hexagon_spiral_transitions_${id}`, createCssTransforms)
 
     // HERIIAM: need to wait for svgImages to be set
-    const savedState: Hexagon = getLocalStorage(id)
+    const savedState: CollageState = getLocalStorage(id)
     if (savedState) {
       savedState.data.forEach((image, i) => {
         const transform = transforms.data[i]
@@ -265,16 +265,7 @@
     setTimeout(() => (play = false), transformDelay * 1000)
   }
 
-  function queryImage(index: number | string): SVGImageElement {
-    if (typeof index === "string") {
-      return document.querySelector(
-        `.${scope} .i[data-target="${index}"] > image`
-      )
-    }
-    return document.querySelector(`.${scope} .i${index} > image`)
-  }
-
-  function copy(from: HexagonData, into: HexagonData) {
+  function copy(from: CollageCellState, into: CollageCellState) {
     into.id = from.id
     into.x = from.x
     into.y = from.y
@@ -283,7 +274,7 @@
     transforms = transforms
   }
 
-  function swap(i1: HexagonData, i2: HexagonData) {
+  function swap(i1: CollageCellState, i2: CollageCellState) {
     const { id, x, y, width, height } = i1
 
     i1.id = i2.id
@@ -302,7 +293,7 @@
     transforms = transforms
   }
 
-  function swapHandler(e) {
+  function swapHandler(e: CustomEvent) {
     const { mode, target1, target2 } = e.detail
     const t1 = transforms.data.find((i) => i.target === target1)
     if (!t1) {
@@ -325,7 +316,7 @@
     }
   }
 
-  function createSettings(): Hexagon {
+  function createSettings(): CollageState {
     return {
       id,
       title: transforms.title,

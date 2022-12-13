@@ -56,7 +56,7 @@
         dispatch("keydown", { key: e.key, source })
       }}
     >
-      <img src={source} />
+      <img src={source} alt="" />
     </button>
   {/each}
 </container>

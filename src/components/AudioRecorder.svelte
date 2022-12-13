@@ -9,8 +9,6 @@
 
   let stop: HTMLButtonElement
   let record: HTMLButtonElement
-  let soundClips: HTMLElement
-  let mainSection: HTMLElement
   let mediaRecorder: MediaRecorder
 
   let audioPlayer: HTMLAudioElement
@@ -119,7 +117,7 @@
 
 <div>
   <div class="wrapper">
-    <section bind:this={mainSection} class="main-controls">
+    <section class="main-controls">
       <div id="buttons">
         <button
           bind:this={record}
@@ -135,9 +133,9 @@
       </div>
     </section>
 
-    <section bind:this={soundClips} class="sound-clips">
+    <section class="sound-clips">
       <audio bind:this={audioPlayer} />
-      {#each recordings as recording, i}
+      {#each recordings as recording}
         <article>
           <input type="text" bind:value={recording.title} />
           <button class="play" on:click={() => playRecording(recording)} />

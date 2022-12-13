@@ -10,7 +10,7 @@ export type Photo = {
     height: number
 }
 
-export type HexagonData = {
+export type CollageCellState = {
     id: string
     target: string
     x: number
@@ -25,10 +25,10 @@ export type HexagonData = {
     }
 }
 
-export type Hexagon = {
+export type CollageState = {
     id: string
     title: string
-    data: Array<HexagonData>
+    data: Array<CollageCellState>
 }
 
 function range(size: number) {
@@ -87,12 +87,12 @@ const transforms: Record<string, Array<{
 
 }
 
-const collages: Array<Hexagon> =
+const collages: Array<CollageState> =
     [
         {
             id: "7x5-3",
             title: "7x5-3",
-            data: transforms["7x5-3"].map((t, i) => {
+            data: transforms["7x5-3"].map((t) => {
                 return {
                     target: `i${t.i}`,
                     id: `AIk5ERFrV7YxvPBqVg3prtWxO1iGmqxFd0or1PI65r6t69FZGQWHC2Z0so4NT0XQhaOJnOKu3ihhEtEMR4wRt_Frw0ookSwA9g`,
@@ -108,7 +108,7 @@ const collages: Array<Hexagon> =
         {
             id: "square-16",
             title: "square-16",
-            data: transforms["square-16"].map((t, i) => {
+            data: transforms["square-16"].map((t) => {
                 return {
                     target: `i${t.i}`,
                     id: `AIk5ERHkVze4l_coT8puVELK7N6oo1IL2Ejp3VSbhZfpYHgMS-AJcs8MFO4w1b1zhu-vQnY_JbVRMQXdmDmJHP0qKcsrqKagMw`,
@@ -124,7 +124,7 @@ const collages: Array<Hexagon> =
         {
             id: "spiral-19",
             title: "spiral-19",
-            data: transforms["spiral-19"].map((t, i) => {
+            data: transforms["spiral-19"].map((t) => {
                 return {
                     target: `i${t.i}`,
                     id: `AIk5ERHkVze4l_coT8puVELK7N6oo1IL2Ejp3VSbhZfpYHgMS-AJcs8MFO4w1b1zhu-vQnY_JbVRMQXdmDmJHP0qKcsrqKagMw`,
@@ -140,7 +140,7 @@ const collages: Array<Hexagon> =
         {
             id: "flower-6",
             title: "flower-6",
-            data: transforms["flower-6"].map((t, i) => {
+            data: transforms["flower-6"].map((t) => {
                 return {
                     target: `i${t.i}`,
                     id: `AIk5ERHkVze4l_coT8puVELK7N6oo1IL2Ejp3VSbhZfpYHgMS-AJcs8MFO4w1b1zhu-vQnY_JbVRMQXdmDmJHP0qKcsrqKagMw`,
@@ -1991,11 +1991,6 @@ const collages: Array<Hexagon> =
 collages.push({ id: "next", title: "next", data: [] })
 
 
-function injectClipPath(id: string, body: string) {
-    svgClipPaths.update(p => [...p, { id, body }])
-    return id;
-}
-
 function injectRect(id: string, x: number, y: number, width: number, height: number) {
     const body = `<rect x="${x}" y="${y}" width="${width}" height="${height}"/>`
     svgClipPaths.update(p => [...p, { id, body }]);
@@ -2011,7 +2006,7 @@ function injectPath(id: string, d: string) {
 const dummy = document.createElement("div")
 document.body.appendChild(dummy)
 
-function getEffectiveTransform(data: HexagonData) {
+function getEffectiveTransform(data: CollageCellState) {
     dummy.style.transform = data.transform
     const { transform } = getComputedStyle(dummy)
     return transform === "none" ? "" : transform

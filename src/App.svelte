@@ -1,18 +1,18 @@
 <script lang="ts">
   import { onMount } from "svelte"
   import { photoUrl as PHOTOS } from "./lib/globals"
-  import HexagonSpiral from "./components/HexagonSpiral.svelte"
+  import HexagonSpiral from "./components/CollageView.svelte"
   import DateRange from "./components/DateRange.svelte"
   import {
     transforms,
     collages,
     type Photo,
-    type Hexagon,
-  } from "./data/hexagons"
+    type CollageState,
+  } from "./data/collageTemplates"
 
   import AudioRecorder from "./components/AudioRecorder.svelte"
   import Notes from "./components/Notes.svelte"
-  import ClipPaths from "./components/ClipPaths.svelte"
+  import ClipPaths from "./components/SvgPaths.svelte"
 
   let photos: Array<Photo> = []
 
@@ -31,7 +31,7 @@
   let transformName = ""
   let date_filter_from = ""
   let date_filter_to = ""
-  let activeCollage: Hexagon | undefined
+  let activeCollage: CollageState | undefined
 
   $: {
     date_filter_from && localStorage.setItem("date_filter", date_filter_from)
