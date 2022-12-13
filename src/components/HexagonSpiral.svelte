@@ -203,10 +203,10 @@
 
       if (svgImage && image && resize) {
         if (e.shiftKey) {
-          svgImage.style = `${svgImage.style} translate(${x}px, ${y}px)`
-          svgImage.style = `scale(${1 + width / w0},${1 + height / h0}) ${
-            svgImage.style
-          }`
+          const currentStyle = svgImage.getEffectiveTransform()
+          svgImage.style = `scale(${1 + width / w0},${
+            1 + height / h0
+          }) ${currentStyle} translate(${x}px, ${y}px)`
         } else {
           image.setAttribute("x", x0 + x + "px")
           image.setAttribute("y", y0 + y + "px")
