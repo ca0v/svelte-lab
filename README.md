@@ -29,10 +29,13 @@ It can also accept an initial state.
 
 * From the picker, [A..Z] will copy into that cell
 
+## Technical Notes
+
+The 'swagger-typescript-api' NPM command will generate the service proxies from swagger docs and should be run each time the services API changes
+
 ## What is next?
 
 * FTR: allow audio to be recorded and saved to local storage or service
 * DGN: cell transforms belong in configuration
 * DGN: drag-drop should be handled by CollageView not SvgImage
 * FTR: Can crop and round corners using clip-path: inset() on the svg image (<https://developer.mozilla.org/en-US/docs/Web/CSS/inset>)
-* TDO: add ability to save and update audio track titles

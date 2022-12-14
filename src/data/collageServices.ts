@@ -20,8 +20,13 @@ export async function getAllCollages() {
     return (await api.collage.listList()).data;
 }
 
-export async function saveCollage(collage: CollageData & { note?: string }) {
-    return (await api.collage.saveCreate(collage)).data;
+export async function saveCollage(collage: CollageData) {
+    const { id, title, note, data } = collage;
+    const request: Collage = {
+        id,
+        data: JSON.stringify({ title, note, ...collage.data }),
+    }
+    return (await api.collage.saveCreate(request, { id })).data;
 }
 
 export async function getAudioRecording(id: string) {
@@ -30,6 +35,10 @@ export async function getAudioRecording(id: string) {
 
 export async function getAllAudioRecordings() {
     return (await api.audio.listList()).data;
+}
+
+export async function updateRecording(id: string, changes: Partial<AudioRecording>) {
+    return (await api.audio.updateCreate({ ...changes, id })).data;
 }
 
 export async function saveRecording(recording: AudioRecording) {

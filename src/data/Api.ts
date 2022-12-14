@@ -163,8 +163,8 @@ export class HttpClient<SecurityDataType = unknown> {
           property instanceof Blob
             ? property
             : typeof property === "object" && property !== null
-              ? JSON.stringify(property)
-              : `${property}`,
+            ? JSON.stringify(property)
+            : `${property}`,
         );
         return formData;
       }, new FormData()),
@@ -244,18 +244,18 @@ export class HttpClient<SecurityDataType = unknown> {
       const data = !responseFormat
         ? r
         : await response[responseFormat]()
-          .then((data) => {
-            if (r.ok) {
-              r.data = data;
-            } else {
-              r.error = data;
-            }
-            return r;
-          })
-          .catch((e) => {
-            r.error = e;
-            return r;
-          });
+            .then((data) => {
+              if (r.ok) {
+                r.data = data;
+              } else {
+                r.error = data;
+              }
+              return r;
+            })
+            .catch((e) => {
+              r.error = e;
+              return r;
+            });
 
       if (cancelToken) {
         this.abortControllers.delete(cancelToken);
@@ -353,6 +353,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         query: query,
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @tags Audio
+     * @name UpdateCreate
+     * @request POST:/Audio/update
+     */
+    updateCreate: (data: Recording, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/Audio/update`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
   collage = {
     /**
@@ -363,7 +379,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/Collage/save
      */
     saveCreate: (
-      data: CollageData,
+      data: Collage,
       query?: {
         id?: string;
       },

@@ -14,6 +14,7 @@
     getAllAudioRecordings,
     saveCollage,
     saveRecording,
+    updateRecording,
   } from "./data/collageServices"
   import { setLocalStorage } from "./lib/globals"
   import type { Collage, CollageData, Photo, Recording } from "./data/Api"
@@ -93,6 +94,12 @@
       .toString(36)
       .substring(2, 16 + 2)
   }
+
+  async function trackTitleChangeHandler(e: CustomEvent<any>) {
+    const recording = e.detail
+    console.log("title change", recording)
+    updateRecording(recording.id, { title: recording.title })
+  }
 </script>
 
 <main>
@@ -145,11 +152,7 @@
       <p>Audio Recordings</p>
       <AudioRecorder
         {recordings}
-        on:track-title-change={async (e) => {
-          const recording = e.detail
-          console.log("title change", recording)
-          alert("title change: " + recording.title)
-        }}
+        on:track-title-change={trackTitleChangeHandler}
         on:delete={async (e) => {
           const recording = e.detail
           await deleteRecording(recording)
