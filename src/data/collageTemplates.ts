@@ -1,5 +1,6 @@
 import { svgClipPaths } from "../lib/globals"
 import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
+import type { CollageCellState, CollageState } from "./Api"
 import { getAllCollages, saveCollage } from "./collageServices"
 
 export type Photo = {
@@ -9,28 +10,6 @@ export type Photo = {
     created: string
     width: number
     height: number
-}
-
-export type CollageCellState = {
-    id: string
-    target: string
-    x: number
-    y: number
-    width: number
-    height: number
-    transform: string
-    clipPath: string
-    background?: {
-        fill?: string;
-        stroke?: string;
-    }
-}
-
-export type CollageState = {
-    id: string
-    title?: string
-    note?: string
-    data: Array<CollageCellState>
 }
 
 function range(size: number) {

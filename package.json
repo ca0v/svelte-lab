@@ -5,11 +5,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5173 --strictPort --cors",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist",
     "start-image-server": "dotnet run --project ~/code/tmp/dotnet-lab/ImageRipper/ImageRipper.csproj",
+    "generate-api": "npx swagger-typescript-api -p http://localhost:5000/swagger/v1/swagger.json -o ./src/data",
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
@@ -23,6 +24,7 @@
     "vite": "^3.2.3"
   },
   "dependencies": {
-    "gh-pages": "^4.0.0"
+    "gh-pages": "^4.0.0",
+    "swagger-typescript-api": "^12.0.2"
   }
 }

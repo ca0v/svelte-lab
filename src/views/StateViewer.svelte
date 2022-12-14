@@ -44,15 +44,26 @@
       })
     })
 
-    let scale = Math.max(maxx - minx, maxy - miny)
+    const scale = Math.max(maxx - minx, maxy - miny)
 
     return stateInfo.geometry.rings.map((ring) => {
-      return ring.map((point) => {
+      const points = ring.map((point) => {
         let [x, y] = point
         x = (x - minx) / scale
         y = 1 - (y - miny) / scale
         return [Math.round(resolution * x), Math.round(resolution * y)]
       })
+
+      // if this state is wider than it is tall, we need to center it vertically
+      if (maxx - minx > maxy - miny) {
+        const height = 0.5 * resolution * (1 - (maxy - miny) / scale)
+        points.forEach((p) => (p[1] -= height))
+      } else {
+        const width = 0.5 * resolution * (1 - (maxx - minx) / scale)
+        points.forEach((p) => (p[0] += width))
+      }
+
+      return points
     })
   }
 
@@ -63,6 +74,14 @@
       })
       .join("")
   }
+
+  function renderOutline(
+    e: MouseEvent & { currentTarget: EventTarget & HTMLDivElement },
+    STATE_ABBR: string
+  ) {
+    const stateDiv = e.currentTarget
+    // want to slowly draw the outline of the state around this state
+  }
 </script>
 
 <div>State Viewer</div>
@@ -70,7 +89,17 @@
 <svg viewBox={`0 0 ${resolution} ${resolution}`} width="0" height="0">
   <defs>
     {#each data.features as state}
-      <clipPath id={state.attributes.STATE_ABBR}>
+      {#each normalizeStateData(state.attributes.STATE_ABBR) as polygon}
+        <svg id={`path_${state.attributes.STATE_ABBR}`}>
+          <path
+            stroke="#666"
+            stroke-width="1em"
+            fill="#333"
+            d={`${asPath(removeColinearPoints(polygon))} Z`}
+          /></svg
+        >
+      {/each}
+      <clipPath id={`clip_${state.attributes.STATE_ABBR}`}>
         {#each normalizeStateData(state.attributes.STATE_ABBR) as polygon}
           <path d={`${asPath(removeColinearPoints(polygon))} Z`} />
         {/each}
@@ -79,30 +108,71 @@
   </defs>
 </svg>
 
-<div class="grid-2">
-  {#each data.features as state}
-    <div
-      class="square"
-      style="clip-path: url(#{state.attributes.STATE_ABBR})"
-    />
-  {/each}
+<div class="body">
+  <div class="grid-2">
+    {#each data.features as state}
+      <div class="background">
+        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <div
+          on:mouseover={(e) => {
+            renderOutline(e, state.attributes.STATE_ABBR)
+          }}
+          class="square"
+          style="clip-path: url(#clip_{state.attributes.STATE_ABBR})"
+        />
+      </div>
+      <svg viewBox="1 1 1000 1000">
+        <use xlink:href={`#path_${state.attributes.STATE_ABBR}`} /></svg
+      >
+    {/each}
+  </div>
 </div>
 
 <style>
+  .body {
+    width: 95vw;
+    height: 80vmin;
+    padding: 1vmin;
+    border: 1px solid green;
+    overflow: visible;
+  }
+
   .grid-2 {
     display: grid;
-    grid-template-columns: repeat(auto-fit, max(var(--resolution), 10vw));
-    grid-gap: min(1em, 1vmin);
-    width: 100vw;
-    overflow: hidden;
+    /* confine to the parent height */
+    height: 100%;
+    overflow: auto;
+    grid-template-columns: repeat(auto-fit, var(--resolution));
+    grid-gap: clamp(1em, 2vmin, 5em);
+    place-items: center;
   }
 
   .square {
     padding: 0;
-    margin: 0;
     width: var(--resolution);
     height: var(--resolution);
-    background-color: #393;
+    background-color: tomato;
+    opacity: 0.5;
+    transition: opacity 0.2s, transform 0.2s, outline 0.2s;
+    background-image: url(/svelte-lab/src/assets/default.jpg);
+    background-size: contain;
+  }
+
+  .background {
+    box-sizing: border-box;
     text-align: center;
+    background-image: url(/svelte-lab/src/assets/default.jpg);
+    background-size: contain;
+    background-blend-mode: color-burn;
+    background-color: #666;
+  }
+
+  .background:hover {
+    background-color: #333;
+  }
+  .background:hover .square {
+    opacity: 1;
+    transform: scale(1.5);
+    z-index: 1;
   }
 </style>

@@ -2,12 +2,7 @@
   import { onMount } from "svelte"
   import CollageView from "./components/CollageView.svelte"
   import DateRange from "./components/DateRange.svelte"
-  import {
-    transforms,
-    collages as stories,
-    type Photo,
-    type CollageState,
-  } from "./data/collageTemplates"
+  import { transforms, collages as stories } from "./data/collageTemplates"
 
   import AudioRecorder from "./components/AudioRecorder.svelte"
   import Notes from "./components/Notes.svelte"
@@ -21,10 +16,10 @@
     saveRecording,
   } from "./data/collageServices"
   import { setLocalStorage } from "./lib/globals"
-  import type { AudioRecording } from "./lib/db"
+  import type { CollageState, PhotoInfo, Recording } from "./data/Api"
 
-  let recordings: Array<AudioRecording> = []
-  let photos: Array<Photo> = []
+  let recordings: Array<Recording> = []
+  let photos: Array<PhotoInfo> = []
 
   let collages = [...stories]
   let collageName = ""

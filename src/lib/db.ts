@@ -1,5 +1,5 @@
 type AudioRecording = {
-    id: string
+    id?: string
     title?: string
     url?: string
     blob?: Blob

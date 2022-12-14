@@ -7,12 +7,9 @@
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
-  import {
-    getEffectiveTransform,
-    type CollageState,
-    type CollageCellState,
-  } from "../data/collageTemplates"
+  import { getEffectiveTransform } from "../data/collageTemplates"
   import { asPhotoServiceUrl } from "../data/collageServices"
+  import type { CollageCellState, CollageState } from "../data/Api"
 
   export let id: string
   export let sources: Array<string> = []
