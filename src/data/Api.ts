@@ -9,6 +9,11 @@
  * ---------------------------------------------------------------
  */
 
+export interface Collage {
+  id?: string | null;
+  data?: string | null;
+}
+
 export interface CollageCellBackground {
   fill?: string | null;
   stroke?: string | null;
@@ -381,7 +386,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/Collage/list
      */
     listList: (params: RequestParams = {}) =>
-      this.request<CollageState[], any>({
+      this.request<Collage[], any>({
         path: `/Collage/list`,
         method: "GET",
         format: "json",

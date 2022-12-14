@@ -17,7 +17,8 @@ export function asPhotoServiceUrl(photo: Photo | CollageCellState) {
 }
 
 export async function getAllCollages() {
-    return (await api.collage.listList()).data;
+    const response = (await api.collage.listList()).data;
+    return response.map(r => JSON.parse(r.data) as CollageState);
 }
 
 export async function saveCollage(collage: CollageState & { note?: string }) {
