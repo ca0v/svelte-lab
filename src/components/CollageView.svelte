@@ -9,13 +9,13 @@
   import SvgImage from "./SvgImage.svelte"
   import { getEffectiveTransform } from "../data/collageTemplates"
   import { asPhotoServiceUrl } from "../data/collageServices"
-  import type { CollageCellState, CollageState } from "../data/Api"
+  import type { CollageCellState, CollageData } from "../data/Api"
 
   export let id: string
   export let sources: Array<string> = []
   export let duration = 0.1
   export let readonly = false
-  export let transforms: CollageState
+  export let transforms: CollageData
   export let transformDelay = 0 // to be moved to configuration
 
   let dispatch = createEventDispatcher()
@@ -237,7 +237,7 @@
     injectCss(`hexagon_spiral_init_${id}`, createInitialCss)
     injectCss(`hexagon_spiral_transitions_${id}`, createCssTransforms)
 
-    const savedState: CollageState = getLocalStorage(id)
+    const savedState: CollageData = getLocalStorage(id)
     if (savedState) {
       savedState.data.forEach((image, i) => {
         const transform = transforms.data[i]

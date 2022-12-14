@@ -16,17 +16,17 @@
     saveRecording,
   } from "./data/collageServices"
   import { setLocalStorage } from "./lib/globals"
-  import type { CollageState, PhotoInfo, Recording } from "./data/Api"
+  import type { Collage, CollageData, Photo, Recording } from "./data/Api"
 
   let recordings: Array<Recording> = []
-  let photos: Array<PhotoInfo> = []
+  let photos: Array<Photo> = []
 
   let collages = [...stories]
   let collageName = ""
   let transformName = ""
   let date_filter_from = ""
   let date_filter_to = ""
-  let activeCollage: CollageState | undefined
+  let activeCollage: CollageData | undefined
   let errors: Array<string> = []
 
   $: {

@@ -35,21 +35,21 @@ export interface CollageCellState {
   background?: CollageCellBackground;
 }
 
-export interface CollageState {
+export interface CollageData {
   id?: string | null;
   title?: string | null;
-  data?: CollageCellState[] | null;
   note?: string | null;
+  data?: CollageCellState[] | null;
 }
 
-export interface PhotoInfo {
+export interface Photo {
   id?: string | null;
   filename?: string | null;
   created?: string | null;
-  /** @format int32 */
-  width?: number;
-  /** @format int32 */
-  height?: number;
+  /** @format int64 */
+  width?: number | null;
+  /** @format int64 */
+  height?: number | null;
 }
 
 export interface Recording {
@@ -163,8 +163,8 @@ export class HttpClient<SecurityDataType = unknown> {
           property instanceof Blob
             ? property
             : typeof property === "object" && property !== null
-            ? JSON.stringify(property)
-            : `${property}`,
+              ? JSON.stringify(property)
+              : `${property}`,
         );
         return formData;
       }, new FormData()),
@@ -244,18 +244,18 @@ export class HttpClient<SecurityDataType = unknown> {
       const data = !responseFormat
         ? r
         : await response[responseFormat]()
-            .then((data) => {
-              if (r.ok) {
-                r.data = data;
-              } else {
-                r.error = data;
-              }
-              return r;
-            })
-            .catch((e) => {
-              r.error = e;
-              return r;
-            });
+          .then((data) => {
+            if (r.ok) {
+              r.data = data;
+            } else {
+              r.error = data;
+            }
+            return r;
+          })
+          .catch((e) => {
+            r.error = e;
+            return r;
+          });
 
       if (cancelToken) {
         this.abortControllers.delete(cancelToken);
@@ -363,7 +363,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/Collage/save
      */
     saveCreate: (
-      data: CollageState,
+      data: CollageData,
       query?: {
         id?: string;
       },
@@ -386,7 +386,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/Collage/list
      */
     listList: (params: RequestParams = {}) =>
-      this.request<Collage[], any>({
+      this.request<CollageData[], any>({
         path: `/Collage/list`,
         method: "GET",
         format: "json",
@@ -402,7 +402,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/Photo/list
      */
     listList: (params: RequestParams = {}) =>
-      this.request<PhotoInfo[], any>({
+      this.request<Photo[], any>({
         path: `/Photo/list`,
         method: "GET",
         format: "json",

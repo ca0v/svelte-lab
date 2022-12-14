@@ -1,6 +1,6 @@
 import { svgClipPaths } from "../lib/globals"
 import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
-import type { CollageCellState, CollageState } from "./Api"
+import type { CollageCellState, CollageData } from "./Api"
 import { getAllCollages, saveCollage } from "./collageServices"
 
 export type Photo = {
@@ -68,7 +68,7 @@ const transforms: Record<string, Array<{
 
 }
 
-const templates: Array<CollageState> = [{
+const templates: Array<CollageData> = [{
     id: "7x5-3",
     title: "7x5-3",
     data: transforms["7x5-3"].map((t) => {
@@ -134,7 +134,7 @@ const templates: Array<CollageState> = [{
 },
 ]
 
-const collages: Array<CollageState> = []
+const collages: Array<CollageData> = []
 
 function injectRect(id: string, x: number, y: number, width: number, height: number) {
     const body = `<rect x="${x}" y="${y}" width="${width}" height="${height}"/>`

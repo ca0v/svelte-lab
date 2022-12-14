@@ -4,7 +4,7 @@ import type { Photo } from "./collageTemplates"
 
 const PHOTOS = `${getPhotoUrl()}/photo`
 
-import { Api, type CollageCellState, type CollageState } from "./Api"
+import { Api, type CollageCellState, type Collage, type CollageData } from "./Api"
 const api = new Api({ baseUrl: getPhotoUrl() });
 
 export async function fetchPhotoList() {
@@ -17,11 +17,10 @@ export function asPhotoServiceUrl(photo: Photo | CollageCellState) {
 }
 
 export async function getAllCollages() {
-    const response = (await api.collage.listList()).data;
-    return response.map(r => JSON.parse(r.data) as CollageState);
+    return (await api.collage.listList()).data;
 }
 
-export async function saveCollage(collage: CollageState & { note?: string }) {
+export async function saveCollage(collage: CollageData & { note?: string }) {
     return (await api.collage.saveCreate(collage)).data;
 }
 
