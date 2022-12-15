@@ -4,7 +4,7 @@ import type { Photo } from "./collageTemplates"
 
 const PHOTOS = `${getPhotoUrl()}/photo`
 
-import { Api, type CollageCellState, type Collage, type CollageData } from "./Api"
+import { Api, type CollageCellState, type CollageData } from "./Api"
 const api = new Api({ baseUrl: getPhotoUrl() });
 
 export async function fetchPhotoList() {
@@ -21,14 +21,7 @@ export async function getAllCollages() {
 }
 
 export async function saveCollage(collage: CollageData) {
-    const { id, title, note } = collage;
-    const request: Collage = {
-        id,
-        title,
-        note,
-        data: JSON.stringify(collage.data)
-    }
-    return (await api.collage.saveCreate(request, { id })).data;
+    return (await api.collage.saveCreate(collage, { id: collage.id })).data;
 }
 
 export async function getAudioRecording(id: string) {

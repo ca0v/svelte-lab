@@ -17,7 +17,7 @@
     updateRecording,
   } from "./data/collageServices"
   import { setLocalStorage } from "./lib/globals"
-  import type { Collage, CollageData, Photo, Recording } from "./data/Api"
+  import type { CollageData, Photo, Recording } from "./data/Api"
 
   let recordings: Array<Recording> = []
   let photos: Array<Photo> = []

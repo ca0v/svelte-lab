@@ -9,13 +9,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface Collage {
-  id?: string | null;
-  title?: string | null;
-  note?: string | null;
-  data?: string | null;
-}
-
 export interface CollageCellBackground {
   fill?: string | null;
   stroke?: string | null;
@@ -381,7 +374,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/Collage/save
      */
     saveCreate: (
-      data: Collage,
+      data: CollageData,
       query?: {
         id?: string;
       },
