@@ -21,10 +21,12 @@ export async function getAllCollages() {
 }
 
 export async function saveCollage(collage: CollageData) {
-    const { id, title, note, data } = collage;
+    const { id, title, note } = collage;
     const request: Collage = {
         id,
-        data: JSON.stringify({ title, note, ...collage.data }),
+        title,
+        note,
+        data: JSON.stringify(collage.data)
     }
     return (await api.collage.saveCreate(request, { id })).data;
 }

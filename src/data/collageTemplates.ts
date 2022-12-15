@@ -164,7 +164,7 @@ await Promise.all(collages.filter(c => !stories.find(s => s.id === c.id)).map(as
 }))
 
 
-const both = [...templates.sort((a, b) => a.id.localeCompare(b.id)), ...stories.sort((a, b) => a.id.localeCompare(b.id))]
+const both = [...templates.sort((a, b) => a.title.localeCompare(b.title)), ...stories.sort((a, b) => a.title?.localeCompare(b.title))]
 
 export { transforms, both as collages, getEffectiveTransform }
 

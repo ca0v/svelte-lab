@@ -11,6 +11,8 @@
 
 export interface Collage {
   id?: string | null;
+  title?: string | null;
+  note?: string | null;
   data?: string | null;
 }
 

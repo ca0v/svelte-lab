@@ -30,6 +30,15 @@
   let activeCollage: CollageData | undefined
   let errors: Array<string> = []
 
+  let states = {
+    titleEditor: {
+      edit: false,
+    },
+    audioRecorder: {
+      visible: false,
+    },
+  }
+
   $: {
     date_filter_from && localStorage.setItem("date_filter", date_filter_from)
   }
@@ -117,12 +126,16 @@
     <h2>For Editing</h2>
     <div class="two-column">
       <p><u>C</u>ollage Name</p>
-      <div>
-        <select bind:value={collageName} data-shortcut="C">
-          {#each collages as collage}
-            <option value={collage.id}>{collage.title} ({collage.id})</option>
-          {/each}
-        </select>
+      <div class="collage-name-component">
+        {#if activeCollage && states.titleEditor.edit}
+          <input type="text" bind:value={activeCollage.title} />
+        {:else}
+          <select bind:value={collageName} data-shortcut="C">
+            {#each collages as collage}
+              <option value={collage.id}>{collage.title} {collage.id}</option>
+            {/each}
+          </select>
+        {/if}
         <button
           class="add"
           on:click={() => {
@@ -135,13 +148,24 @@
               ...collages,
             ]
             collageName = collages[0].id
+            states.titleEditor.edit = true
           }}>Create</button
         >
+
+        {#if states.titleEditor.edit}
+          <button
+            on:click={() => {
+              states.titleEditor.edit = !states.titleEditor.edit
+              saveCollage(activeCollage)
+            }}>Save</button
+          >
+        {:else}
+          <button
+            on:click={() =>
+              (states.titleEditor.edit = !states.titleEditor.edit)}>Edit</button
+          >
+        {/if}
       </div>
-      {#if activeCollage}
-        <p>Title</p>
-        <input type="text" bind:value={activeCollage.title} />
-      {/if}
       <p><u>T</u>ransform</p>
       <select data-shortcut="T" bind:value={transformName}>
         {#each Object.entries(transforms) as [name]}<option value={name}
@@ -149,21 +173,30 @@
           >
         {/each}
       </select>
-      <p>Audio Recordings</p>
-      <AudioRecorder
-        {recordings}
-        on:track-title-change={trackTitleChangeHandler}
-        on:delete={async (e) => {
-          const recording = e.detail
-          await deleteRecording(recording)
-          recordings = recordings.filter((r) => r.id !== recording.id)
-        }}
-        on:save={async (e) => {
-          const recording = e.detail
-          await saveRecording(recording)
-          recordings = [recording, ...recordings]
-        }}
-      />
+      {#if states.audioRecorder.visible}
+        <p>Audio Recordings</p>
+        <AudioRecorder
+          {recordings}
+          on:track-title-change={trackTitleChangeHandler}
+          on:delete={async (e) => {
+            const recording = e.detail
+            await deleteRecording(recording)
+            recordings = recordings.filter((r) => r.id !== recording.id)
+          }}
+          on:save={async (e) => {
+            const recording = e.detail
+            await saveRecording(recording)
+            recordings = [recording, ...recordings]
+          }}
+        />
+      {:else}
+        <p />
+        <button
+          on:click={() =>
+            (states.audioRecorder.visible = !states.audioRecorder.visible)}
+          >Audio</button
+        >
+      {/if}
       {#if activeCollage}
         <p>Notes</p>
         <Notes bind:note={activeCollage.note} />
@@ -190,29 +223,26 @@
     </CollageView>
   </div>
 
-  {#if true}
-    <h2>Preview</h2>
-    <div class="frame three-by">
-      {#each stories.filter((c) => c.data.length) as collage, i}
-        <div class="border">
-          <h3 class="fit">{collage.title}</h3>
-          <CollageView
-            id={`view_${collage.id}`}
-            duration={[0.2, 0.3, 0.4][i] || 1}
-            readonly={true}
-            transforms={collage}
-          />
-        </div>
-      {/each}
-    </div>
-  {/if}
+  <h2>Preview</h2>
+  <div class="frame three-by">
+    {#each stories.filter((c) => c.data?.length) as collage, i}
+      <div class="border">
+        <h3 class="fit">{collage.title}</h3>
+        <CollageView
+          id={`view_${collage.id}`}
+          duration={[0.2, 0.3, 0.4][i] || 1}
+          readonly={true}
+          transforms={collage}
+        />
+      </div>
+    {/each}
+  </div>
 </main>
 
 <style>
   .two-column {
     display: grid;
     grid-template-columns: 1fr 7fr;
-    grid-template-rows: repeat(3, 2rem);
     grid-gap: 1rem;
     width: clamp(10rem, 90vw, 80rem);
     margin: 0 auto;
@@ -274,5 +304,15 @@
     grid-template-columns: 1fr;
     cursor: pointer;
     color: red;
+  }
+
+  .collage-name-component {
+    display: grid;
+    grid-template-columns: 1fr 5rem 5rem;
+    grid-gap: 1rem;
+  }
+
+  .collage-name-component > input {
+    color: green;
   }
 </style>
