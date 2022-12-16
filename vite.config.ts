@@ -5,4 +5,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 export default defineConfig({
   plugins: [svelte()],
   base: '/svelte-lab/',
+  build: {
+    target: 'esnext',
+  }
 })
