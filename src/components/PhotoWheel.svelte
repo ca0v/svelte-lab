@@ -14,6 +14,36 @@
       first.focus()
     }
   }
+
+  function keyDownHandler(
+    e: KeyboardEvent & { currentTarget: EventTarget & HTMLButtonElement },
+    source: string
+  ) {
+    if (e.shiftKey && e.key !== "Shift") {
+      dispatch("goto", { key: e.key })
+      return
+    }
+    switch (e.key) {
+      case ",":
+      case "<": {
+        const target = e.currentTarget.previousElementSibling as HTMLElement
+        if (!target) return
+        target.focus()
+        e.preventDefault()
+        break
+      }
+      case ".":
+      case ">": {
+        const target = e.currentTarget.nextElementSibling as HTMLElement
+        if (!target) return
+        target.focus()
+        e.preventDefault()
+        break
+      }
+      default:
+        dispatch("keydown", { key: e.key, source })
+    }
+  }
 </script>
 
 <container bind:this={container}>
@@ -49,11 +79,7 @@
         dispatch("click", source)
       }}
       on:keydown={(e) => {
-        if (e.shiftKey && e.key !== "Shift") {
-          dispatch("goto", { key: e.key })
-          return
-        }
-        dispatch("keydown", { key: e.key, source })
+        keyDownHandler(e, source)
       }}
     >
       <img src={source} alt="" />

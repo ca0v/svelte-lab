@@ -416,7 +416,9 @@
         if (index < 0) return
         const targetImage = transforms.data[index]
         if (targetImage) {
-          targetImage.id = source
+          targetImage.id = extractId(source)
+          // forces a render
+          transforms = transforms
         }
       }}
     />
