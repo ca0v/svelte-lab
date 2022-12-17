@@ -1,3 +1,8 @@
+export function extractId(href: string): string {
+    return href.substring(href.lastIndexOf("id=") + 3)
+}
+
+
 export function range(size: number) {
     return new Array(size).fill(0).map((_, i) => i);
 }

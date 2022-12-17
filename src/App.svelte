@@ -12,7 +12,7 @@
     fetchPhotoList,
     saveCollage,
   } from "./data/collageServices"
-  import { setLocalStorage } from "./lib/globals"
+  import { extractId, setLocalStorage } from "./lib/globals"
   import type { Photo } from "./data/Api"
   import Toaster from "./components/Toaster.svelte"
   import { toast } from "./store/toasts"
@@ -36,6 +36,21 @@
       from: "",
       to: "",
     },
+  }
+
+  // assign images to each image element
+  function autoAssignImages(urls: string[]) {
+    let j = 0
+    activeCollage.data.some((transform) => {
+      if (j >= urls.length) return true
+      transform.id = transform.id || extractId(urls[j++])
+    })
+    activeCollage = activeCollage
+  }
+
+  function clearAllImages() {
+    activeCollage.data.forEach((t) => (t.id = ""))
+    activeCollage = activeCollage
   }
 
   $: {
@@ -172,6 +187,16 @@
             on:click={() => applyTransform(name)}
           />
         {/each}
+        <button
+          on:click={() => {
+            autoAssignImages(photosToShow.map(asPhotoServiceUrl))
+          }}>Auto Assign</button
+        >
+        <button
+          on:click={() => {
+            clearAllImages()
+          }}>Clear All</button
+        >
         <DateRange
           bind:date_filter_from={states.datefilter.from}
           bind:date_filter_to={states.datefilter.to}

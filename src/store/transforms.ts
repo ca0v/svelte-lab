@@ -38,7 +38,7 @@ const transforms: Record<string, CollageTemplate> = {
         ...range(6).map(i => ({ "i": i + 7, "style": `rotate(${60 * i}deg) translate(80px, 0) rotate(-${60 * i}deg)`, clipPath: "30" })),
         ...range(6).map(i => ({ "i": i + 13, "style": `rotate(${30 + 60 * i}deg) translate(69.5px, 0) rotate(-${30 + 60 * i}deg)`, clipPath: "30" })),
     ],
-    "grid-3x3": gridMaker(3, 3, 60, 60, "grid-3x3", 3),
+    "grid-3x3": gridMaker(3, 3, 65, 65, injectRect("grid-3x3", -30, -30, 65, 65), 1),
     "grid-6x6": gridMaker(6, 6, 30, 30, "grid-6x6", 3),
     "grid-4x5": range(5).map(row => {
         const scale = 0.7;
@@ -77,7 +77,6 @@ const transforms: Record<string, CollageTemplate> = {
 }
 
 function injectCss() {
-    injectRect("grid-3x3", -30, -30, 60, 60)
     injectRect("grid-6x6", -15, -15, 30, 30)
     injectRect("box", -25, -25, 50, 50)
     injectRect("box_7x5", -35, -25, 70, 50)

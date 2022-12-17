@@ -54,7 +54,8 @@
     grid-template-columns: 1fr 1fr 1fr;
     grid-auto-rows: 1.5rem;
     gap: 1em;
-    width: clamp(10rem, 50vw, 45rem);
+    min-width: 10rem;
+    max-width: 45rem;
     margin: 0 auto;
   }
 </style>

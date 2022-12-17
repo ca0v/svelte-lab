@@ -2,7 +2,11 @@
   const ID_MAP = "QWERTASDFGYUIOPHJKLZXCVBNM!@#$%^&*()".split("")
   import { onMount } from "svelte"
 
-  import { getEffectiveTransform, getLocalStorage } from "../lib/globals"
+  import {
+    extractId,
+    getEffectiveTransform,
+    getLocalStorage,
+  } from "../lib/globals"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
@@ -54,21 +58,6 @@
       document.head.appendChild(style)
     }
     style.innerHTML = generator()
-  }
-
-  // assign images to each image element
-  function autoAssignImages(urls: string[]) {
-    let j = 0
-    transforms.data.some((transform) => {
-      if (j >= urls.length) return true
-      transform.id = transform.id || extractId(urls[j++])
-    })
-    transforms = transforms
-  }
-
-  function clearAllImages() {
-    transforms.data.forEach((t) => (t.id = ""))
-    transforms = transforms
   }
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
@@ -308,10 +297,6 @@
     }
   }
 
-  function extractId(href: string): string {
-    return href.substring(href.lastIndexOf("id=") + 3)
-  }
-
   onMount(() => applyState(id))
 
   function focusTarget(targetName: string) {
@@ -361,18 +346,6 @@
     </svg>
   </section>
   {#if !readonly && editmode}
-    <div class="toolbar">
-      <button
-        on:click={() => {
-          autoAssignImages(sources)
-        }}>Auto Assign</button
-      >
-      <button
-        on:click={() => {
-          clearAllImages()
-        }}>Clear All</button
-      >
-    </div>
     <slot />
     <PhotoWheel
       {sources}
