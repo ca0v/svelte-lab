@@ -214,7 +214,12 @@
     <div class="frame three-by">
       {#each $stories.filter((c) => c.data?.length).reverse() as collage, i}
         <div class="border">
-          <h3 class="fit">{collage.title}</h3>
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <h3 class="fit">
+            <button on:click={() => (collageId = collage.id)}>
+              {collage.title}
+            </button>
+          </h3>
           <CollageView
             id={`view_${collage.id}`}
             duration={[0.2, 0.3, 0.4][i] || 1}
