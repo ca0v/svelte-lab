@@ -37,6 +37,9 @@
     audioRecorder: {
       visible: false,
     },
+    preview: {
+      visible: false,
+    },
   }
 
   $: {
@@ -72,6 +75,7 @@
     date_filter_from = localStorage.getItem("date_filter") || ""
     collageName = localStorage.getItem("collage_name") || ""
     photos = await fetchPhotoList()
+    photos.sort((a, b) => a.created.localeCompare(b.created))
     date_filter_from =
       date_filter_from || photos[0]?.created.split("T")[0] || ""
 
@@ -132,7 +136,7 @@
         {:else}
           <select bind:value={collageName} data-shortcut="C">
             {#each collages as collage}
-              <option value={collage.id}>{collage.title} {collage.id}</option>
+              <option value={collage.id}>{collage.title}</option>
             {/each}
           </select>
         {/if}
@@ -223,20 +227,25 @@
     </CollageView>
   </div>
 
-  <h2>Preview</h2>
-  <div class="frame three-by">
-    {#each stories.filter((c) => c.data?.length) as collage, i}
-      <div class="border">
-        <h3 class="fit">{collage.title}</h3>
-        <CollageView
-          id={`view_${collage.id}`}
-          duration={[0.2, 0.3, 0.4][i] || 1}
-          readonly={true}
-          transforms={collage}
-        />
-      </div>
-    {/each}
-  </div>
+  <button on:click={() => (states.preview.visible = !states.preview.visible)}
+    >Preview</button
+  >
+  {#if states.preview.visible}
+    <h2>Preview</h2>
+    <div class="frame three-by">
+      {#each stories.filter((c) => c.data?.length).reverse() as collage, i}
+        <div class="border">
+          <h3 class="fit">{collage.title}</h3>
+          <CollageView
+            id={`view_${collage.id}`}
+            duration={[0.2, 0.3, 0.4][i] || 1}
+            readonly={true}
+            transforms={collage}
+          />
+        </div>
+      {/each}
+    </div>
+  {/if}
 </main>
 
 <style>

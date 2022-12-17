@@ -35,6 +35,7 @@ The 'swagger-typescript-api' NPM command will generate the service proxies from 
 
 ## What is next?
 
+* BUG: PhotoWheel only knows image url, no way to assign photo ID to collage (and yet drop() works because of `extractId(e.detail.url)`)
 * FTR: allow audio to be recorded and saved to local storage or service
 * DGN: cell transforms belong in configuration
 * DGN: drag-drop should be handled by CollageView not SvgImage

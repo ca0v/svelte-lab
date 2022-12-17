@@ -135,6 +135,8 @@
       if (rotation) {
         const currentStyle = getEffectiveTransform(sourceTransform)
         sourceTransform.transform = `${currentStyle} rotate(${rotation}deg)`
+        transforms.data[sourceTransformIndex] =
+          transforms.data[sourceTransformIndex]
 
         return handled()
       }
@@ -221,6 +223,7 @@
             currentTransform.y += y
             currentTransform.width += width
             currentTransform.height += height
+            // force update
             transforms.data[sourceTransformIndex] =
               transforms.data[sourceTransformIndex]
           }

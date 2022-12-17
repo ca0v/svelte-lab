@@ -3,15 +3,6 @@ import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
 import type { CollageCellState, CollageData } from "./Api"
 import { getAllCollages, saveCollage } from "./collageServices"
 
-export type Photo = {
-    id: string
-    filename: string
-    url: string
-    created: string
-    width: number
-    height: number
-}
-
 function range(size: number) {
     return new Array(size).fill(0).map((_, i) => i);
 }
@@ -23,6 +14,7 @@ function range(size: number) {
     or maybe just put it back in ClipPaths.svelte
  */
 injectRect("box", -25, -25, 50, 50)
+injectRect("box_7x5", -35, -25, 70, 50)
 injectPath("0", polygonToPath(polygonPath(6, 21, 0)))
 injectPath("poly5_0", polygonToPath(polygonPath(5, 51, 0)))
 injectPath("poly5_36", polygonToPath(polygonPath(5, 36, 52)))
@@ -52,6 +44,18 @@ const transforms: Record<string, Array<{
         ...range(6).map(i => ({ "i": i + 7, "style": `rotate(${60 * i}deg) translate(80px, 0) rotate(-${60 * i}deg)`, clipPath: "30" })),
         ...range(6).map(i => ({ "i": i + 13, "style": `rotate(${30 + 60 * i}deg) translate(69.5px, 0) rotate(-${30 + 60 * i}deg)`, clipPath: "30" })),
     ],
+    "grid-4x5": range(5).map(row => {
+        const scale = 0.7;
+        const w = 70 * scale;
+        const h = 50 * scale;
+        const gap = 0.05;
+        return range(4).map(col => ({
+            "i": col + row * 4,
+            "style": `translate(${-100 + w / 2 + col * w + gap * w}px, ${-100 + h / 2 + row * h + gap * h}px)`,
+            clipPath: "box_7x5", bbox: { x: -w / 2, y: -h / 2, width: w, height: h }
+        }))
+    }
+    ).flat(),
     "square-16": range(4).map(row =>
         range(4).map(col => ({
             "i": col + row * 4,
@@ -75,6 +79,22 @@ const templates: Array<CollageData> = [{
         return {
             target: `i${t.i}`,
             id: `AIk5ERFrV7YxvPBqVg3prtWxO1iGmqxFd0or1PI65r6t69FZGQWHC2Z0so4NT0XQhaOJnOKu3ihhEtEMR4wRt_Frw0ookSwA9g`,
+            x: t.bbox.x,
+            y: t.bbox.y,
+            width: t.bbox.width,
+            height: t.bbox.height,
+            transform: t.style,
+            clipPath: t.clipPath,
+        }
+    })
+},
+{
+    id: "grid-4x5",
+    title: "grid-4x5",
+    data: transforms["grid-4x5"].map((t) => {
+        return {
+            target: `i${t.i}`,
+            id: `AIk5ERHkVze4l_coT8puVELK7N6oo1IL2Ejp3VSbhZfpYHgMS-AJcs8MFO4w1b1zhu-vQnY_JbVRMQXdmDmJHP0qKcsrqKagMw`,
             x: t.bbox.x,
             y: t.bbox.y,
             width: t.bbox.width,
