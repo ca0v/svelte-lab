@@ -43,3 +43,4 @@ The 'swagger-typescript-api' NPM command will generate the service proxies from 
 * DGN: cell transforms belong in configuration
 * DGN: drag-drop should be handled by CollageView not SvgImage
 * FTR: Can crop and round corners using clip-path: inset() on the svg image (<https://developer.mozilla.org/en-US/docs/Web/CSS/inset>)
+* FTR: need to be able to bring-to-front and send-to-back
