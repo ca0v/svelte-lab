@@ -375,7 +375,6 @@
   {#if !readonly}
     <div class="clone" class:dragging={false}>Clone Here</div>
   {/if}
-  <slot />
 </div>
 
 <style>
