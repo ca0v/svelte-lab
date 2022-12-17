@@ -1,9 +1,8 @@
 <script lang="ts">
-  const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
-  import { onMount, createEventDispatcher } from "svelte"
+  const ID_MAP = "QWERTASDFGYUIOPHJKLZXCVBNM!@#$%^&*()".split("")
+  import { onMount } from "svelte"
 
   import { getEffectiveTransform, getLocalStorage } from "../lib/globals"
-  import { sleep } from "../lib/paths"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
@@ -17,7 +16,6 @@
   export let transforms: CollageData
   export let transformDelay = 0 // to be moved to configuration
 
-  let dispatch = createEventDispatcher()
   let play = readonly
   let editmode = !readonly
 
@@ -134,8 +132,7 @@
       if (rotation) {
         const currentStyle = getEffectiveTransform(sourceTransform.transform)
         sourceTransform.transform = `${currentStyle} rotate(${rotation}deg)`
-        transforms.data[sourceTransformIndex] =
-          transforms.data[sourceTransformIndex]
+        transforms = transforms
 
         return handled()
       }
@@ -208,8 +205,7 @@
           }) ${currentStyle} translate(${x}px, ${y}px)`
           const currentTransform = transforms.data[sourceTransformIndex]
           currentTransform.transform = newStyle
-          transforms.data[sourceTransformIndex] =
-            transforms.data[sourceTransformIndex]
+          transforms = transforms
         } else {
           if (sourceTransformIndex < 0) {
             image.setAttribute("x", x0 + x + "px")
@@ -223,8 +219,7 @@
             currentTransform.width += width
             currentTransform.height += height
             // force update
-            transforms.data[sourceTransformIndex] =
-              transforms.data[sourceTransformIndex]
+            transforms = transforms
           }
         }
         return handled()

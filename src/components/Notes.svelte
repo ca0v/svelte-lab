@@ -1,8 +1,9 @@
 <script lang="ts">
   export let note = ""
+  export let shortcut = ""
 </script>
 
-<textarea bind:value={note} spellcheck="true" />
+<textarea data-shortcut={shortcut} bind:value={note} spellcheck="true" />
 
 <style>
   textarea {

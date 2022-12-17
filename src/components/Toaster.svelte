@@ -16,17 +16,19 @@
 <style>
   .toaster {
     position: fixed;
-    bottom: 1rem;
-    left: 1rem;
+    bottom: 0;
+    left: 0;
     width: 20em;
     max-height: 50vh;
     background-color: #333;
     padding: 1rem;
-    border-radius: 1rem;
+    border-top-right-radius: 1rem;
     line-height: 2rem;
     opacity: 0.8;
     transition-duration: 200ms;
     border: 1px solid green;
+    border-bottom: none;
+    border-left: none;
   }
 
   .toaster:has(.error) {

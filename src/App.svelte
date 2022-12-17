@@ -13,14 +13,13 @@
     saveCollage,
   } from "./data/collageServices"
   import { setLocalStorage } from "./lib/globals"
-  import type { CollageData, Photo } from "./data/Api"
+  import type { Photo } from "./data/Api"
   import Toaster from "./components/Toaster.svelte"
   import { toast } from "./store/toasts"
 
   let photos: Array<Photo> = []
 
   let collageId = ""
-  let activeCollage: CollageData | undefined
 
   let states = {
     saving: false,
@@ -44,10 +43,17 @@
       localStorage.setItem("date_filter", states.datefilter.from)
   }
 
+  $: activeCollage = collageId && $stories.find((h) => h.id === collageId)
+
   $: {
     collageId && localStorage.setItem("collage_name", collageId)
-    activeCollage = collageId && $stories.find((h) => h.id === collageId)
   }
+
+  $: photosToShow = photos.filter(
+    (p) =>
+      !states.datefilter.from ||
+      (states.datefilter.from <= p.created && p.created <= states.datefilter.to)
+  )
 
   function applyTransform(activeTransformId: string) {
     const transform = $transforms[activeTransformId]
@@ -91,9 +97,13 @@
   <div class="frame">
     <h2>For Editing</h2>
     <div class="two-column">
-      <p><u>C</u>ollage Name</p>
+      <p>S<u>t</u>ories</p>
       <div class="collage-name-component">
-        <select bind:value={collageId}>
+        <select
+          bind:value={collageId}
+          data-shortcut="Shift>t"
+          title="Select an existing story"
+        >
           {#each $stories as collage}
             <option value={collage.id}>{collage.title}</option>
           {/each}
@@ -105,6 +115,8 @@
         {/if}
         <button
           class="add"
+          data-shortcut="Shift>c"
+          title="Create a new collage"
           on:click={() => {
             const newStory = {
               id: createUniqueId(),
@@ -114,12 +126,13 @@
             stories.update((s) => [newStory, ...s])
             collageId = newStory.id
             states.titleEditor.edit = true
-          }}>Create</button
+          }}><u>C</u>reate</button
         >
         <button
           disabled={states.saving}
           class="add"
-          data-shortcut="S"
+          data-shortcut="Shift>s"
+          title="Save the collage"
           on:click={async () => {
             states.saving = true
             try {
@@ -134,22 +147,12 @@
             } finally {
               states.saving = false
             }
-          }}>Save</button
+          }}><u>S</u>ave</button
         >
       </div>
-      <p>Transform</p>
-      <div class="toolbar">
-        {#each Object.entries($transforms) as [name]}
-          <input
-            type="button"
-            value={name}
-            on:click={() => applyTransform(name)}
-          />
-        {/each}
-      </div>
       {#if activeCollage}
-        <p>Notes</p>
-        <Notes bind:note={activeCollage.note} />
+        <p><u>N</u>otes</p>
+        <Notes shortcut="Shift>n" bind:note={activeCollage.note} />
       {/if}
     </div>
     <CollageView
@@ -159,20 +162,23 @@
       on:save={async () => {
         throw "not supported, remove"
       }}
-      sources={photos
-        .filter(
-          (p) =>
-            !states.datefilter.from ||
-            (states.datefilter.from <= p.created &&
-              p.created <= states.datefilter.to)
-        )
-        .map(asPhotoServiceUrl)}
+      sources={photosToShow.map(asPhotoServiceUrl)}
     >
-      <DateRange
-        bind:date_filter_from={states.datefilter.from}
-        bind:date_filter_to={states.datefilter.to}
-      />
+      <div class="toolbar">
+        {#each Object.entries($transforms) as [name]}
+          <input
+            type="button"
+            value={name}
+            on:click={() => applyTransform(name)}
+          />
+        {/each}
+        <DateRange
+          bind:date_filter_from={states.datefilter.from}
+          bind:date_filter_to={states.datefilter.to}
+        />
+      </div>
     </CollageView>
+    <p>{photosToShow.length} photo(s)</p>
   </div>
 
   <button on:click={() => (states.preview.visible = !states.preview.visible)}
@@ -268,17 +274,5 @@
     display: grid;
     grid-auto-flow: column;
     grid-gap: 1rem;
-  }
-
-  .grid {
-    position: relative;
-    background-color: #333;
-    display: grid;
-    grid-auto-flow: row;
-    grid-gap: 1rem;
-    overflow: auto;
-    max-height: 50vh;
-    width: auto;
-    min-width: 10rem;
   }
 </style>
