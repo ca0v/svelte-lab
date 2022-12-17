@@ -46,14 +46,22 @@ const transforms: Record<string, Array<{
     ],
     "grid-4x5": range(5).map(row => {
         const scale = 0.7;
-        const w = 70 * scale;
-        const h = 50 * scale;
+        const width = Math.round(70 * scale);
+        const height = Math.round(50 * scale);
+        const x = Math.round(-width / 2)
+        const y = Math.round(-height / 2)
         const gap = 0.05;
-        return range(4).map(col => ({
-            "i": col + row * 4,
-            "style": `translate(${-100 + w / 2 + col * w + gap * w}px, ${-100 + h / 2 + row * h + gap * h}px)`,
-            clipPath: "box_7x5", bbox: { x: -w / 2, y: -h / 2, width: w, height: h }
-        }))
+        const bbox = { x, y, width, height }
+        return range(4).map(col => {
+            const dx = Math.round(-100 + width / 2 + col * width + gap * width);
+            const dy = Math.round(-100 + height / 2 + row * height + gap * height);
+            return {
+                "i": col + row * 4,
+                bbox,
+                "style": `translate(${dx}px, ${dy}px)`,
+                clipPath: "box_7x5",
+            }
+        })
     }
     ).flat(),
     "square-16": range(4).map(row =>

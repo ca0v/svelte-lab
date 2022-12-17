@@ -35,7 +35,10 @@ The 'swagger-typescript-api' NPM command will generate the service proxies from 
 
 ## What is next?
 
-* BUG: PhotoWheel only knows image url, no way to assign photo ID to collage (and yet drop() works because of `extractId(e.detail.url)`)
+* BUG: the "Transform" is really a "Template" and should not be bound..copy the template and disengage
+* BUG: errors are silent...e.g. run without services running...no warnings
+* BUG: remove 2nd "Save" button in editor, drop "Focus", "Edit"
+* BUG: dates are treating Zulu as local time...very confusing
 * FTR: allow audio to be recorded and saved to local storage or service
 * DGN: cell transforms belong in configuration
 * DGN: drag-drop should be handled by CollageView not SvgImage

@@ -369,27 +369,6 @@
   {#if !readonly && editmode}
     <div class="toolbar">
       <button
-        class="off-screen"
-        data-shortcut="F"
-        on:click={() =>
-          sleep(0).then(() => {
-            photoWheelComponent.focus()
-          })}><u>F</u>ocus</button
-      >
-      <button
-        class="off-screen"
-        data-shortcut="E"
-        on:click={() => (editmode = !editmode)}><u>E</u>dit</button
-      >
-      <button
-        data-shortcut="S"
-        title="Save to local storage"
-        on:click={() => {
-          console.log("save clicked")
-          dispatch("save")
-        }}><u>S</u>ave</button
-      >
-      <button
         on:click={() => {
           autoAssignImages(sources)
         }}>Auto Assign</button
@@ -446,7 +425,9 @@
   }
 
   svg.border {
-    border: 1px solid red;
+    box-sizing: border-box;
+    margin: 1em;
+    outline: 1px solid green;
   }
 
   .clone {

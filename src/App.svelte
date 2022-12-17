@@ -16,14 +16,15 @@
     saveRecording,
     updateRecording,
   } from "./data/collageServices"
-  import { setLocalStorage } from "./lib/globals"
+  import { setLocalStorage, toast } from "./lib/globals"
   import type { CollageData, Photo, Recording } from "./data/Api"
+  import Toaster from "./components/Toaster.svelte"
 
   let recordings: Array<Recording> = []
   let photos: Array<Photo> = []
 
   let collages = [...stories]
-  let collageName = ""
+  let collageId = ""
   let transformName = ""
   let date_filter_from = ""
   let date_filter_to = ""
@@ -31,6 +32,7 @@
   let errors: Array<string> = []
 
   let states = {
+    saving: false,
     titleEditor: {
       edit: false,
     },
@@ -47,9 +49,9 @@
   }
 
   $: {
-    collageName && localStorage.setItem("collage_name", collageName)
+    collageId && localStorage.setItem("collage_name", collageId)
     activeCollage =
-      collageName && collages && collages.find((h) => h.id === collageName)
+      collageId && collages && collages.find((h) => h.id === collageId)
   }
 
   $: {
@@ -73,7 +75,7 @@
 
   onMount(async () => {
     date_filter_from = localStorage.getItem("date_filter") || ""
-    collageName = localStorage.getItem("collage_name") || ""
+    collageId = localStorage.getItem("collage_name") || ""
     photos = await fetchPhotoList()
     photos.sort((a, b) => a.created.localeCompare(b.created))
     date_filter_from =
@@ -131,14 +133,15 @@
     <div class="two-column">
       <p><u>C</u>ollage Name</p>
       <div class="collage-name-component">
-        {#if activeCollage && states.titleEditor.edit}
+        <select bind:value={collageId} data-shortcut="C">
+          {#each collages as collage}
+            <option value={collage.id}>{collage.title}</option>
+          {/each}
+        </select>
+        {#if activeCollage}
           <input type="text" bind:value={activeCollage.title} />
         {:else}
-          <select bind:value={collageName} data-shortcut="C">
-            {#each collages as collage}
-              <option value={collage.id}>{collage.title}</option>
-            {/each}
-          </select>
+          <input type="text" disabled />
         {/if}
         <button
           class="add"
@@ -146,32 +149,38 @@
             collages = [
               {
                 id: createUniqueId(),
-                title: "New Collage",
+                title: date_filter_from,
                 data: [],
               },
               ...collages,
             ]
-            collageName = collages[0].id
+            collageId = collages[0].id
             states.titleEditor.edit = true
           }}>Create</button
         >
-
-        {#if states.titleEditor.edit}
-          <button
-            on:click={() => {
-              states.titleEditor.edit = !states.titleEditor.edit
-              saveCollage(activeCollage)
-            }}>Save</button
-          >
-        {:else}
-          <button
-            on:click={() =>
-              (states.titleEditor.edit = !states.titleEditor.edit)}>Edit</button
-          >
-        {/if}
+        <button
+          disabled={states.saving}
+          class="add"
+          data-shortcut="S"
+          on:click={async () => {
+            states.saving = true
+            try {
+              console.log("save", activeCollage)
+              toast("Saving")
+              setLocalStorage(`${activeCollage.id}`, activeCollage)
+              await saveCollage({ ...activeCollage })
+              toast("Saved")
+            } catch (ex) {
+              reportError(ex)
+              toast(`Error: ${ex}`)
+            } finally {
+              states.saving = false
+            }
+          }}>Save</button
+        >
       </div>
-      <p><u>T</u>ransform</p>
-      <select data-shortcut="T" bind:value={transformName}>
+      <p>Transform</p>
+      <select data-shortcut="R" bind:value={transformName}>
         {#each Object.entries(transforms) as [name]}<option value={name}
             >{name}</option
           >
@@ -207,13 +216,11 @@
       {/if}
     </div>
     <CollageView
-      id={collageName}
+      id={collageId}
       transforms={activeCollage}
       duration={0.01}
       on:save={async () => {
-        console.log("save", activeCollage)
-        setLocalStorage(`${activeCollage.id}`, activeCollage)
-        await saveCollage({ ...activeCollage })
+        throw "not supported, remove"
       }}
       sources={photos
         .filter(
@@ -247,6 +254,8 @@
     </div>
   {/if}
 </main>
+
+<Toaster />
 
 <style>
   .two-column {
@@ -317,11 +326,7 @@
 
   .collage-name-component {
     display: grid;
-    grid-template-columns: 1fr 5rem 5rem;
+    grid-template-columns: 1fr 1fr 5rem 5rem;
     grid-gap: 1rem;
-  }
-
-  .collage-name-component > input {
-    color: green;
   }
 </style>

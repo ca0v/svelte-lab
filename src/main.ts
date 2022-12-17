@@ -8,18 +8,18 @@ const app = new App({
 export default app
 
 document.body.addEventListener("keydown", (e: KeyboardEvent & { currentTarget: HTMLElement }) => {
-  if (e.ctrlKey) return
+  if (e.altKey) return
   if (e.metaKey) return
 
-  if (e.altKey) {
+  if (e.ctrlKey || e.metaKey) {
     const key = e.key
     // get any element that has this key as a data-shortcut value
     const element = e.currentTarget.querySelector(
       `[data-shortcut="${key.toUpperCase()}"]`
     ) as HTMLElement
     if (element) {
-      element.focus();
       element.click()
+      element.focus();
       e.preventDefault()
     }
   }

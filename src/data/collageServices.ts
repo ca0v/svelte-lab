@@ -1,6 +1,6 @@
+import type { Photo } from "../d.ts";
 import type { AudioRecording } from "../lib/db"
 import { getPhotoUrl } from "../lib/globals"
-import type { Photo } from "./collageTemplates"
 
 const PHOTOS = `${getPhotoUrl()}/photo`
 
