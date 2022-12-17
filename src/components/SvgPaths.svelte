@@ -1,5 +1,5 @@
 <script>
-  import { svgClipPaths } from "../lib/globals"
+  import { svgClipPaths } from "../store/svg"
 </script>
 
 <svg id="clip-path-defs" width="0" height="0">

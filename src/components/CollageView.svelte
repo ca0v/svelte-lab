@@ -2,12 +2,11 @@
   const ID_MAP = "ASDFJKQWERTYLOPGHBN".split("")
   import { onMount, createEventDispatcher } from "svelte"
 
-  import { getLocalStorage } from "../lib/globals"
+  import { getEffectiveTransform, getLocalStorage } from "../lib/globals"
   import { sleep } from "../lib/paths"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
-  import { getEffectiveTransform } from "../data/collageTemplates"
   import { asPhotoServiceUrl } from "../data/collageServices"
   import type { CollageCellState, CollageData } from "../data/Api"
 
@@ -133,7 +132,7 @@
           break
       }
       if (rotation) {
-        const currentStyle = getEffectiveTransform(sourceTransform)
+        const currentStyle = getEffectiveTransform(sourceTransform.transform)
         sourceTransform.transform = `${currentStyle} rotate(${rotation}deg)`
         transforms.data[sourceTransformIndex] =
           transforms.data[sourceTransformIndex]
@@ -203,7 +202,7 @@
 
       if (sourceTransform && image && resize) {
         if (e.shiftKey) {
-          const currentStyle = getEffectiveTransform(sourceTransform)
+          const currentStyle = getEffectiveTransform(sourceTransform.transform)
           const newStyle = `scale(${1 + width / w0},${
             1 + height / h0
           }) ${currentStyle} translate(${x}px, ${y}px)`

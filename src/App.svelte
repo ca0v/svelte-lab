@@ -2,34 +2,25 @@
   import { onMount } from "svelte"
   import CollageView from "./components/CollageView.svelte"
   import DateRange from "./components/DateRange.svelte"
-  import { transforms, collages as stories } from "./data/collageTemplates"
+  import { stories } from "./store/stories"
+  import { collageTemplates as transforms } from "./store/transforms"
 
-  import AudioRecorder from "./components/AudioRecorder.svelte"
   import Notes from "./components/Notes.svelte"
   import SvgPaths from "./components/SvgPaths.svelte"
   import {
     asPhotoServiceUrl,
-    deleteRecording,
     fetchPhotoList,
-    getAllAudioRecordings,
     saveCollage,
-    saveRecording,
-    updateRecording,
   } from "./data/collageServices"
-  import { setLocalStorage, toast } from "./lib/globals"
-  import type { CollageData, Photo, Recording } from "./data/Api"
+  import { setLocalStorage } from "./lib/globals"
+  import type { CollageData, Photo } from "./data/Api"
   import Toaster from "./components/Toaster.svelte"
+  import { toast } from "./store/toasts"
 
-  let recordings: Array<Recording> = []
   let photos: Array<Photo> = []
 
-  let collages = [...stories]
   let collageId = ""
-  let transformName = ""
-  let date_filter_from = ""
-  let date_filter_to = ""
   let activeCollage: CollageData | undefined
-  let errors: Array<string> = []
 
   let states = {
     saving: false,
@@ -42,20 +33,24 @@
     preview: {
       visible: false,
     },
+    datefilter: {
+      from: "",
+      to: "",
+    },
   }
 
   $: {
-    date_filter_from && localStorage.setItem("date_filter", date_filter_from)
+    states.datefilter.from &&
+      localStorage.setItem("date_filter", states.datefilter.from)
   }
 
   $: {
     collageId && localStorage.setItem("collage_name", collageId)
-    activeCollage =
-      collageId && collages && collages.find((h) => h.id === collageId)
+    activeCollage = collageId && $stories.find((h) => h.id === collageId)
   }
 
-  $: {
-    const transform = transforms[transformName]
+  function applyTransform(activeTransformId: string) {
+    const transform = $transforms[activeTransformId]
     if (transform && activeCollage) {
       // capture existing images
       const ids = activeCollage?.data.map((d) => d.id).filter((v) => !!v)
@@ -74,34 +69,12 @@
   }
 
   onMount(async () => {
-    date_filter_from = localStorage.getItem("date_filter") || ""
+    states.datefilter.from = localStorage.getItem("date_filter") || ""
     collageId = localStorage.getItem("collage_name") || ""
     photos = await fetchPhotoList()
     photos.sort((a, b) => a.created.localeCompare(b.created))
-    date_filter_from =
-      date_filter_from || photos[0]?.created.split("T")[0] || ""
-
-    recordings = await getAllAudioRecordings()
-
-    document.addEventListener(
-      "console.error",
-      (e: Event & { detail: Array<string> }) => {
-        const message = e.detail.join(",")
-        errors = [message, ...errors]
-      }
-    )
-
-    window.addEventListener("error", (e: ErrorEvent & { detail: any }) => {
-      try {
-        if (e.detail?.message) {
-          errors = [e.detail.message, ...errors]
-        } else {
-          console.log(e)
-        }
-      } catch (e) {
-        console.log(e)
-      }
-    })
+    states.datefilter.from =
+      states.datefilter.from || photos[0]?.created.split("T")[0] || ""
   })
 
   function createUniqueId(): string {
@@ -109,23 +82,10 @@
       .toString(36)
       .substring(2, 16 + 2)
   }
-
-  async function trackTitleChangeHandler(e: CustomEvent<any>) {
-    const recording = e.detail
-    console.log("title change", recording)
-    updateRecording(recording.id, { title: recording.title })
-  }
 </script>
 
 <main>
   <SvgPaths />
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <errors on:click={() => (errors.length = 0)}>
-    {#each errors as error}
-      <div class="error">{error}</div>
-    {/each}
-  </errors>
-
   <h1>Photo Playground</h1>
 
   <div class="frame">
@@ -133,8 +93,8 @@
     <div class="two-column">
       <p><u>C</u>ollage Name</p>
       <div class="collage-name-component">
-        <select bind:value={collageId} data-shortcut="C">
-          {#each collages as collage}
+        <select bind:value={collageId}>
+          {#each $stories as collage}
             <option value={collage.id}>{collage.title}</option>
           {/each}
         </select>
@@ -146,15 +106,13 @@
         <button
           class="add"
           on:click={() => {
-            collages = [
-              {
-                id: createUniqueId(),
-                title: date_filter_from,
-                data: [],
-              },
-              ...collages,
-            ]
-            collageId = collages[0].id
+            const newStory = {
+              id: createUniqueId(),
+              title: states.datefilter.from,
+              data: [],
+            }
+            stories.update((s) => [newStory, ...s])
+            collageId = newStory.id
             states.titleEditor.edit = true
           }}>Create</button
         >
@@ -180,36 +138,15 @@
         >
       </div>
       <p>Transform</p>
-      <select data-shortcut="R" bind:value={transformName}>
-        {#each Object.entries(transforms) as [name]}<option value={name}
-            >{name}</option
-          >
+      <div class="toolbar">
+        {#each Object.entries($transforms) as [name]}
+          <input
+            type="button"
+            value={name}
+            on:click={() => applyTransform(name)}
+          />
         {/each}
-      </select>
-      {#if states.audioRecorder.visible}
-        <p>Audio Recordings</p>
-        <AudioRecorder
-          {recordings}
-          on:track-title-change={trackTitleChangeHandler}
-          on:delete={async (e) => {
-            const recording = e.detail
-            await deleteRecording(recording)
-            recordings = recordings.filter((r) => r.id !== recording.id)
-          }}
-          on:save={async (e) => {
-            const recording = e.detail
-            await saveRecording(recording)
-            recordings = [recording, ...recordings]
-          }}
-        />
-      {:else}
-        <p />
-        <button
-          on:click={() =>
-            (states.audioRecorder.visible = !states.audioRecorder.visible)}
-          >Audio</button
-        >
-      {/if}
+      </div>
       {#if activeCollage}
         <p>Notes</p>
         <Notes bind:note={activeCollage.note} />
@@ -225,12 +162,16 @@
       sources={photos
         .filter(
           (p) =>
-            !date_filter_from ||
-            (date_filter_from <= p.created && p.created <= date_filter_to)
+            !states.datefilter.from ||
+            (states.datefilter.from <= p.created &&
+              p.created <= states.datefilter.to)
         )
         .map(asPhotoServiceUrl)}
     >
-      <DateRange bind:date_filter_from bind:date_filter_to />
+      <DateRange
+        bind:date_filter_from={states.datefilter.from}
+        bind:date_filter_to={states.datefilter.to}
+      />
     </CollageView>
   </div>
 
@@ -240,7 +181,7 @@
   {#if states.preview.visible}
     <h2>Preview</h2>
     <div class="frame three-by">
-      {#each stories.filter((c) => c.data?.length).reverse() as collage, i}
+      {#each $stories.filter((c) => c.data?.length).reverse() as collage, i}
         <div class="border">
           <h3 class="fit">{collage.title}</h3>
           <CollageView
@@ -317,16 +258,27 @@
     font-size: clamp(8px, 1cqw, 16px);
   }
 
-  errors {
-    display: grid;
-    grid-template-columns: 1fr;
-    cursor: pointer;
-    color: red;
-  }
-
   .collage-name-component {
     display: grid;
     grid-template-columns: 1fr 1fr 5rem 5rem;
     grid-gap: 1rem;
+  }
+
+  .toolbar {
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 1rem;
+  }
+
+  .grid {
+    position: relative;
+    background-color: #333;
+    display: grid;
+    grid-auto-flow: row;
+    grid-gap: 1rem;
+    overflow: auto;
+    max-height: 50vh;
+    width: auto;
+    min-width: 10rem;
   }
 </style>

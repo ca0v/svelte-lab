@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { toasts } from "../lib/globals"
+  import { toasts } from "../store/toasts"
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -15,7 +15,7 @@
 
 <style>
   .toaster {
-    position: absolute;
+    position: fixed;
     bottom: 1rem;
     left: 1rem;
     width: 20em;
@@ -24,7 +24,7 @@
     padding: 1rem;
     border-radius: 1rem;
     line-height: 2rem;
-    opacity: 1;
+    opacity: 0.8;
     transition-duration: 200ms;
     border: 1px solid green;
   }

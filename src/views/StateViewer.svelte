@@ -74,14 +74,6 @@
       })
       .join("")
   }
-
-  function renderOutline(
-    e: MouseEvent & { currentTarget: EventTarget & HTMLDivElement },
-    STATE_ABBR: string
-  ) {
-    const stateDiv = e.currentTarget
-    // want to slowly draw the outline of the state around this state
-  }
 </script>
 
 <div>State Viewer</div>
@@ -114,9 +106,6 @@
       <div class="background">
         <!-- svelte-ignore a11y-mouse-events-have-key-events -->
         <div
-          on:mouseover={(e) => {
-            renderOutline(e, state.attributes.STATE_ABBR)
-          }}
           class="square"
           style="clip-path: url(#clip_{state.attributes.STATE_ABBR})"
         />

@@ -1,17 +1,6 @@
-import { writable } from "svelte/store"
-
-type ToastLevel = "err" | "info";
-export const toasts = writable<Array<{ message: string, showUntil: number, level: ToastLevel }>>([]);
-
-export function toast(message: string, duration = 5, level: ToastLevel = "info") {
-    toasts.update((t) => t.filter((t) => t.showUntil > Date.now()))
-
-    const showUntil = Date.now() + 1000 * duration;
-    toasts.update(v => [{ message, showUntil, level }, ...v]);
-    setTimeout(() => toasts.update((t) => t.filter((t) => t.showUntil > Date.now())), 1000 * duration + 200)
+export function range(size: number) {
+    return new Array(size).fill(0).map((_, i) => i);
 }
-
-export const svgClipPaths = writable<Array<{ id: string, body: string }>>([])
 
 // read data from localstorage
 const getLocalStorage = (key: string) => {
@@ -41,6 +30,15 @@ const getPhotoUrl = () => {
     const newPhotoUrl = promptUser('Please enter your photo url')
     newPhotoUrl && setLocalStorage('photoServerUrl', newPhotoUrl)
     return newPhotoUrl
+}
+
+const dummy = document.createElement("div")
+document.body.appendChild(dummy)
+
+export function getEffectiveTransform(transform: string) {
+    dummy.style.transform = transform
+    const result = getComputedStyle(dummy).transform
+    return result === "none" ? "" : result
 }
 
 export { setLocalStorage, getLocalStorage, getPhotoUrl }
