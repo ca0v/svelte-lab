@@ -216,7 +216,6 @@
       states.saving = true
       try {
         console.log("save", activeCollage)
-        toast("Saving")
         setLocalStorage(`${activeCollage.id}`, activeCollage)
         await saveCollage({ ...activeCollage })
         toast("Saved")

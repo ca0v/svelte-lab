@@ -153,14 +153,16 @@
 
   details > summary {
     padding: 0.25rem;
+    border-radius: 4px;
+    list-style: none;
+  }
+
+  details[open] > summary {
+    border-radius: 0;
+    text-align: right;
   }
 
   details > summary.escape-mode {
-    background-color: green;
-    color: white;
-  }
-
-  details > summary {
-    list-style: none;
+    outline: 1px solid green;
   }
 </style>
