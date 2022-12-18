@@ -17,7 +17,7 @@ export function reportExceptions<T>(f: (a: T) => void) {
             f(a)
         } catch (e) {
             console.error(e)
-            toast(e.message, 5, "err")
+            toast(e.message || e, 5, "err")
         }
     }
 }

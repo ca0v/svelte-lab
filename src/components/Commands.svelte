@@ -103,7 +103,7 @@
 
 <aside class="commands">
   <details bind:open={isOpen}>
-    <summary class:escape-mode={escapeMode}>Commands</summary>
+    <summary class:escape-mode={escapeMode}>☰</summary>
     <div class="two-columns">
       {#each $commands as command}
         <div title={command.name}>{command.title}</div>
@@ -143,7 +143,7 @@
     overflow: hidden;
     overflow-y: auto;
     width: auto;
-    height: auto;
+    max-height: 80vh;
   }
 
   details[open] {
@@ -153,11 +153,14 @@
 
   details > summary {
     padding: 0.25rem;
-    height: 2rem;
   }
 
   details > summary.escape-mode {
     background-color: green;
     color: white;
+  }
+
+  details > summary {
+    list-style: none;
   }
 </style>

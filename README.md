@@ -36,8 +36,8 @@ The 'swagger-typescript-api' NPM command will generate the service proxies from 
 ## What is next?
 
 * BUG: errors are silent...e.g. run without services running...no warnings
-* BUG: dates are treating Zulu as local time...very confusing
 * DGN: drag-drop should be handled by CollageView not SvgImage
 * FTR: Can crop and round corners using clip-path: inset() on the svg image (<https://developer.mozilla.org/en-US/docs/Web/CSS/inset>)
 * FTR: need to be able to bring-to-front and send-to-back
 * DGN: Remove the PhotoWheel from the CollageView, create a higher-level composite control
+* BUG: lost ability to tab when editing

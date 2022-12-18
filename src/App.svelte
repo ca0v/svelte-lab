@@ -25,6 +25,9 @@
 
   let states = {
     saving: false,
+    editor: {
+      editmode: false,
+    },
     titleEditor: {
       edit: false,
     },
@@ -72,7 +75,6 @@
       (asZulu(states.datefilter.from) <= p.created &&
         p.created <= asZulu(states.datefilter.to))
 
-    if (result) console.log(states.datefilter.from, p.created)
     return result
   })
 
@@ -112,6 +114,29 @@
     states.datefilter.to =
       states.datefilter.to || addDays(states.datefilter.from, 1)
 
+    addCommand({
+      name: "Preview",
+      event: "preview",
+      title: "Preview collage",
+      trigger: {
+        key: "p",
+        isCtrl: true,
+      },
+      execute: () => (states.preview.visible = !states.preview.visible),
+    })
+
+    addCommand({
+      name: "Toggle Edit Mode",
+      event: "toggle_edit_mode",
+      title: "Toggle Edit Mode",
+      trigger: {
+        key: "/",
+      },
+      execute: () => {
+        states.editor.editmode = !states.editor.editmode
+      },
+    })
+
     Object.keys($transforms).forEach((name, i) => {
       addCommand({
         name,
@@ -138,7 +163,6 @@
           .split(">")
           .reverse()
 
-        console.log({ shortcut })
         const command = {
           name: `goto-${element.title}`,
           title: element.title,
@@ -211,13 +235,13 @@
   <h1>Just.Collage</h1>
 
   <div class="frame">
-    <h2>Photo Collage Editing</h2>
+    <h2>Photo Collage Editor</h2>
     <div class="two-column">
       <p>S<u>t</u>ories</p>
       <div class="collage-name-component">
         <select
           bind:value={collageId}
-          data-shortcut="t"
+          data-shortcut="Shift>T"
           title="Select an existing story"
         >
           {#each $stories as collage}
@@ -236,32 +260,30 @@
         <Notes shortcut="Shift>N" bind:note={activeCollage.note} />
       {/if}
     </div>
+    <div class="spacer" />
     {#if activeCollage}
       <CollageView
         id={collageId}
         transforms={activeCollage}
         duration={0.01}
+        bind:editmode={states.editor.editmode}
         on:save={async () => {
           throw "not supported, remove"
         }}
         sources={photosToShow.map(asPhotoServiceUrl)}
       >
+        <div class="spacer" />
         <div class="toolbar">
-          <div class="border">
-            <DateRange
-              bind:date_filter_from={states.datefilter.from}
-              bind:date_filter_to={states.datefilter.to}
-            />
-          </div>
+          <DateRange
+            bind:date_filter_from={states.datefilter.from}
+            bind:date_filter_to={states.datefilter.to}
+          />
           <p>{photosToShow.length} of {photos.length} photo(s)</p>
         </div>
       </CollageView>
     {/if}
   </div>
 
-  <button on:click={() => (states.preview.visible = !states.preview.visible)}
-    >Preview</button
-  >
   {#if states.preview.visible}
     <h2>Preview</h2>
     <div class="frame three-by">
@@ -331,11 +353,7 @@
   .border {
     padding: 0.25rem;
     border-radius: 0.25rem;
-    border: 1px dotted rgba(200, 200, 200, 0.2);
-  }
-
-  main {
-    margin-bottom: 5rem;
+    background-color: #333;
   }
 
   .fit {
@@ -360,5 +378,10 @@
     grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
     grid-gap: 0.25rem;
     padding: 0.25rem;
+  }
+
+  .spacer {
+    height: 1rem;
+    width: 1rem;
   }
 </style>

@@ -12,18 +12,17 @@
   import SvgImage from "./SvgImage.svelte"
   import { asPhotoServiceUrl } from "../data/collageServices"
   import type { CollageCellState, CollageData } from "../data/Api"
-  import { addCommand, removeCommand } from "../store/commands"
   import { reportExceptions } from "../store/toasts"
 
   export let id: string
   export let sources: Array<string> = []
   export let duration = 0.1
   export let readonly = false
+  export let editmode = !readonly
   export let transforms: CollageData
   export let transformDelay = 0 // to be moved to configuration
 
   let play = readonly
-  let editmode = !readonly
 
   let photoWheelComponent: PhotoWheel
   let scope = `hexagon_spiral_${id}`
@@ -71,8 +70,6 @@
       e.stopPropagation()
       return true
     }
-
-    handled()
 
     // get the image that is currently focused
     const image = document.activeElement as SVGImageElement
@@ -296,21 +293,6 @@
 
   onMount(() => {
     applyState(id)
-    addCommand({
-      name: "Toggle Edit Mode",
-      event: "toggle_edit_mode",
-      title: "Toggle Edit Mode",
-      trigger: {
-        key: "/",
-      },
-      execute: () => {
-        editmode = !editmode
-      },
-    })
-  })
-
-  onDestroy(() => {
-    removeCommand("toggle_edit_mode")
   })
 
   function focusTarget(targetName: string) {
