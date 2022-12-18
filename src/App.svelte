@@ -176,10 +176,10 @@
     on:clear_all_photos={() => clearAllImages()}
   />
 
-  <h1>Photo Playground</h1>
+  <h1>Just.Collage</h1>
 
   <div class="frame">
-    <h2>For Editing</h2>
+    <h2>Photo Collage Editing</h2>
     <div class="two-column">
       <p>S<u>t</u>ories</p>
       <div class="collage-name-component">
@@ -220,9 +220,9 @@
               bind:date_filter_to={states.datefilter.to}
             />
           </div>
+          <p>{photosToShow.length} of {photos.length} photo(s)</p>
         </div>
       </CollageView>
-      <p>{photosToShow.length} of {photos.length} photo(s)</p>
     {/if}
   </div>
 

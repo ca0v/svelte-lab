@@ -89,11 +89,11 @@
 
 <style>
   container {
+    box-sizing: border-box;
     display: grid;
     grid-auto-flow: column;
-    gap: 0.5rem;
+    gap: 2px;
     overflow-x: scroll;
-    padding: 1rem;
     align-items: top;
     height: 12vh;
   }

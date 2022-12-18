@@ -1,6 +1,6 @@
 <script lang="ts">
   const ID_MAP = "QWERTASDFGYUIOPHJKLZXCVBNM!@#$%^&*()".split("")
-  import { onMount } from "svelte"
+  import { onMount, onDestroy } from "svelte"
 
   import {
     extractId,
@@ -12,8 +12,8 @@
   import SvgImage from "./SvgImage.svelte"
   import { asPhotoServiceUrl } from "../data/collageServices"
   import type { CollageCellState, CollageData } from "../data/Api"
-  import { addCommand } from "../store/commands"
-  import { reportExceptions, toast } from "../store/toasts"
+  import { addCommand, removeCommand } from "../store/commands"
+  import { reportExceptions } from "../store/toasts"
 
   export let id: string
   export let sources: Array<string> = []
@@ -309,6 +309,10 @@
     })
   })
 
+  onDestroy(() => {
+    removeCommand("toggle_edit_mode")
+  })
+
   function focusTarget(targetName: string) {
     const target = document.querySelector(`[data-target="${targetName}"] image`)
     // @ts-ignore
@@ -389,9 +393,14 @@
 
 <style>
   svg {
+    box-sizing: border-box;
     position: relative;
     overflow: visible;
     width: min(100%, 30em);
+  }
+
+  svg.border {
+    outline: 1px solid green;
   }
 
   section {
@@ -399,12 +408,6 @@
     grid-auto-flow: row;
     grid-template-columns: 80cqmin;
     justify-content: center;
-  }
-
-  svg.border {
-    box-sizing: border-box;
-    margin: 1em;
-    outline: 1px solid green;
   }
 
   .clone {
