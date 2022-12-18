@@ -12,6 +12,7 @@
   import SvgImage from "./SvgImage.svelte"
   import { asPhotoServiceUrl } from "../data/collageServices"
   import type { CollageCellState, CollageData } from "../data/Api"
+  import { addCommand } from "../store/commands"
 
   export let id: string
   export let sources: Array<string> = []
@@ -70,13 +71,7 @@
       return true
     }
 
-    const keymap = {
-      "/": () => {
-        editmode = !editmode
-      },
-    }
-
-    if (keymap[e.key]) return keymap[e.key]() && handled()
+    handled()
 
     // get the image that is currently focused
     const image = document.activeElement as SVGImageElement
@@ -297,7 +292,20 @@
     }
   }
 
-  onMount(() => applyState(id))
+  onMount(() => {
+    applyState(id)
+    addCommand({
+      name: "Toggle Edit Mode",
+      event: "toggle_edit_mode",
+      title: "Toggle Edit Mode",
+      trigger: {
+        key: "/",
+      },
+      execute: () => {
+        editmode = !editmode
+      },
+    })
+  })
 
   function focusTarget(targetName: string) {
     const target = document.querySelector(`[data-target="${targetName}"] image`)

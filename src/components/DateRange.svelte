@@ -1,4 +1,28 @@
 <script lang="ts">
+  import { addCommand } from "../store/commands"
+
+  addCommand({
+    name: "prior_day",
+    title: "Show prior photos",
+    trigger: {
+      key: "ArrowLeft",
+    },
+    execute: () => {
+      date_filter_from = addDays(date_filter_from, -1)
+    },
+  })
+
+  addCommand({
+    name: "next_day",
+    title: "Show later photos",
+    trigger: {
+      key: "ArrowRight",
+    },
+    execute: () => {
+      date_filter_from = addDays(date_filter_from, 1)
+    },
+  })
+
   export let date_filter_from: string = ""
   export let date_filter_to: string = ""
 

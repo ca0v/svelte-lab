@@ -5,6 +5,7 @@
   import { stories } from "./store/stories"
   import { collageTemplates as transforms } from "./store/transforms"
 
+  import Commands from "./components/Commands.svelte"
   import Notes from "./components/Notes.svelte"
   import SvgPaths from "./components/SvgPaths.svelte"
   import {
@@ -16,6 +17,7 @@
   import type { Photo } from "./data/Api"
   import Toaster from "./components/Toaster.svelte"
   import { toast } from "./store/toasts"
+  import { addCommand } from "./store/commands"
 
   let photos: Array<Photo> = []
 
@@ -106,6 +108,24 @@
     photos.sort((a, b) => a.created.localeCompare(b.created))
     states.datefilter.from =
       states.datefilter.from || photos[0]?.created.split("T")[0] || ""
+
+    Object.entries($transforms).forEach(([name, transform], i) => {
+      addCommand({
+        name,
+        event: name,
+        title: `Use the "${name}" transform`,
+        trigger: {
+          key: i >= 40 ? "" : (i % 10) + 1 + "",
+          isCtrl: i >= 10 && i < 20,
+          isAlt: i >= 20 && i < 30,
+          isShift: i >= 30 && i < 40,
+        },
+        execute: () => {
+          applyTransform(name)
+          toast(`Transform applied: ${name}`)
+        },
+      })
+    })
   })
 
   function createUniqueId(): string {
@@ -117,6 +137,38 @@
 
 <main>
   <SvgPaths />
+  <Commands
+    watch={document}
+    on:start_new_story={() => {
+      const newStory = {
+        id: createUniqueId(),
+        title: states.datefilter.from,
+        data: [],
+      }
+      stories.update((s) => [newStory, ...s])
+      collageId = newStory.id
+      states.titleEditor.edit = true
+    }}
+    on:save_story={async () => {
+      states.saving = true
+      try {
+        console.log("save", activeCollage)
+        toast("Saving")
+        setLocalStorage(`${activeCollage.id}`, activeCollage)
+        await saveCollage({ ...activeCollage })
+        toast("Saved")
+      } catch (ex) {
+        reportError(ex)
+        toast(`Error: ${ex}`)
+      } finally {
+        states.saving = false
+      }
+    }}
+    on:auto_assign_photos={() =>
+      autoAssignImages(photosToShow.map(asPhotoServiceUrl))}
+    on:clear_all_photos={() => clearAllImages()}
+  />
+
   <h1>Photo Playground</h1>
 
   <div class="frame">
@@ -138,42 +190,6 @@
         {:else}
           <input type="text" disabled />
         {/if}
-        <button
-          class="add"
-          data-shortcut="Shift>c"
-          title="Create a new collage"
-          on:click={() => {
-            const newStory = {
-              id: createUniqueId(),
-              title: states.datefilter.from,
-              data: [],
-            }
-            stories.update((s) => [newStory, ...s])
-            collageId = newStory.id
-            states.titleEditor.edit = true
-          }}><u>C</u>reate</button
-        >
-        <button
-          disabled={states.saving}
-          class="add"
-          data-shortcut="Shift>s"
-          title="Save the collage"
-          on:click={async () => {
-            states.saving = true
-            try {
-              console.log("save", activeCollage)
-              toast("Saving")
-              setLocalStorage(`${activeCollage.id}`, activeCollage)
-              await saveCollage({ ...activeCollage })
-              toast("Saved")
-            } catch (ex) {
-              reportError(ex)
-              toast(`Error: ${ex}`)
-            } finally {
-              states.saving = false
-            }
-          }}><u>S</u>ave</button
-        >
       </div>
       {#if activeCollage}
         <p><u>N</u>otes</p>
@@ -190,27 +206,6 @@
       sources={photosToShow.map(asPhotoServiceUrl)}
     >
       <div class="toolbar">
-        <div class="border">
-          <button
-            on:click={() => {
-              autoAssignImages(photosToShow.map(asPhotoServiceUrl))
-            }}>Auto Assign</button
-          >
-          <button
-            on:click={() => {
-              clearAllImages()
-            }}>Clear All</button
-          >
-        </div>
-        <div class="border">
-          {#each Object.entries($transforms) as [name]}
-            <input
-              type="button"
-              value={name}
-              on:click={() => applyTransform(name)}
-            />
-          {/each}
-        </div>
         <div class="border">
           <DateRange
             bind:date_filter_from={states.datefilter.from}
@@ -292,7 +287,9 @@
   }
 
   .border {
-    border: 1px solid rgba(200, 200, 200, 0.5);
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    border: 1px dotted rgba(200, 200, 200, 0.2);
   }
 
   main {
@@ -312,7 +309,7 @@
 
   .collage-name-component {
     display: grid;
-    grid-template-columns: 1fr 1fr 5rem 5rem;
+    grid-template-columns: 1fr 1fr;
     grid-gap: 1rem;
   }
 
@@ -321,10 +318,5 @@
     grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
     grid-gap: 0.25rem;
     padding: 0.25rem;
-  }
-
-  .border {
-    padding: 0.25rem;
-    border-radius: 0.25rem;
   }
 </style>
