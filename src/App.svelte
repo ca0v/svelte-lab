@@ -129,10 +129,42 @@
         },
       })
     })
+
+    document
+      .querySelectorAll("[data-shortcut]")
+      .forEach((element: HTMLElement) => {
+        const shortcut = element
+          .getAttribute("data-shortcut")
+          .split(">")
+          .reverse()
+
+        console.log({ shortcut })
+        const command = {
+          name: `goto-${element.title}`,
+          title: element.title,
+          trigger: {
+            key: shortcut[0],
+            isShift: shortcut.includes("Shift"),
+            isCtrl: shortcut.includes("Ctrl"),
+            isAlt: shortcut.includes("Alt"),
+          },
+          execute: () => {
+            element.focus()
+            return true
+          },
+        }
+        addCommand(command)
+      })
   })
 
   onDestroy(() => {
     Object.keys($transforms).forEach(removeCommand)
+
+    document
+      .querySelectorAll("[data-shortcut]")
+      .forEach((element: HTMLElement) => {
+        removeCommand(`goto-${element.title}`)
+      })
   })
 
   function createUniqueId(): string {
@@ -185,22 +217,23 @@
       <div class="collage-name-component">
         <select
           bind:value={collageId}
-          data-shortcut="Shift>t"
+          data-shortcut="t"
           title="Select an existing story"
         >
           {#each $stories as collage}
             <option value={collage.id}>{collage.title}</option>
           {/each}
         </select>
-        {#if activeCollage}
-          <input type="text" bind:value={activeCollage.title} />
-        {:else}
-          <input type="text" disabled />
-        {/if}
+        <input
+          type="text"
+          bind:value={activeCollage.title}
+          title="Edit the title for this story"
+          disabled={!activeCollage}
+        />
       </div>
       {#if activeCollage}
         <p><u>N</u>otes</p>
-        <Notes shortcut="Shift>n" bind:note={activeCollage.note} />
+        <Notes shortcut="Shift>N" bind:note={activeCollage.note} />
       {/if}
     </div>
     {#if activeCollage}

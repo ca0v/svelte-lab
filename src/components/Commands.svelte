@@ -24,14 +24,18 @@
 
   let lastKeyUp = ""
   let lastKeyDown = ""
+  let lastKeyDownHandled = false
   let isOpen = false
   let escapeMode = false
 
   function keyUpHandler(event: KeyboardEvent) {
+    // do not remain in escape mode if user doing other things
+    escapeMode = escapeMode && lastKeyDownHandled
     lastKeyUp = event.key
   }
 
   function keyDownHandler(event: KeyboardEvent) {
+    lastKeyDownHandled = false
     lastKeyDown = event.key
     if (!escapeMode && event.key !== "Escape") return
     const { key, shiftKey, ctrlKey, altKey, metaKey } = event
@@ -45,19 +49,14 @@
           trigger.isCtrl === (ctrlKey || metaKey || false) &&
           trigger.isAlt === altKey) ||
         false
-      if (match) {
-        console.log("matched", asMenuItem(action))
-      } else {
-        console.log("no match", trigger.key == key, trigger.isShift == shiftKey)
-      }
       return match
     })
 
-    console.log({ potentialActions })
     potentialActions.forEach(executeCommand)
     if (potentialActions.length) {
       event.preventDefault()
       event.stopPropagation()
+      lastKeyDownHandled = true
     }
   }
 

@@ -44,7 +44,6 @@
   {#if date_filter_from}
     <button
       class="prev"
-      data-shortcut="P"
       on:click={() => {
         date_filter_from = addDays(date_filter_from, -1)
       }}>{dow(addDays(date_filter_from, -1))}</button
@@ -53,7 +52,6 @@
   {#if date_filter_from}
     <button
       class="next"
-      data-shortcut="N"
       on:click={() => {
         date_filter_from = addDays(date_filter_from, 1)
       }}>{dow(addDays(date_filter_from, +1))}</button

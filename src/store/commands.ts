@@ -11,7 +11,7 @@ export type Command = {
         isAlt?: boolean
         isCtrl?: boolean
     }
-    execute?: (command: Command) => true | void;
+    execute?: (command: Command) => boolean | void;
 }
 
 const initialCommands: Array<Command> = [

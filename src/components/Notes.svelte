@@ -3,7 +3,12 @@
   export let shortcut = ""
 </script>
 
-<textarea data-shortcut={shortcut} bind:value={note} spellcheck="true" />
+<textarea
+  data-shortcut={shortcut}
+  bind:value={note}
+  spellcheck="true"
+  title="Describe this story"
+/>
 
 <style>
   textarea {
