@@ -11,3 +11,14 @@ export function toast(message: string, duration = 5, level: ToastLevel = "info")
     setTimeout(() => toasts.update((t) => t.filter((t) => t.showUntil > Date.now())), 1000 * duration + 200)
 }
 
+export function reportExceptions<T>(f: (a: T) => void) {
+    return (a: T) => {
+        try {
+            f(a)
+        } catch (e) {
+            console.error(e)
+            toast(e.message, 5, "err")
+        }
+    }
+}
+

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { addDays, dow } from "../lib/globals"
   import { addCommand } from "../store/commands"
 
   addCommand({
@@ -26,21 +27,8 @@
   export let date_filter_from: string = ""
   export let date_filter_to: string = ""
 
-  function addDays(date_filter: string, arg1: number): string {
-    if (!date_filter) return date_filter
-    const currentDate = new Date(date_filter)
-    currentDate.setDate(currentDate.getDate() + arg1)
-    return currentDate.toISOString().split("T")[0]
-  }
-
   $: {
     date_filter_to = addDays(date_filter_from, 1)
-  }
-
-  function dow(yyyymmdd: string) {
-    const [year, month, day] = yyyymmdd.split("-").map((v) => parseInt(v))
-    const result = new Date(year, month - 1, day).getDay()
-    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][result]
   }
 </script>
 

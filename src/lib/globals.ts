@@ -46,4 +46,17 @@ export function getEffectiveTransform(transform: string) {
     return result === "none" ? "" : result
 }
 
+export function addDays(yyyy_mm_dd: string, days: number): string {
+    if (!yyyy_mm_dd) return yyyy_mm_dd
+    const currentDate = new Date(yyyy_mm_dd)
+    currentDate.setDate(currentDate.getDate() + days)
+    return currentDate.toISOString().split("T")[0]
+}
+
+export function dow(yyyymmdd: string) {
+    const [year, month, day] = yyyymmdd.split("-").map((v) => parseInt(v))
+    const result = new Date(year, month - 1, day).getDay()
+    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][result]
+}
+
 export { setLocalStorage, getLocalStorage, getPhotoUrl }

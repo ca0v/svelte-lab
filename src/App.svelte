@@ -13,7 +13,7 @@
     fetchPhotoList,
     saveCollage,
   } from "./data/collageServices"
-  import { extractId, setLocalStorage } from "./lib/globals"
+  import { addDays, extractId, setLocalStorage } from "./lib/globals"
   import type { Photo } from "./data/Api"
   import Toaster from "./components/Toaster.svelte"
   import { toast } from "./store/toasts"
@@ -109,6 +109,9 @@
     states.datefilter.from =
       states.datefilter.from || photos[0]?.created.split("T")[0] || ""
 
+    states.datefilter.to =
+      states.datefilter.to || addDays(states.datefilter.from, 1)
+
     Object.entries($transforms).forEach(([name, transform], i) => {
       addCommand({
         name,
@@ -196,25 +199,27 @@
         <Notes shortcut="Shift>n" bind:note={activeCollage.note} />
       {/if}
     </div>
-    <CollageView
-      id={collageId}
-      transforms={activeCollage}
-      duration={0.01}
-      on:save={async () => {
-        throw "not supported, remove"
-      }}
-      sources={photosToShow.map(asPhotoServiceUrl)}
-    >
-      <div class="toolbar">
-        <div class="border">
-          <DateRange
-            bind:date_filter_from={states.datefilter.from}
-            bind:date_filter_to={states.datefilter.to}
-          />
+    {#if activeCollage}
+      <CollageView
+        id={collageId}
+        transforms={activeCollage}
+        duration={0.01}
+        on:save={async () => {
+          throw "not supported, remove"
+        }}
+        sources={photosToShow.map(asPhotoServiceUrl)}
+      >
+        <div class="toolbar">
+          <div class="border">
+            <DateRange
+              bind:date_filter_from={states.datefilter.from}
+              bind:date_filter_to={states.datefilter.to}
+            />
+          </div>
         </div>
-      </div>
-    </CollageView>
-    <p>{photosToShow.length} of {photos.length} photo(s)</p>
+      </CollageView>
+      <p>{photosToShow.length} of {photos.length} photo(s)</p>
+    {/if}
   </div>
 
   <button on:click={() => (states.preview.visible = !states.preview.visible)}

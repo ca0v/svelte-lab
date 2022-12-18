@@ -13,6 +13,7 @@
   import { asPhotoServiceUrl } from "../data/collageServices"
   import type { CollageCellState, CollageData } from "../data/Api"
   import { addCommand } from "../store/commands"
+  import { reportExceptions, toast } from "../store/toasts"
 
   export let id: string
   export let sources: Array<string> = []
@@ -78,10 +79,11 @@
     const target = image.parentElement.dataset.target
     // get the svgImage from this
 
-    const sourceTransformIndex = transforms.data.findIndex(
+    const sourceTransformIndex = transforms?.data?.findIndex(
       (d) => d.target === target
     )
-    const sourceTransform = transforms.data[sourceTransformIndex]
+    const sourceTransform =
+      sourceTransformIndex >= 0 && transforms.data[sourceTransformIndex]
 
     if (e.ctrlKey) {
       switch (e.key) {
@@ -314,7 +316,7 @@
   }
 </script>
 
-<div class={scope} on:keydown={keyDownHandler}>
+<div class={scope} on:keydown={reportExceptions(keyDownHandler)}>
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <section>
     <svg
@@ -353,7 +355,7 @@
       {/if}
     </svg>
   </section>
-  {#if !readonly && editmode}
+  {#if !readonly && editmode && transforms}
     <slot />
     <PhotoWheel
       {sources}
