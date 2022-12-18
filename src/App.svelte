@@ -64,11 +64,21 @@
     collageId && localStorage.setItem("collage_name", collageId)
   }
 
-  $: photosToShow = photos.filter(
-    (p) =>
+  $: photosToShow = photos.filter((p) => {
+    const result =
       !states.datefilter.from ||
-      (states.datefilter.from <= p.created && p.created <= states.datefilter.to)
-  )
+      (asZulu(states.datefilter.from) <= p.created &&
+        p.created <= asZulu(states.datefilter.to))
+
+    if (result) console.log(states.datefilter.from, p.created)
+    return result
+  })
+
+  function asZulu(yyyymmdd: string) {
+    const [year, month, day] = yyyymmdd.split("-").map((v) => parseInt(v))
+    const result = new Date(year, month - 1, day).toISOString()
+    return result
+  }
 
   function applyTransform(activeTransformId: string) {
     const transform = $transforms[activeTransformId]
@@ -180,30 +190,36 @@
       sources={photosToShow.map(asPhotoServiceUrl)}
     >
       <div class="toolbar">
-        {#each Object.entries($transforms) as [name]}
-          <input
-            type="button"
-            value={name}
-            on:click={() => applyTransform(name)}
+        <div class="border">
+          <button
+            on:click={() => {
+              autoAssignImages(photosToShow.map(asPhotoServiceUrl))
+            }}>Auto Assign</button
+          >
+          <button
+            on:click={() => {
+              clearAllImages()
+            }}>Clear All</button
+          >
+        </div>
+        <div class="border">
+          {#each Object.entries($transforms) as [name]}
+            <input
+              type="button"
+              value={name}
+              on:click={() => applyTransform(name)}
+            />
+          {/each}
+        </div>
+        <div class="border">
+          <DateRange
+            bind:date_filter_from={states.datefilter.from}
+            bind:date_filter_to={states.datefilter.to}
           />
-        {/each}
-        <button
-          on:click={() => {
-            autoAssignImages(photosToShow.map(asPhotoServiceUrl))
-          }}>Auto Assign</button
-        >
-        <button
-          on:click={() => {
-            clearAllImages()
-          }}>Clear All</button
-        >
-        <DateRange
-          bind:date_filter_from={states.datefilter.from}
-          bind:date_filter_to={states.datefilter.to}
-        />
+        </div>
       </div>
     </CollageView>
-    <p>{photosToShow.length} photo(s)</p>
+    <p>{photosToShow.length} of {photos.length} photo(s)</p>
   </div>
 
   <button on:click={() => (states.preview.visible = !states.preview.visible)}
@@ -302,7 +318,13 @@
 
   .toolbar {
     display: grid;
-    grid-auto-flow: column;
-    grid-gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    grid-gap: 0.25rem;
+    padding: 0.25rem;
+  }
+
+  .border {
+    padding: 0.25rem;
+    border-radius: 0.25rem;
   }
 </style>

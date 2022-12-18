@@ -12,6 +12,12 @@
   $: {
     date_filter_to = addDays(date_filter_from, 1)
   }
+
+  function dow(yyyymmdd: string) {
+    const [year, month, day] = yyyymmdd.split("-").map((v) => parseInt(v))
+    const result = new Date(year, month - 1, day).getDay()
+    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][result]
+  }
 </script>
 
 <div class="toolbar">
@@ -21,7 +27,7 @@
       data-shortcut="P"
       on:click={() => {
         date_filter_from = addDays(date_filter_from, -1)
-      }}>{addDays(date_filter_from, -1)}</button
+      }}>{dow(addDays(date_filter_from, -1))}</button
     >{/if}
   <input type="date" bind:value={date_filter_from} />
   {#if date_filter_from}
@@ -30,7 +36,7 @@
       data-shortcut="N"
       on:click={() => {
         date_filter_from = addDays(date_filter_from, 1)
-      }}>{addDays(date_filter_from, +1)}</button
+      }}>{dow(addDays(date_filter_from, +1))}</button
     >
   {/if}
 </div>
@@ -51,11 +57,9 @@
 
   .toolbar {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
     grid-auto-rows: 1.5rem;
-    gap: 1em;
-    min-width: 10rem;
+    gap: 0.25em;
     max-width: 45rem;
-    margin: 0 auto;
   }
 </style>

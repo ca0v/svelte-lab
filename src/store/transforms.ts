@@ -6,14 +6,18 @@ import { injectPath, injectRect } from "./svg";
 
 export const collageTemplates = writable<Record<string, CollageTemplate>>({});
 
-function gridMaker(rows: number, cols: number, width: number, height: number, clipPath: string, gap: number = 0) {
+function gridMaker2(cols: number, rows: number, width: number, height: number, clipPath: string, gap: number = 0) {
+    return gridMaker(cols, rows, width, height, injectRect(clipPath, -Math.floor(width / 2), -Math.floor(height / 2), width, height), gap)
+}
+
+function gridMaker(cols: number, rows: number, width: number, height: number, clipPath: string, gap: number = 0) {
     return range(rows).map(row => {
-        const x = Math.round(-width / 2)
-        const y = Math.round(-height / 2)
+        const x = -Math.ceil(width / 2)
+        const y = -Math.ceil(height / 2)
         const bbox = { x, y, width, height }
         return range(cols).map(col => {
-            const dx = Math.round(gap / 2 + -100 + width / 2 + col * width + gap * col);
-            const dy = Math.round(gap / 2 + -100 + height / 2 + row * height + gap * row);
+            const dx = Math.round(col * width + gap * col - 100 - x);
+            const dy = Math.round(row * height + gap * row - 100 - y);
             return {
                 "i": col + row * cols,
                 bbox,
@@ -38,28 +42,9 @@ const transforms: Record<string, CollageTemplate> = {
         ...range(6).map(i => ({ "i": i + 7, "style": `rotate(${60 * i}deg) translate(80px, 0) rotate(-${60 * i}deg)`, clipPath: "30" })),
         ...range(6).map(i => ({ "i": i + 13, "style": `rotate(${30 + 60 * i}deg) translate(69.5px, 0) rotate(-${30 + 60 * i}deg)`, clipPath: "30" })),
     ],
-    "grid-3x3": gridMaker(3, 3, 65, 65, injectRect("grid-3x3", -30, -30, 65, 65), 1),
+    "grid-3x3": gridMaker(3, 3, 65, 65, injectRect("grid-3x3", -33, -33, 65, 65), 1),
     "grid-6x6": gridMaker(6, 6, 30, 30, "grid-6x6", 3),
-    "grid-4x5": range(5).map(row => {
-        const scale = 0.7;
-        const width = Math.round(70 * scale);
-        const height = Math.round(50 * scale);
-        const x = Math.round(-width / 2)
-        const y = Math.round(-height / 2)
-        const gap = 0.05;
-        const bbox = { x, y, width, height }
-        return range(4).map(col => {
-            const dx = Math.round(-100 + width / 2 + col * width + gap * width);
-            const dy = Math.round(-100 + height / 2 + row * height + gap * height);
-            return {
-                "i": col + row * 4,
-                bbox,
-                "style": `translate(${dx}px, ${dy}px)`,
-                clipPath: "box_7x5",
-            }
-        })
-    }
-    ).flat(),
+    "grid-4x5": gridMaker2(4, 5, 49, 39, "grid-4x5", 1),
     "square-16": range(4).map(row =>
         range(4).map(col => ({
             "i": col + row * 4,
