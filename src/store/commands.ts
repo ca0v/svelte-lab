@@ -55,3 +55,7 @@ export const commands = writable<Array<Command>>(initialCommands);
 export function addCommand(command: Command) {
     commands.update(v => [...v, command]);
 }
+
+export function removeCommand(commandName: string) {
+    commands.update(v => v.filter(c => c.name !== commandName));
+}

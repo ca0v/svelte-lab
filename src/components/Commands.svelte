@@ -1,6 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, onDestroy } from "svelte"
-  import { addCommand, commands, type Command } from "../store/commands"
+  import {
+    addCommand,
+    commands,
+    removeCommand,
+    type Command,
+  } from "../store/commands"
   import { toast } from "../store/toasts"
 
   export let watch: Document | Element
@@ -19,17 +24,8 @@
 
   let lastKeyUp = ""
   let lastKeyDown = ""
+  let isOpen = false
   let escapeMode = false
-
-  addCommand({
-    name: "toggle-escape-mode",
-    title: "Toggle Escape Mode",
-    trigger: { key: "Escape" },
-    execute: () => {
-      escapeMode = !escapeMode
-      return true
-    },
-  })
 
   function keyUpHandler(event: KeyboardEvent) {
     lastKeyUp = event.key
@@ -76,16 +72,38 @@
   onMount(() => {
     watch?.addEventListener("keydown", keyDownHandler)
     watch?.addEventListener("keyup", keyUpHandler)
+
+    addCommand({
+      name: "toggle-escape-mode",
+      title: "Toggle Escape Mode",
+      trigger: { key: "Escape" },
+      execute: () => {
+        escapeMode = !escapeMode
+        return true
+      },
+    })
+
+    addCommand({
+      name: "toggle-command-menu",
+      title: "Close This Menu",
+      trigger: { key: "Enter" },
+      execute: () => {
+        isOpen = !isOpen
+      },
+    })
   })
 
   onDestroy(() => {
     watch?.removeEventListener("keydown", keyDownHandler)
     watch?.removeEventListener("keyup", keyUpHandler)
+
+    removeCommand("toggle-escape-mode")
+    removeCommand("toggle-command-menu")
   })
 </script>
 
 <aside class="commands">
-  <details open={escapeMode}>
+  <details bind:open={isOpen}>
     <summary class:escape-mode={escapeMode}>Commands</summary>
     <div class="two-columns">
       {#each $commands as command}

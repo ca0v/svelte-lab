@@ -1,28 +1,7 @@
 <script lang="ts">
+  import { onMount, onDestroy } from "svelte"
   import { addDays, dow } from "../lib/globals"
-  import { addCommand } from "../store/commands"
-
-  addCommand({
-    name: "prior_day",
-    title: "Show prior photos",
-    trigger: {
-      key: "ArrowLeft",
-    },
-    execute: () => {
-      date_filter_from = addDays(date_filter_from, -1)
-    },
-  })
-
-  addCommand({
-    name: "next_day",
-    title: "Show later photos",
-    trigger: {
-      key: "ArrowRight",
-    },
-    execute: () => {
-      date_filter_from = addDays(date_filter_from, 1)
-    },
-  })
+  import { addCommand, removeCommand } from "../store/commands"
 
   export let date_filter_from: string = ""
   export let date_filter_to: string = ""
@@ -30,6 +9,35 @@
   $: {
     date_filter_to = addDays(date_filter_from, 1)
   }
+
+  onMount(() => {
+    addCommand({
+      name: "prior_day",
+      title: "Show prior photos",
+      trigger: {
+        key: "ArrowLeft",
+      },
+      execute: () => {
+        date_filter_from = addDays(date_filter_from, -1)
+      },
+    })
+
+    addCommand({
+      name: "next_day",
+      title: "Show later photos",
+      trigger: {
+        key: "ArrowRight",
+      },
+      execute: () => {
+        date_filter_from = addDays(date_filter_from, 1)
+      },
+    })
+  })
+
+  onDestroy(() => {
+    removeCommand("prior_day")
+    removeCommand("next_day")
+  })
 </script>
 
 <div class="toolbar">

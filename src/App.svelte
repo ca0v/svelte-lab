@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte"
+  import { onDestroy, onMount } from "svelte"
   import CollageView from "./components/CollageView.svelte"
   import DateRange from "./components/DateRange.svelte"
   import { stories } from "./store/stories"
@@ -17,7 +17,7 @@
   import type { Photo } from "./data/Api"
   import Toaster from "./components/Toaster.svelte"
   import { toast } from "./store/toasts"
-  import { addCommand } from "./store/commands"
+  import { addCommand, removeCommand } from "./store/commands"
 
   let photos: Array<Photo> = []
 
@@ -112,7 +112,7 @@
     states.datefilter.to =
       states.datefilter.to || addDays(states.datefilter.from, 1)
 
-    Object.entries($transforms).forEach(([name, transform], i) => {
+    Object.keys($transforms).forEach((name, i) => {
       addCommand({
         name,
         event: name,
@@ -129,6 +129,10 @@
         },
       })
     })
+  })
+
+  onDestroy(() => {
+    Object.keys($transforms).forEach(removeCommand)
   })
 
   function createUniqueId(): string {
