@@ -23,7 +23,8 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 * FTR: Can crop and round corners using clip-path: inset() on the svg image (<https://developer.mozilla.org/en-US/docs/Web/CSS/inset>)
 * FTR: need to be able to bring-to-front and send-to-back
 * DGN: Remove the PhotoWheel from the CollageView, create a higher-level composite control
-* BUG: lost ability to tab when editing
+* BUG: "ENTER" moves photo to top but does not persist the ordering
+* BUG: "Preview" is not rendering any collages
 * LRN: Make use of 'use', '#key', '#await', 'click|once|preventDefault', named &lt;slot&gt;, &lt;svelte:fragment&gt;, $$slots, svelte:self
 
 ## References

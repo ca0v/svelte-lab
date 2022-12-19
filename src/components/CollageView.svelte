@@ -1,16 +1,13 @@
 <script lang="ts">
   const ID_MAP = "QWERTASDFGYUIOPHJKLZXCVBNM1234568790".split("")
 
-  import {
-    extractId,
-    getEffectiveTransform,
-    getLocalStorage,
-  } from "../lib/globals"
+  import { getEffectiveTransform } from "../lib/globals"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
   import type { CollageCellState, CollageData, Photo } from "../data/Api"
   import { reportExceptions } from "../store/toasts"
+  import { addCommand } from "../store/commands"
 
   export let sources: Array<{ id: string; url: string }> = []
   export let readonly = false
@@ -19,6 +16,19 @@
   export let transformDelay = 0 // to be moved to configuration
 
   let play = readonly
+  let photoWheel: PhotoWheel
+
+  addCommand({
+    name: "goto-photowheel",
+    title: "Focus the PhotoWheel",
+    trigger: {
+      key: "p",
+      isShift: true,
+    },
+    execute: () => {
+      photoWheel?.focus()
+    },
+  })
 
   let scope = `hexagon_spiral`
 
@@ -92,10 +102,13 @@
       let resize = false
       switch (e.key) {
         case "Enter":
-          image.parentElement.appendChild(image)
+          image.parentElement.parentElement.appendChild(image.parentElement)
           return handled()
         case "Delete":
+          console.log("delete", sourceTransform)
           sourceTransform.id = ""
+          sourceTransform.baseurl = ""
+          transforms = transforms
           return handled()
         case "ArrowUp":
           y -= 1
@@ -151,7 +164,6 @@
           sourceTransform.y += y || -height / 2
           sourceTransform.width += width
           sourceTransform.height += height
-          console.log(sourceTransform)
         }
         // force update
         transforms = transforms
@@ -167,6 +179,7 @@
 
   function copy(from: CollageCellState, into: CollageCellState) {
     into.id = from.id
+    into.baseurl = from.baseurl
     into.x = from.x
     into.y = from.y
     into.width = from.width
@@ -272,6 +285,7 @@
     <slot />
     <PhotoWheel
       {sources}
+      bind:this={photoWheel}
       on:goto={(data) => {
         const { key } = data.detail
         const index = ID_MAP.indexOf(key.toLocaleUpperCase())
@@ -287,7 +301,8 @@
         if (index < 0) return
         const targetImage = transforms.data[index]
         if (targetImage) {
-          targetImage.id = extractId(source)
+          targetImage.id = source.id
+          targetImage.baseurl = source.url
           // forces a render
           transforms = transforms
         }

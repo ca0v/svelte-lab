@@ -9,23 +9,20 @@
   import Notes from "./components/Notes.svelte"
   import SvgPaths from "./components/SvgPaths.svelte"
   import { fetchPhotoList, saveCollage } from "./data/collageServices"
-  import {
-    addDays,
-    extractId,
-    getLocalStorage,
-    setLocalStorage,
-  } from "./lib/globals"
+  import { addDays, getLocalStorage, setLocalStorage } from "./lib/globals"
   import type { CollageData, Photo } from "./data/Api"
   import Toaster from "./components/Toaster.svelte"
   import { reportExceptions, toast } from "./store/toasts"
   import { addCommand, removeCommand } from "./store/commands"
   import { signin, signout } from "./lib/googleApi"
   import { refreshBaseurl } from "./store/photos"
+  import { writable } from "svelte/store"
 
   let photos: Array<Photo> = []
   let photosToShow: Array<Photo> = []
 
-  let collageId = ""
+  let collageId = writable<string>("")
+
   let activeCollage: CollageData | null = null
 
   let states = {
@@ -114,10 +111,21 @@
       .substring(2, 16 + 2)
   }
 
-  $: states.datefilter.from &&
+  states.datefilter.from &&
     localStorage.setItem("date_filter", states.datefilter.from)
 
-  $: collageId && localStorage.setItem("collage_name", collageId)
+  collageId.subscribe((v) => {
+    localStorage.setItem("collage_name", $collageId)
+
+    if (states.isSignedIn && $collageId) {
+      const _ = $stories.find((h) => h.id === $collageId)
+      if (_?.data) {
+        refreshBaseurl(_.data).then(() => {
+          activeCollage = _
+        })
+      }
+    }
+  })
 
   $: states.datefilter.to =
     states.datefilter.to || addDays(states.datefilter.from, 1)
@@ -134,20 +142,9 @@
     }
   }
 
-  $: {
-    if (states.isSignedIn && collageId) {
-      const _ = collageId && $stories.find((h) => h.id === collageId)
-      if (_?.data) {
-        refreshBaseurl(_.data).then(() => {
-          activeCollage = _
-        })
-      }
-    }
-  }
-
   onMount(async () => {
     states.datefilter.from = localStorage.getItem("date_filter") || ""
-    collageId = localStorage.getItem("collage_name") || ""
+    $collageId = localStorage.getItem("collage_name") || ""
 
     addCommand({
       name: "Preview",
@@ -276,7 +273,7 @@
         data: [],
       }
       stories.update((s) => [newStory, ...s])
-      collageId = newStory.id
+      $collageId = newStory.id
       states.titleEditor.edit = true
     }}
     on:save_story={async () => {
@@ -323,7 +320,7 @@
       <div class="two-column">
         <p>S<u>t</u>ories</p>
         <select
-          bind:value={collageId}
+          bind:value={$collageId}
           data-shortcut="Shift>T"
           title="Select an existing story"
         >
@@ -376,7 +373,7 @@
             <h3 class="fit">
               <button
                 on:click={() => {
-                  collageId = collage.id
+                  $collageId = collage.id
                   states.preview.visible = false
                 }}
               >
