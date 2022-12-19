@@ -62,6 +62,7 @@
   }
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
+    if (!editmode) return
     if (e.altKey) return
     if (e.metaKey) return
 
