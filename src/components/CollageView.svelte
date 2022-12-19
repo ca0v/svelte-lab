@@ -88,7 +88,7 @@
           // create a duplicate of the svgImage
           if (sourceTransformIndex >= 0) {
             const newId = transforms.data.length + 1
-            let clone = transforms.data[sourceTransformIndex]
+            let clone = sourceTransform
             clone = JSON.parse(JSON.stringify(clone))
             clone.target = "i" + newId
             clone.transform = `translate(10px, 10px) ${clone.transform}`
@@ -155,15 +155,11 @@
         case "+":
           width += 2
           height += 2
-          x -= 1
-          y -= 1
           resize = true
           break
         case "-":
           width -= 2
           height -= 2
-          x += 1
-          y += 1
           resize = true
           break
         default:
@@ -182,29 +178,22 @@
 
       if (sourceTransform && image && resize) {
         if (e.shiftKey) {
-          const currentStyle = getEffectiveTransform(sourceTransform.transform)
-          const newStyle = `scale(${1 + width / w0},${
-            1 + height / h0
-          }) ${currentStyle} translate(${x}px, ${y}px)`
-          const currentTransform = transforms.data[sourceTransformIndex]
-          currentTransform.transform = newStyle
-          transforms = transforms
+          const currentTransform = getEffectiveTransform(
+            sourceTransform.transform
+          )
+          const newTransform = `scale(${
+            1 + width / w0
+          }) ${currentTransform} translate(${x}px, ${y}px)`
+          sourceTransform.transform = newTransform
         } else {
-          if (sourceTransformIndex < 0) {
-            image.setAttribute("x", x0 + x + "px")
-            image.setAttribute("y", y0 + y + "px")
-            image.setAttribute("width", w0 + width + "px")
-            image.setAttribute("height", h0 + height + "px")
-          } else {
-            const currentTransform = transforms.data[sourceTransformIndex]
-            currentTransform.x += x
-            currentTransform.y += y
-            currentTransform.width += width
-            currentTransform.height += height
-            // force update
-            transforms = transforms
-          }
+          sourceTransform.x += x || -width / 2
+          sourceTransform.y += y || -height / 2
+          sourceTransform.width += width
+          sourceTransform.height += height
+          console.log(sourceTransform)
         }
+        // force update
+        transforms = transforms
         return handled()
       }
     }

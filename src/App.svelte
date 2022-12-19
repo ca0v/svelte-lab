@@ -237,23 +237,22 @@
     <h2>Photo Collage Editor</h2>
     <div class="two-column">
       <p>S<u>t</u>ories</p>
-      <div class="collage-name-component">
-        <select
-          bind:value={collageId}
-          data-shortcut="Shift>T"
-          title="Select an existing story"
-        >
-          {#each $stories as collage}
-            <option value={collage.id}>{collage.title}</option>
-          {/each}
-        </select>
-        <input
-          type="text"
-          bind:value={activeCollage.title}
-          title="Edit the title for this story"
-          disabled={!activeCollage}
-        />
-      </div>
+      <select
+        bind:value={collageId}
+        data-shortcut="Shift>T"
+        title="Select an existing story"
+      >
+        {#each $stories as collage}
+          <option value={collage.id}>{collage.title}</option>
+        {/each}
+      </select>
+      <p>Title</p>
+      <input
+        type="text"
+        bind:value={activeCollage.title}
+        title="Edit the title for this story"
+        disabled={!activeCollage}
+      />
       {#if activeCollage}
         <p><u>N</u>otes</p>
         <Notes shortcut="Shift>N" bind:note={activeCollage.note} />
@@ -311,10 +310,8 @@
 <style>
   .two-column {
     display: grid;
-    grid-template-columns: 1fr 7fr;
+    grid-template-columns: 5rem auto;
     grid-gap: 1rem;
-    width: clamp(10rem, 90vw, 80rem);
-    margin: 0 auto;
   }
 
   .three-by {
@@ -364,12 +361,6 @@
 
   * {
     font-size: clamp(8px, 1cqw, 16px);
-  }
-
-  .collage-name-component {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 1rem;
   }
 
   .toolbar {

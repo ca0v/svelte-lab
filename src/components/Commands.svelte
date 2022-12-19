@@ -108,7 +108,7 @@
       {#each $commands as command}
         <div title={command.name}>{command.title}</div>
         <button on:click={() => executeCommand(command)}>
-          <code>{asMenuItem(command)}</code>
+          {asMenuItem(command)}
         </button>
       {/each}
     </div>
@@ -116,14 +116,11 @@
 </aside>
 
 <style>
-  .commands {
+  aside {
     position: fixed;
     top: 0;
     right: 0;
     z-index: 100;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-    margin: 0.5rem;
     cursor: pointer;
   }
 
@@ -133,26 +130,27 @@
     gap: 0.25rem;
   }
 
-  code {
-    font-family: monospace;
-    font-size: larger;
-  }
-
   details {
-    padding: 0.25rem;
+    color: transparent;
+    padding: 1rem;
+    padding-top: 0;
     overflow: hidden;
     overflow-y: auto;
     width: auto;
     max-height: 80vh;
+    transition-duration: 300ms;
   }
 
   details[open] {
+    color: white;
     background-color: #333;
-    opacity: 1;
+    border-bottom-left-radius: 1rem;
+    outline: 1px solid #666;
   }
 
   details > summary {
-    padding: 0.25rem;
+    color: white;
+    padding: 0.5rem;
     border-radius: 4px;
     list-style: none;
   }
@@ -163,6 +161,6 @@
   }
 
   details > summary.escape-mode {
-    outline: 1px solid green;
+    color: green;
   }
 </style>
