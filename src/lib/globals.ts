@@ -1,3 +1,8 @@
+import { PhotoDB } from "./indexdb"
+
+const photoDB = new PhotoDB();
+await photoDB.initialize();
+
 export function extractId(href: string): string {
     return href.substring(href.lastIndexOf("id=") + 3)
 }
@@ -8,8 +13,13 @@ export function range(size: number) {
 }
 
 // read data from localstorage
-const getLocalStorage = (key: string) => {
-    const data = localStorage.getItem(`svelte_lab.${key}`)
+const getLocalStorage = async (key: string) => {
+    key = `svelte_lab.${key}`
+    let data = await photoDB.getGlobal<any>(key);
+    if (data) {
+        return data.value;
+    }
+    data = localStorage.getItem(key)
     if (data) {
         return JSON.parse(data)
     }
@@ -18,7 +28,9 @@ const getLocalStorage = (key: string) => {
 
 // write data to localstorage
 const setLocalStorage = (key: string, data: any) => {
-    localStorage.setItem(`svelte_lab.${key}`, JSON.stringify(data));
+    key = `svelte_lab.${key}`
+    //localStorage.setItem(key, JSON.stringify(data));
+    photoDB.putGlobal(key, data)
 }
 
 // prompt user for value
@@ -27,8 +39,8 @@ const promptUser = (message: string) => {
 }
 
 // get the photo url or prompt user for it
-const getPhotoUrl = () => {
-    const photoUrl = getLocalStorage('photoServerUrl')
+const getPhotoUrl = async () => {
+    const photoUrl = await getLocalStorage('photoServerUrl')
     if (photoUrl) {
         return photoUrl
     }

@@ -15,7 +15,7 @@
     getLocalStorage,
     setLocalStorage,
   } from "./lib/globals"
-  import type { Photo } from "./data/Api"
+  import type { CollageData, Photo } from "./data/Api"
   import Toaster from "./components/Toaster.svelte"
   import { reportExceptions, toast } from "./store/toasts"
   import { addCommand, removeCommand } from "./store/commands"
@@ -26,6 +26,7 @@
   let photosToShow: Array<Photo> = []
 
   let collageId = ""
+  let activeCollage: CollageData | null = null
 
   let states = {
     saving: false,
@@ -57,11 +58,6 @@
     console.log({ photos })
     states.datefilter.from =
       states.datefilter.from || photos[0]?.created.split("T")[0] || ""
-
-    states.datefilter.to =
-      states.datefilter.to || addDays(states.datefilter.from, 1)
-
-    // update baseurl for these photos
   }
 
   function handleSignoutClick() {
@@ -70,17 +66,20 @@
   }
 
   // assign images to each image element
-  function autoAssignImages(urls: string[]) {
+  function autoAssignImages(photos: Photo[]) {
     let j = 0
     activeCollage.data.some((transform) => {
-      if (j >= urls.length) return true
-      transform.id = transform.id || extractId(urls[j++])
+      if (j >= photos.length) return true
+      transform.id = transform.id || photos[j++].id
     })
     activeCollage = activeCollage
   }
 
   function clearAllImages() {
-    activeCollage.data.forEach((t) => (t.id = ""))
+    activeCollage.data.forEach((t) => {
+      t.id = ""
+      t.baseurl = ""
+    })
     activeCollage = activeCollage
   }
 
@@ -117,8 +116,12 @@
 
   $: states.datefilter.from &&
     localStorage.setItem("date_filter", states.datefilter.from)
-  $: activeCollage = collageId && $stories.find((h) => h.id === collageId)
+
   $: collageId && localStorage.setItem("collage_name", collageId)
+
+  $: states.datefilter.to =
+    states.datefilter.to || addDays(states.datefilter.from, 1)
+
   $: {
     if (states.isSignedIn && states.datefilter.from && states.datefilter.to) {
       const from = asZulu(states.datefilter.from)
@@ -126,10 +129,19 @@
       const toShow = photos.filter((p) => from <= p.created && p.created < to)
 
       refreshBaseurl(toShow).then(() => {
-        console.log("refreshed baseurl")
-        console.log({ from, to, photos, toShow })
         photosToShow = toShow
       })
+    }
+  }
+
+  $: {
+    if (states.isSignedIn && collageId) {
+      const _ = collageId && $stories.find((h) => h.id === collageId)
+      if (_?.data) {
+        refreshBaseurl(_.data).then(() => {
+          activeCollage = _
+        })
+      }
     }
   }
 
@@ -215,11 +227,12 @@
   })
 
   async function getPhotosFor2022() {
-    let startDate = getLocalStorage("fetchPhotoList:end-date") || "2021-12-31"
-    let endDate = "2022-08-01"
+    const startDate =
+      (await getLocalStorage("fetchPhotoList:end-date")) || "2021-12-31"
+    const endDate = "2022-12-31"
 
-    let cachedPhotos: Record<string, Photo> =
-      getLocalStorage("fetchPhotoList:photos") || {}
+    const cachedPhotos: Record<string, Photo> =
+      (await getLocalStorage("fetchPhotoList:photos")) || {}
 
     const responseIterator = fetchPhotoList(startDate, endDate)
 
@@ -280,8 +293,7 @@
         states.saving = false
       }
     }}
-    on:auto_assign_photos={() =>
-      autoAssignImages(photosToShow.map((p) => p.baseurl))}
+    on:auto_assign_photos={() => autoAssignImages(photosToShow)}
     on:clear_all_photos={() => clearAllImages()}
   />
 
@@ -315,18 +327,18 @@
           data-shortcut="Shift>T"
           title="Select an existing story"
         >
-          {#each $stories as collage}
+          {#each $stories.sort( (a, b) => a.title.localeCompare(b.title) ) as collage}
             <option value={collage.id}>{collage.title}</option>
           {/each}
         </select>
-        <p>Title</p>
-        <input
-          type="text"
-          bind:value={activeCollage.title}
-          title="Edit the title for this story"
-          disabled={!activeCollage}
-        />
         {#if activeCollage}
+          <p>Title</p>
+          <input
+            type="text"
+            bind:value={activeCollage.title}
+            title="Edit the title for this story"
+            disabled={!activeCollage}
+          />
           <p><u>N</u>otes</p>
           <Notes shortcut="Shift>N" bind:note={activeCollage.note} />
         {/if}
@@ -387,6 +399,12 @@
 <Toaster />
 
 <style>
+  main {
+    margin: 0;
+    margin-left: 5rem;
+    width: calc(100vw - 10rem);
+  }
+
   p {
     padding: 0;
     margin: 0;
@@ -395,7 +413,6 @@
 
   .frame {
     justify-content: center;
-    width: calc(clamp(20rem, 100vw, 100rem) - 2rem);
   }
 
   h3,
@@ -444,9 +461,13 @@
 
   .toolbar {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
     grid-gap: 0.25rem;
     padding: 0.25rem;
+    justify-content: center;
+  }
+
+  .toolbar > input {
+    width: fit-content;
   }
 
   .spacer {

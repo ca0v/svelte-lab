@@ -20,7 +20,8 @@ export async function refreshBaseurl(
 
     photos.forEach((p) => {
         const original = p.baseurl
-        const current = transformToUrlMap[p.id].baseurl
+        const current = transformToUrlMap[p.id]?.baseurl
+        if (!current) return;
         if (original != current) {
             console.log(`refreshing baseurl for ${p.id} from ${original} to ${current}`)
             p.baseurl = current;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  const ID_MAP = "QWERTASDFGYUIOPHJKLZXCVBNM!@#$%^&*()".split("")
+  const ID_MAP = "QWERTASDFGYUIOPHJKLZXCVBNM1234568790".split("")
 
   import {
     extractId,
@@ -225,7 +225,7 @@
     target?.focus()
   }
 
-  $: reportExceptions(() => transforms && refreshTransforms(transforms.data))()
+  //$: reportExceptions(() => transforms && refreshTransforms(transforms.data))()
 </script>
 
 <div class={scope} on:keydown={reportExceptions(keyDownHandler)}>

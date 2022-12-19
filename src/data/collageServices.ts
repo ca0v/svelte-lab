@@ -2,12 +2,13 @@ import type { AudioRecording } from "../lib/db"
 import { getPhotoUrl } from "../lib/globals"
 import { loadAllPhotos, loadAllPhotosByDate, loadAllPhotosByIds, loadMediaItem } from "../lib/googlePhotoApi"
 
-const PHOTOS = `${getPhotoUrl()}/photo`
-
 import { Api, type CollageCellState, type CollageData, type Photo } from "./Api"
-const api = new Api({ baseUrl: getPhotoUrl() });
+const baseUrl = await getPhotoUrl();
+const api = new Api({ baseUrl });
 
 export async function* fetchPhotoList(startDate: string, endDate: string): AsyncGenerator<Array<Photo>, void, void> {
+    if (!startDate) throw new Error("startDate is required");
+    if (!endDate) throw new Error("endDate is required");
     const startDateMap = startDate.split("-").map((v) => parseInt(v, 10))
     const endDateMap = endDate.split("-").map((v) => parseInt(v, 10))
 

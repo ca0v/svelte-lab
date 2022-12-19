@@ -4,5 +4,5 @@ import { getAllCollages } from "../data/collageServices"
 export const stories = writable<Array<CollageData>>([]);
 
 export const additionalStories = await getAllCollages();
-stories.update(v => [...v, ...additionalStories]);
+additionalStories && stories.update(v => [...v, ...additionalStories]);
 
