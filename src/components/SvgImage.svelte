@@ -165,19 +165,15 @@
       on:focus={() => (active = true)}
       on:blur={() => (active = false)}
       on:mousedown={mouseDownHandler}
-      on:dragstart={(e) => {
-        console.log("dragstart never fires")
-        e.preventDefault()
-      }}
       on:dragover={(e) => {
         console.log("dragover", target)
         e.dataTransfer.dropEffect = "copy"
         e.preventDefault()
       }}
       on:drop={(e) => {
-        console.log("drop", target)
-        const url = e.dataTransfer.getData("text/plain")
-        dispatch("drop", { url })
+        const data = JSON.parse(e.dataTransfer.getData("application/json"))
+        console.log("drop", target, data)
+        dispatch("drop", data)
         active = true
         e.preventDefault()
       }}

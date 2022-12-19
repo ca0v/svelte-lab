@@ -9,13 +9,10 @@
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
-  import { fetchPhotoByIds } from "../data/collageServices"
   import type { CollageCellState, CollageData, Photo } from "../data/Api"
   import { reportExceptions } from "../store/toasts"
-  import { refreshTransforms } from "../store/photos"
 
-  export let id: string
-  export let sources: Array<string> = []
+  export let sources: Array<{ id: string; url: string }> = []
   export let readonly = false
   export let editmode = !readonly
   export let transforms: CollageData
@@ -178,15 +175,17 @@
   }
 
   function swap(i1: CollageCellState, i2: CollageCellState) {
-    const { id, x, y, width, height } = i1
+    const { id, baseurl, x, y, width, height } = i1
 
     i1.id = i2.id
+    i1.baseurl = i2.baseurl
     i1.x = i2.x
     i1.y = i2.y
     i1.width = i2.width
     i1.height = i2.height
 
     i2.id = id
+    i2.baseurl = baseurl
     i2.x = x
     i2.y = y
     i2.width = width
@@ -251,8 +250,10 @@
             height={transform.height}
             on:swap={swapHandler}
             on:drop={(e) => {
-              const id = extractId(e.detail.url)
+              console.log("drop", e.detail)
+              const { id, url } = e.detail
               transform.id = id
+              transform.baseurl = url
               transforms = transforms
             }}
             target={`${transform.target}`}

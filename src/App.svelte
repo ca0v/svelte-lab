@@ -346,13 +346,12 @@
       <div class="spacer" />
       {#if activeCollage && states.isSignedIn}
         <CollageView
-          id={collageId}
           transforms={activeCollage}
           bind:editmode={states.editor.editmode}
           on:save={async () => {
             throw "not supported, remove"
           }}
-          sources={photosToShow.map((p) => p.baseurl)}
+          sources={photosToShow.map((p) => ({ id: p.id, url: p.baseurl }))}
         >
           <div class="spacer" />
           <div class="toolbar">
@@ -384,11 +383,7 @@
                 {collage.title}
               </button>
             </h3>
-            <CollageView
-              id={`view_${collage.id}`}
-              readonly={true}
-              transforms={collage}
-            />
+            <CollageView readonly={true} transforms={collage} />
           </div>
         {/each}
       </div>

@@ -1,8 +1,13 @@
 <script lang="ts">
+  type Source = {
+    id: string
+    url: string
+  }
+
   import { createEventDispatcher } from "svelte"
   import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
   const dispatch = createEventDispatcher()
-  export let sources: Array<string> = []
+  export let sources: Array<Source> = []
   let container: HTMLElement
 
   let lastFocusedElement: any = null
@@ -17,7 +22,7 @@
 
   function keyDownHandler(
     e: KeyboardEvent & { currentTarget: EventTarget & HTMLButtonElement },
-    source: string
+    source: Source
   ) {
     if (e.shiftKey && e.key !== "Shift") {
       dispatch("goto", { key: e.key })
@@ -66,6 +71,7 @@
       on:dragstart={(e) => {
         console.log("dragstart", e)
         e.dataTransfer.dropEffect = "copy"
+        e.dataTransfer.setData("application/json", JSON.stringify(source))
       }}
       on:dragend={(e) => {
         console.log("dragend", e)
@@ -82,7 +88,7 @@
         keyDownHandler(e, source)
       }}
     >
-      <img src={source} alt="" />
+      <img src={source.url} alt="" />
     </button>
   {/each}
 </container>
