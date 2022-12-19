@@ -283,24 +283,31 @@
   </div>
 
   {#if states.preview.visible}
-    <h2>Preview</h2>
-    <div class="frame three-by">
-      {#each $stories.filter((c) => c.data?.length).reverse() as collage, i}
-        <div class="border">
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <h3 class="fit">
-            <button on:click={() => (collageId = collage.id)}>
-              {collage.title}
-            </button>
-          </h3>
-          <CollageView
-            id={`view_${collage.id}`}
-            duration={[0.2, 0.3, 0.4][i] || 1}
-            readonly={true}
-            transforms={collage}
-          />
-        </div>
-      {/each}
+    <div class="preview-area">
+      <h2>Preview</h2>
+      <div class="frame three-by">
+        {#each $stories.filter((c) => c.data?.length).reverse() as collage, i}
+          <div class="border">
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <h3 class="fit">
+              <button
+                on:click={() => {
+                  collageId = collage.id
+                  states.preview.visible = false
+                }}
+              >
+                {collage.title}
+              </button>
+            </h3>
+            <CollageView
+              id={`view_${collage.id}`}
+              duration={[0.2, 0.3, 0.4][i] || 1}
+              readonly={true}
+              transforms={collage}
+            />
+          </div>
+        {/each}
+      </div>
     </div>
   {/if}
 </main>
@@ -373,5 +380,15 @@
   .spacer {
     height: 1rem;
     width: 1rem;
+  }
+
+  .preview-area {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    background-color: black;
   }
 </style>
