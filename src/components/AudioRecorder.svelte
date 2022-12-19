@@ -2,16 +2,18 @@
   import { onMount, createEventDispatcher } from "svelte"
   import type { AudioRecording } from "../lib/db"
 
-  const dispatch = createEventDispatcher()
   export let recordings: Array<AudioRecording> = []
+
+  const chunks_1 = []
+  const dispatch = createEventDispatcher()
+  const appStartTime = Date.now()
 
   let stop: HTMLButtonElement
   let record: HTMLButtonElement
   let mediaRecorder: MediaRecorder
 
   let audioPlayer: HTMLAudioElement
-
-  const chunks_1 = []
+  let stream: MediaStream
 
   async function recordClickHandler() {
     try {
@@ -53,8 +55,6 @@
     stopListening()
   }
 
-  let stream: MediaStream
-
   async function startListening() {
     stop.disabled = true
 
@@ -85,10 +85,6 @@
     stream?.getTracks().forEach((track) => track.stop())
   }
 
-  onMount(() => {
-    //
-  })
-
   function deleteRecording(recording: AudioRecording): any {
     dispatch("delete", { id: recording.id })
   }
@@ -105,7 +101,6 @@
     dispatch("save", recording)
   }
 
-  const appStartTime = Date.now()
   function timeSinceAppStarted() {
     const currentTime = Date.now()
     const secondsSinceAppStarted = (currentTime - appStartTime) / 1000
@@ -158,6 +153,22 @@
     box-sizing: border-box;
   }
 
+  /* css for a record button  */
+  button {
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+  }
+
+  article {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
   .wrapper {
     height: 100%;
     display: flex;
@@ -198,21 +209,5 @@
   .stop:not(:disabled) {
     background-color: red;
     color: white;
-  }
-
-  /* css for a record button  */
-  button {
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 24px;
-    height: 24px;
-  }
-
-  article {
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
   }
 </style>

@@ -20,7 +20,6 @@
   import { addCommand, removeCommand } from "./store/commands"
 
   let photos: Array<Photo> = []
-
   let collageId = ""
 
   let states = {
@@ -58,26 +57,6 @@
     activeCollage = activeCollage
   }
 
-  $: {
-    states.datefilter.from &&
-      localStorage.setItem("date_filter", states.datefilter.from)
-  }
-
-  $: activeCollage = collageId && $stories.find((h) => h.id === collageId)
-
-  $: {
-    collageId && localStorage.setItem("collage_name", collageId)
-  }
-
-  $: photosToShow = photos.filter((p) => {
-    const result =
-      !states.datefilter.from ||
-      (asZulu(states.datefilter.from) <= p.created &&
-        p.created <= asZulu(states.datefilter.to))
-
-    return result
-  })
-
   function asZulu(yyyymmdd: string) {
     const [year, month, day] = yyyymmdd.split("-").map((v) => parseInt(v))
     const result = new Date(year, month - 1, day).toISOString()
@@ -102,6 +81,23 @@
       }))
     }
   }
+
+  function createUniqueId(): string {
+    return Math.random()
+      .toString(36)
+      .substring(2, 16 + 2)
+  }
+
+  $: states.datefilter.from &&
+    localStorage.setItem("date_filter", states.datefilter.from)
+  $: activeCollage = collageId && $stories.find((h) => h.id === collageId)
+  $: collageId && localStorage.setItem("collage_name", collageId)
+  $: photosToShow = photos.filter(
+    (p) =>
+      !states.datefilter.from ||
+      (asZulu(states.datefilter.from) <= p.created &&
+        p.created <= asZulu(states.datefilter.to))
+  )
 
   onMount(async () => {
     states.datefilter.from = localStorage.getItem("date_filter") || ""
@@ -190,12 +186,6 @@
         removeCommand(`goto-${element.title}`)
       })
   })
-
-  function createUniqueId(): string {
-    return Math.random()
-      .toString(36)
-      .substring(2, 16 + 2)
-  }
 </script>
 
 <main>
@@ -263,7 +253,6 @@
       <CollageView
         id={collageId}
         transforms={activeCollage}
-        duration={0.01}
         bind:editmode={states.editor.editmode}
         on:save={async () => {
           throw "not supported, remove"
@@ -301,7 +290,6 @@
             </h3>
             <CollageView
               id={`view_${collage.id}`}
-              duration={[0.2, 0.3, 0.4][i] || 1}
               readonly={true}
               transforms={collage}
             />
@@ -315,19 +303,6 @@
 <Toaster />
 
 <style>
-  .two-column {
-    display: grid;
-    grid-template-columns: 5rem auto;
-    grid-gap: 1rem;
-  }
-
-  .three-by {
-    display: grid;
-    grid-template-columns: repeat(4, 20vw);
-    grid-template-rows: repeat(3, 1fr);
-    row-gap: 2rem;
-  }
-
   p {
     padding: 0;
     margin: 0;
@@ -351,6 +326,19 @@
 
   h2 {
     font-size: clamp(8px, 1.8cqw, 20px);
+  }
+
+  .two-column {
+    display: grid;
+    grid-template-columns: 5rem auto;
+    grid-gap: 1rem;
+  }
+
+  .three-by {
+    display: grid;
+    grid-template-columns: repeat(4, 20vw);
+    grid-template-rows: repeat(3, 1fr);
+    row-gap: 2rem;
   }
 
   .border {

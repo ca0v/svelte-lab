@@ -11,6 +11,11 @@
   export let watch: Document | Element
 
   const dispatcher = createEventDispatcher()
+  let lastKeyUp = ""
+  let lastKeyDown = ""
+  let lastKeyDownHandled = false
+  let isOpen = false
+  let escapeMode = false
 
   function asMenuItem(action: Command) {
     if (!action.trigger) return "<none>"
@@ -21,12 +26,6 @@
 
     return `${modifiers + key}`
   }
-
-  let lastKeyUp = ""
-  let lastKeyDown = ""
-  let lastKeyDownHandled = false
-  let isOpen = false
-  let escapeMode = false
 
   function keyUpHandler(event: KeyboardEvent) {
     // do not remain in escape mode if user doing other things
@@ -124,12 +123,6 @@
     cursor: pointer;
   }
 
-  .two-columns {
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    gap: 0.25rem;
-  }
-
   details {
     color: transparent;
     padding: 1rem;
@@ -163,4 +156,11 @@
   details > summary.escape-mode {
     color: green;
   }
+
+  .two-columns {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 0.25rem;
+  }
+
 </style>
