@@ -1,6 +1,5 @@
 <script lang="ts">
   const ID_MAP = "QWERTASDFGYUIOPHJKLZXCVBNM!@#$%^&*()".split("")
-  import { onMount } from "svelte"
 
   import {
     extractId,
@@ -10,9 +9,10 @@
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
-  import { asPhotoServiceUrl } from "../data/collageServices"
-  import type { CollageCellState, CollageData } from "../data/Api"
+  import { fetchPhotoByIds } from "../data/collageServices"
+  import type { CollageCellState, CollageData, Photo } from "../data/Api"
   import { reportExceptions } from "../store/toasts"
+  import { refreshTransforms } from "../store/photos"
 
   export let id: string
   export let sources: Array<string> = []
@@ -23,7 +23,6 @@
 
   let play = readonly
 
-  let photoWheelComponent: PhotoWheel
   let scope = `hexagon_spiral`
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
@@ -34,7 +33,6 @@
     function handled() {
       e.preventDefault()
       e.stopPropagation()
-      return true
     }
 
     // get the image that is currently focused
@@ -88,7 +86,7 @@
     }
 
     if (sourceTransform && image) {
-      let { x: x0, y: y0, width: w0, height: h0 } = sourceTransform
+      let { width: w0 } = sourceTransform
       let x = 0
       let y = 0
       let width = 0
@@ -227,27 +225,7 @@
     target?.focus()
   }
 
-  onMount(() => {
-    if (!id) return
-    if (!transforms) return
-
-    const savedState: CollageData = getLocalStorage(id)
-    if (savedState) {
-      savedState.data.forEach((image, i) => {
-        const transform = transforms.data[i]
-        if (!transform) return
-        transform.id = image.id
-        transform.transform = image.transform
-        transform.clipPath = image.clipPath
-        transform.x = image.x
-        transform.y = image.y
-        transform.width = image.width
-        transform.height = image.height
-      })
-    }
-
-    replay()
-  })
+  $: reportExceptions(() => transforms && refreshTransforms(transforms.data))()
 </script>
 
 <div class={scope} on:keydown={reportExceptions(keyDownHandler)}>
@@ -265,7 +243,7 @@
             {play}
             {editmode}
             {readonly}
-            href={asPhotoServiceUrl(transform)}
+            href={transform.baseurl}
             clipPath={transform.clipPath}
             x={transform.x}
             y={transform.y}
@@ -293,7 +271,6 @@
     <slot />
     <PhotoWheel
       {sources}
-      bind:this={photoWheelComponent}
       on:goto={(data) => {
         const { key } = data.detail
         const index = ID_MAP.indexOf(key.toLocaleUpperCase())

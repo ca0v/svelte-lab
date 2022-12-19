@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, createEventDispatcher } from "svelte"
+  import { createEventDispatcher } from "svelte"
   import type { AudioRecording } from "../lib/db"
 
   export let recordings: Array<AudioRecording> = []
