@@ -61,7 +61,41 @@ const transforms: Record<string, CollageTemplate> = {
 
 }
 
-function injectCss() {
+function createCssTransforms(scope: string, size = 20) {
+    return Array(size)
+        .fill(0)
+        .map((_, i) => {
+            const t = `translate(${size / 2 - i}em,-12vh)`
+            return `transform: ${t} !important;opacity(0);`
+        })
+        .map((t, i) => `.${scope} .play.i${i} { ${t} }`)
+        .join("\n")
+}
+
+function createInitialCss(scope: string, duration = 0.1, size = 20) {
+    return Array(size)
+        .fill(0)
+        .map((_, i) => {
+            return `transition-delay: ${i * duration}ms; transition-duration: ${(5 + i) * duration
+                }s; opacity:1;`
+        })
+        .map((t, i) => `.${scope} .i${i} { ${t} }`)
+        .join("\n")
+}
+
+// inject css into style tag
+export function injectCss(id: string, generator: () => string) {
+    let style = document.querySelector(`#${id}`)
+    if (!style) {
+        style = document.createElement("style")
+        style.id = id
+        document.head.appendChild(style)
+    }
+    style.innerHTML = generator()
+}
+
+
+function initialize() {
     injectRect("grid-6x6", -15, -15, 30, 30)
     injectRect("box", -25, -25, 50, 50)
     injectRect("box_7x5", -35, -25, 70, 50)
@@ -73,6 +107,10 @@ function injectCss() {
     injectPath("2", polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64)))
     injectRect("7x5", -35, -25, 70, 50)
     collageTemplates.update(t => ({ ...t, ...transforms }))
+
+    injectCss(`hexagon_spiral_init`, () => createInitialCss(`hexagon_spiral`, 0.1, 20))
+    injectCss(`hexagon_spiral_transitions`, () => createCssTransforms(`hexagon_spiral`, 20))
+
 }
 
-injectCss()
+initialize()

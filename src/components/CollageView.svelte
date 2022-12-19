@@ -1,6 +1,6 @@
 <script lang="ts">
   const ID_MAP = "QWERTASDFGYUIOPHJKLZXCVBNM!@#$%^&*()".split("")
-  import { onMount, onDestroy } from "svelte"
+  import { onMount } from "svelte"
 
   import {
     extractId,
@@ -16,7 +16,6 @@
 
   export let id: string
   export let sources: Array<string> = []
-  export let duration = 0.1
   export let readonly = false
   export let editmode = !readonly
   export let transforms: CollageData
@@ -25,41 +24,7 @@
   let play = readonly
 
   let photoWheelComponent: PhotoWheel
-  let scope = `hexagon_spiral_${id}`
-
-  function createCssTransforms(size = 20) {
-    return Array(size)
-      .fill(0)
-      .map((_, i) => {
-        const t = `translate(${size / 2 - i}em,-12vh)`
-        return `transform: ${t} !important;opacity(0);`
-      })
-      .map((t, i) => `.${scope} .play.i${i} { ${t} }`)
-      .join("\n")
-  }
-
-  function createInitialCss(size = 20) {
-    return Array(size)
-      .fill(0)
-      .map((_, i) => {
-        return `transition-delay: ${i * duration}ms; transition-duration: ${
-          (5 + i) * duration
-        }s; opacity:1;`
-      })
-      .map((t, i) => `.${scope} .i${i} { ${t} }`)
-      .join("\n")
-  }
-
-  // inject css into style tag
-  function injectCss(id: string, generator: () => string) {
-    let style = document.querySelector(`#${id}`)
-    if (!style) {
-      style = document.createElement("style")
-      style.id = id
-      document.head.appendChild(style)
-    }
-    style.innerHTML = generator()
-  }
+  let scope = `hexagon_spiral`
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
     if (!editmode) return
@@ -200,31 +165,6 @@
     }
   }
 
-  async function applyState(id: string) {
-    if (!id) return
-    if (!transforms) return
-
-    injectCss(`hexagon_spiral_init_${id}`, createInitialCss)
-    injectCss(`hexagon_spiral_transitions_${id}`, createCssTransforms)
-
-    const savedState: CollageData = getLocalStorage(id)
-    if (savedState) {
-      savedState.data.forEach((image, i) => {
-        const transform = transforms.data[i]
-        if (!transform) return
-        transform.id = image.id
-        transform.transform = image.transform
-        transform.clipPath = image.clipPath
-        transform.x = image.x
-        transform.y = image.y
-        transform.width = image.width
-        transform.height = image.height
-      })
-    }
-
-    replay()
-  }
-
   function replay() {
     play = true
     setTimeout(() => (play = false), transformDelay * 1000)
@@ -281,15 +221,33 @@
     }
   }
 
-  onMount(() => {
-    applyState(id)
-  })
-
   function focusTarget(targetName: string) {
     const target = document.querySelector(`[data-target="${targetName}"] image`)
     // @ts-ignore
     target?.focus()
   }
+
+  onMount(() => {
+    if (!id) return
+    if (!transforms) return
+
+    const savedState: CollageData = getLocalStorage(id)
+    if (savedState) {
+      savedState.data.forEach((image, i) => {
+        const transform = transforms.data[i]
+        if (!transform) return
+        transform.id = image.id
+        transform.transform = image.transform
+        transform.clipPath = image.clipPath
+        transform.x = image.x
+        transform.y = image.y
+        transform.width = image.width
+        transform.height = image.height
+      })
+    }
+
+    replay()
+  })
 </script>
 
 <div class={scope} on:keydown={reportExceptions(keyDownHandler)}>
