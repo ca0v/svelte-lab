@@ -22,6 +22,7 @@
   let photosToShow: Array<Photo> = []
 
   let collageId = writable<string>("")
+  let collageView: CollageView
 
   let activeCollage: CollageData | null = null
 
@@ -147,6 +148,18 @@
     $collageId = localStorage.getItem("collage_name") || ""
 
     addCommand({
+      name: "goto-photowheel",
+      title: "Focus the PhotoWheel",
+      trigger: {
+        key: "p",
+        isShift: true,
+      },
+      execute: () => {
+        collageView.focusPhotoWheel()
+      },
+    })
+
+    addCommand({
       name: "Preview",
       event: "preview",
       title: "Preview collage",
@@ -175,7 +188,8 @@
         event: name,
         title: `Use the "${name}" transform`,
         trigger: {
-          key: i >= 40 ? "" : (i % 10) + 1 + "",
+          key: (i >= 40 ? "" : (i % 10) + 1) + "",
+          preamble: "t",
           isCtrl: i >= 10 && i < 20,
           isAlt: i >= 20 && i < 30,
           isShift: i >= 30 && i < 40,
@@ -214,6 +228,8 @@
   })
 
   onDestroy(() => {
+    removeCommand("Preview")
+    removeCommand("Toggle Edit Mode")
     Object.keys($transforms).forEach(removeCommand)
 
     document
@@ -343,6 +359,7 @@
       <div class="spacer" />
       {#if activeCollage && states.isSignedIn}
         <CollageView
+          bind:this={collageView}
           transforms={activeCollage}
           bind:editmode={states.editor.editmode}
           on:save={async () => {

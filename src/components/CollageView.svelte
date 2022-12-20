@@ -18,19 +18,11 @@
   let play = readonly
   let photoWheel: PhotoWheel
 
-  addCommand({
-    name: "goto-photowheel",
-    title: "Focus the PhotoWheel",
-    trigger: {
-      key: "p",
-      isShift: true,
-    },
-    execute: () => {
-      photoWheel?.focus()
-    },
-  })
-
   let scope = `hexagon_spiral`
+
+  export function focusPhotoWheel() {
+    photoWheel?.focus()
+  }
 
   function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
     if (!editmode) return
@@ -319,7 +311,7 @@
     box-sizing: border-box;
     position: relative;
     overflow: visible;
-    width: min(100%, 30em);
+    overflow: hidden;
   }
 
   svg.border {

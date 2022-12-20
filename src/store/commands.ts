@@ -10,6 +10,7 @@ export type Command = {
         isShift?: boolean
         isAlt?: boolean
         isCtrl?: boolean
+        preamble?: string
     }
     execute?: (command: Command) => boolean | void;
 }
@@ -29,6 +30,7 @@ const initialCommands: Array<Command> = [
         title: "Save story",
         trigger: {
             key: "s",
+            isCtrl: true,
         },
     },
     {
@@ -37,6 +39,7 @@ const initialCommands: Array<Command> = [
         title: "Auto assign photos",
         trigger: {
             key: "a",
+            isCtrl: true,
         },
     },
     {
@@ -45,6 +48,7 @@ const initialCommands: Array<Command> = [
         title: "Clear all photos",
         trigger: {
             key: "c",
+            isCtrl: true,
         },
     }
 

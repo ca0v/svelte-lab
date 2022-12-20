@@ -17,35 +17,62 @@
 
   function asMenuItem(action: Command) {
     if (!action.trigger) return "<none>"
-    const key = action.trigger.key
-    const modifiers = `${action.trigger.isShift ? "Shift+" : ""}${
-      action.trigger.isCtrl ? "Ctrl+" : ""
-    }${action.trigger.isAlt ? "Alt+" : ""}`
+    const { key, preamble, isShift, isCtrl, isAlt } = action.trigger
+    const modifiers = `${isShift ? "Shift+" : ""}${isCtrl ? "Ctrl+" : ""}${
+      isAlt ? "Alt+" : ""
+    }`
 
-    return `${modifiers + key}`
+    return `${preamble ? preamble + " " : ""}${modifiers + key}`
   }
 
+  let lastKeyUp = ""
   function keyUpHandler(event: KeyboardEvent) {
     // do not remain in escape mode if user doing other things
     escapeMode = escapeMode && lastKeyDownHandled
+    // record the keypress unless it was handled
+    lastKeyUp = event.key
   }
 
   function keyDownHandler(event: KeyboardEvent) {
     lastKeyDownHandled = false
-    if (!escapeMode && event.key !== "Escape") return
-    const { key, shiftKey, ctrlKey, altKey, metaKey } = event
+    const { key, shiftKey, ctrlKey, altKey } = event
     const potentialActions = $commands.filter((action) => {
       const { trigger } = action
       if (!trigger) return false
-      const match =
-        trigger.key === key ||
-        ("" && trigger.isShift === shiftKey) ||
-        (false &&
-          trigger.isCtrl === (ctrlKey || metaKey || false) &&
-          trigger.isAlt === altKey) ||
-        false
+      trigger.isAlt = trigger.isAlt || false
+      trigger.isCtrl = trigger.isCtrl || false
+      trigger.isShift = trigger.isShift || false
+
+      let match =
+        trigger.key == key &&
+        trigger.isShift == shiftKey &&
+        trigger.isCtrl == ctrlKey &&
+        trigger.isAlt == altKey
+
+      if (match && trigger.preamble) {
+        match = trigger.preamble == lastKeyUp
+      }
       return match
     })
+
+    if (!potentialActions.length) {
+      // do any commands have a matching preamble?
+      const matchingPreamble = $commands.filter((action) => {
+        if (!lastKeyUp) return false
+        const { trigger } = action
+        if (!trigger) return false
+        const { preamble } = trigger
+        if (!preamble) return false
+        return action.trigger?.preamble == key
+      })
+      if (matchingPreamble) {
+        event.preventDefault()
+        event.stopPropagation()
+        lastKeyDownHandled = true
+        console.log("preamble found", matchingPreamble)
+      }
+      return
+    }
 
     potentialActions.forEach(executeCommand)
     if (potentialActions.length) {
