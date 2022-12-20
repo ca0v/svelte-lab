@@ -1,8 +1,9 @@
 import type { AudioRecording } from "../lib/db"
 import { getPhotoUrl } from "../lib/globals"
-import { loadAllPhotos, loadAllPhotosByDate, loadAllPhotosByIds, loadMediaItem } from "../lib/googlePhotoApi"
+import { loadAllPhotos, loadAllPhotosByIds, loadMediaItem } from "../lib/googlePhotoApi"
 
-import { Api, type CollageCellState, type CollageData, type Photo } from "./Api"
+import type { CollageCellState, CollageData, Photo } from "../d.ts/index"
+import { Api } from "./Api";
 const baseUrl = await getPhotoUrl();
 const api = new Api({ baseUrl });
 
@@ -64,31 +65,14 @@ export async function asPhotoServiceUrl(photo: CollageCellState) {
     return photoInfo.baseUrl;
 }
 
+export async function getCollage(id: string) {
+    return (await api.collage.get(id));
+}
+
 export async function getAllCollages() {
-    return (await api.collage.listList()).data;
+    return (await api.collage.get());
 }
 
 export async function saveCollage(collage: CollageData) {
-    return (await api.collage.saveCreate(collage, { id: collage.id })).data;
-}
-
-export async function getAudioRecording(id: string) {
-    return (await api.audio.getAudio({ id })).data;
-}
-
-export async function getAllAudioRecordings() {
-    return (await api.audio.listList()).data;
-}
-
-export async function updateRecording(id: string, changes: Partial<AudioRecording>) {
-    return (await api.audio.updateCreate({ ...changes, id })).data;
-}
-
-export async function saveRecording(recording: AudioRecording) {
-
-    return (await api.audio.saveCreate({ audioFile: new File([recording.blob], recording.title) }, { id: recording.id })).data;
-}
-
-export async function deleteRecording(recording: AudioRecording) {
-    return (await api.audio.deleteList({ id: recording.id })).data;
+    return (await api.collage.create(collage)).data;
 }

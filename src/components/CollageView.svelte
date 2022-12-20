@@ -5,7 +5,7 @@
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
-  import type { CollageCellState, CollageData, Photo } from "../data/Api"
+  import type { CollageCellState, CollageData, Photo } from "../d.ts/index"
   import { reportExceptions } from "../store/toasts"
   import { addCommand } from "../store/commands"
 

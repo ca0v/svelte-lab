@@ -1,4 +1,4 @@
-import type { Photo } from "../data/Api";
+import type { Photo } from "../d.ts/index";
 import { fetchPhotoByIds } from "../data/collageServices";
 
 const transformToUrlMap: Record<string, Photo> = {}

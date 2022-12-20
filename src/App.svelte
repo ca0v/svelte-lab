@@ -10,7 +10,7 @@
   import SvgPaths from "./components/SvgPaths.svelte"
   import { fetchPhotoList, saveCollage } from "./data/collageServices"
   import { addDays, getLocalStorage, setLocalStorage } from "./lib/globals"
-  import type { CollageData, Photo } from "./data/Api"
+  import type { CollageData, Photo } from "./d.ts/index"
   import Toaster from "./components/Toaster.svelte"
   import { reportExceptions, toast } from "./store/toasts"
   import { addCommand, removeCommand, shortcut } from "./store/commands"
