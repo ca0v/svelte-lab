@@ -26,6 +26,8 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 * BUG: "ENTER" moves photo to top but does not persist the ordering
 * BUG: "Preview" is not rendering any collages
 * LRN: Make use of 'use', '#key', '#await', 'click|once|preventDefault', named &lt;slot&gt;, &lt;svelte:fragment&gt;, $$slots, svelte:self
+* DGN: Instead of storing the 'known' image list in local storage, save it to the collage server in photos
+* DGN: Often exceeding per-minute quota...how to cache better?
 
 ## References
 

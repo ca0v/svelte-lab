@@ -7,7 +7,6 @@
   import SvgImage from "./SvgImage.svelte"
   import type { CollageCellState, CollageData, Photo } from "../d.ts/index"
   import { reportExceptions } from "../store/toasts"
-  import { addCommand } from "../store/commands"
 
   export let sources: Array<{ id: string; url: string }> = []
   export let readonly = false
@@ -17,6 +16,14 @@
   let photoWheel: PhotoWheel
 
   let scope = `hexagon_spiral`
+
+  export let width = "auto"
+
+  $: setWorkareaWidthCssVariable(width)
+
+  function setWorkareaWidthCssVariable(value: string) {
+    document.documentElement.style.setProperty("--workarea-width", `${value}`)
+  }
 
   export function focusPhotoWheel() {
     photoWheel?.focus()
@@ -225,7 +232,7 @@
   //$: reportExceptions(() => transforms && refreshTransforms(transforms.data))()
 </script>
 
-<div class={scope} on:keydown={reportExceptions(keyDownHandler)}>
+<div class={scope + " workarea"} on:keydown={reportExceptions(keyDownHandler)}>
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <section>
     <svg
@@ -345,5 +352,10 @@
     justify-content: center;
     gap: 0.5em;
     margin: 0.5em;
+  }
+
+  .workarea {
+    width: var(--workarea-width);
+    margin: 0 auto;
   }
 </style>

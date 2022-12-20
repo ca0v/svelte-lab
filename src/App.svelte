@@ -31,6 +31,7 @@
     isSignedIn: false,
     editor: {
       editmode: false,
+      width: 100,
     },
     titleEditor: {
       edit: false,
@@ -332,6 +333,13 @@
           />
           <p><u>N</u>otes</p>
           <Notes shortcut="Shift>N" bind:note={activeCollage.note} />
+          <p>Zoom Level</p>
+          <input
+            type="range"
+            bind:value={states.editor.width}
+            min="10"
+            max="90"
+          />
         {/if}
       </div>
       <div class="spacer" />
@@ -340,6 +348,7 @@
           <p>Loading...</p>
         {:then}
           <CollageView
+            width={states.editor.width + "vw"}
             bind:this={collageView}
             transforms={activeCollage}
             bind:editmode={states.editor.editmode}
