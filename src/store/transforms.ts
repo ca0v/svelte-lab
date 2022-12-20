@@ -68,11 +68,11 @@ function createCssTransforms(scope: string, size = 20) {
             const t = `translate(${size / 2 - i}em,-12vh)`
             return `transform: ${t} !important;opacity(0);`
         })
-        .map((t, i) => `.${scope} .play.i${i} { ${t} }`)
+        .map((t, i) => `.${scope}.play .i${i} { ${t} }`)
         .join("\n")
 }
 
-function createInitialCss(scope: string, duration = 0.1, size = 20) {
+function createInitialCss(scope: string, duration = 0, size = 20) {
     return Array(size)
         .fill(0)
         .map((_, i) => {
@@ -108,8 +108,8 @@ function initialize() {
     injectRect("7x5", -35, -25, 70, 50)
     collageTemplates.update(t => ({ ...t, ...transforms }))
 
-    injectCss(`hexagon_spiral_init`, () => createInitialCss(`hexagon_spiral`, 0.1, 20))
-    injectCss(`hexagon_spiral_transitions`, () => createCssTransforms(`hexagon_spiral`, 20))
+    injectCss(`hexagon_spiral_init`, () => createInitialCss(`hexagon_spiral`, 0.1, 36))
+    injectCss(`hexagon_spiral_transitions`, () => createCssTransforms(`hexagon_spiral`, 36))
 
 }
 

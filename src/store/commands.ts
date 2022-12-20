@@ -64,3 +64,29 @@ export function addCommand(command: Command) {
 export function removeCommand(commandName: string) {
     commands.update(v => v.filter(c => c.name !== commandName));
 }
+
+// svelte action
+export function shortcut(node: HTMLElement, shortcut: string) {
+    const tokens = shortcut.split(">").reverse()
+    const command = {
+        name: `goto-${node.title}`,
+        title: node.title,
+        trigger: {
+            key: tokens[0],
+            isShift: tokens.includes("Shift"),
+            isCtrl: tokens.includes("Ctrl"),
+            isAlt: tokens.includes("Alt"),
+        },
+        execute: () => {
+            node.focus()
+            return true
+        },
+    }
+    addCommand(command)
+    return {
+        destroy() {
+            //unregisterShortcuts(node)
+        },
+    }
+}
+

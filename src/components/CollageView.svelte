@@ -13,9 +13,7 @@
   export let readonly = false
   export let editmode = !readonly
   export let transforms: CollageData
-  export let transformDelay = 0 // to be moved to configuration
 
-  let play = readonly
   let photoWheel: PhotoWheel
 
   let scope = `hexagon_spiral`
@@ -164,11 +162,6 @@
     }
   }
 
-  function replay() {
-    play = true
-    setTimeout(() => (play = false), transformDelay * 1000)
-  }
-
   function copy(from: CollageCellState, into: CollageCellState) {
     into.id = from.id
     into.baseurl = from.baseurl
@@ -244,9 +237,9 @@
       {#if transforms?.data}
         {#each transforms.data as transform, i}
           <SvgImage
-            {play}
             {editmode}
             {readonly}
+            fast={editmode}
             href={transform.baseurl}
             clipPath={transform.clipPath}
             x={transform.x}

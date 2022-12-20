@@ -7,7 +7,6 @@
   export let target = "center"
   export let style = ""
   export let hotkey = ""
-  export let play = false
   export let href = ""
   export let fast = false
   export let editmode = false
@@ -101,12 +100,7 @@
 </script>
 
 {#if readonly}
-  <g
-    class:play
-    class={target}
-    style={`transform: ${style}`}
-    data-target={target}
-  >
+  <g class={target} style={`transform: ${style}`} data-target={target}>
     <use
       class="border"
       class:active
@@ -131,12 +125,7 @@
 {/if}
 
 {#if !readonly}
-  <g
-    class:play
-    class={target}
-    style={`transform: ${style}`}
-    data-target={target}
-  >
+  <g class={target} style={`transform: ${style}`} data-target={target}>
     <use
       class="border"
       class:active
@@ -181,7 +170,7 @@
 
     <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
     <text class="selector if-focus" class:editmode class:active textLength="1"
-      >{hotkey}{play ? "." : ""}</text
+      >{hotkey}</text
     >
   </g>
 {/if}
@@ -192,9 +181,11 @@
     opacity: 1;
   }
 
+  g:has(image.fast),
   image:focus,
   image.fast {
-    transition-duration: 0ms;
+    transition-duration: 150ms;
+    transition-timing-function: linear;
   }
 
   image.active {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte"
+  import { onDestroy, onMount, beforeUpdate } from "svelte"
   import CollageView from "./components/CollageView.svelte"
   import DateRange from "./components/DateRange.svelte"
   import { stories } from "./store/stories"
@@ -13,7 +13,7 @@
   import type { CollageData, Photo } from "./data/Api"
   import Toaster from "./components/Toaster.svelte"
   import { reportExceptions, toast } from "./store/toasts"
-  import { addCommand, removeCommand } from "./store/commands"
+  import { addCommand, removeCommand, shortcut } from "./store/commands"
   import { signin, signout } from "./lib/googleApi"
   import { refreshBaseurl } from "./store/photos"
   import { writable } from "svelte/store"
@@ -115,16 +115,17 @@
   states.datefilter.from &&
     localStorage.setItem("date_filter", states.datefilter.from)
 
-  collageId.subscribe((v) => {
+  async function refreshStory(story: CollageData) {
+    if (story?.data) {
+      await refreshBaseurl(story.data)
+    }
+  }
+
+  collageId.subscribe(async (v) => {
     localStorage.setItem("collage_name", $collageId)
 
     if (states.isSignedIn && $collageId) {
-      const _ = $stories.find((h) => h.id === $collageId)
-      if (_?.data) {
-        refreshBaseurl(_.data).then(() => {
-          activeCollage = _
-        })
-      }
+      activeCollage = $stories.find((h) => h.id === $collageId)
     }
   })
 
@@ -200,36 +201,13 @@
         },
       })
     })
-
-    document
-      .querySelectorAll("[data-shortcut]")
-      .forEach((element: HTMLElement) => {
-        const shortcut = element
-          .getAttribute("data-shortcut")
-          .split(">")
-          .reverse()
-
-        const command = {
-          name: `goto-${element.title}`,
-          title: element.title,
-          trigger: {
-            key: shortcut[0],
-            isShift: shortcut.includes("Shift"),
-            isCtrl: shortcut.includes("Ctrl"),
-            isAlt: shortcut.includes("Alt"),
-          },
-          execute: () => {
-            element.focus()
-            return true
-          },
-        }
-        addCommand(command)
-      })
   })
 
   onDestroy(() => {
     removeCommand("Preview")
     removeCommand("Toggle Edit Mode")
+    removeCommand("goto-photowheel")
+
     Object.keys($transforms).forEach(removeCommand)
 
     document
@@ -337,7 +315,7 @@
         <p>S<u>t</u>ories</p>
         <select
           bind:value={$collageId}
-          data-shortcut="Shift>T"
+          use:shortcut={"Shift>T"}
           title="Select an existing story"
         >
           {#each $stories.sort( (a, b) => a.title.localeCompare(b.title) ) as collage}
@@ -358,24 +336,28 @@
       </div>
       <div class="spacer" />
       {#if activeCollage && states.isSignedIn}
-        <CollageView
-          bind:this={collageView}
-          transforms={activeCollage}
-          bind:editmode={states.editor.editmode}
-          on:save={async () => {
-            throw "not supported, remove"
-          }}
-          sources={photosToShow.map((p) => ({ id: p.id, url: p.baseurl }))}
-        >
-          <div class="spacer" />
-          <div class="toolbar">
-            <DateRange
-              bind:date_filter_from={states.datefilter.from}
-              bind:date_filter_to={states.datefilter.to}
-            />
-            <p>{photosToShow.length} of {photos.length} photo(s)</p>
-          </div>
-        </CollageView>
+        {#await refreshStory(activeCollage)}
+          <p>Loading...</p>
+        {:then}
+          <CollageView
+            bind:this={collageView}
+            transforms={activeCollage}
+            bind:editmode={states.editor.editmode}
+            on:save={async () => {
+              throw "not supported, remove"
+            }}
+            sources={photosToShow.map((p) => ({ id: p.id, url: p.baseurl }))}
+          >
+            <div class="spacer" />
+            <div class="toolbar">
+              <DateRange
+                bind:date_filter_from={states.datefilter.from}
+                bind:date_filter_to={states.datefilter.to}
+              />
+              <p>{photosToShow.length} of {photos.length} photo(s)</p>
+            </div>
+          </CollageView>
+        {/await}
       {/if}
     </div>
   {/if}
@@ -397,7 +379,11 @@
                 {collage.title}
               </button>
             </h3>
-            <CollageView readonly={true} transforms={collage} />
+            {#await refreshStory(collage)}
+              <p>Loading...</p>
+            {:then}
+              <CollageView readonly={true} transforms={collage} />
+            {/await}
           </div>
         {/each}
       </div>

@@ -1,10 +1,11 @@
 <script lang="ts">
   export let note = ""
   export let shortcut = ""
+  import { shortcut as registerShortcut } from "../store/commands"
 </script>
 
 <textarea
-  data-shortcut={shortcut}
+  use:registerShortcut={shortcut}
   bind:value={note}
   spellcheck="true"
   title="Describe this story"
