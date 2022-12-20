@@ -22,15 +22,17 @@
       isAlt ? "Alt+" : ""
     }`
 
-    return `${preamble ? preamble + " " : ""}${modifiers + key}`
+    return `${preamble ? preamble.toUpperCase() + " " : ""}${
+      modifiers + key.toUpperCase()
+    }`
   }
 
   let lastKeyUp = ""
   function keyUpHandler(event: KeyboardEvent) {
     // do not remain in escape mode if user doing other things
     escapeMode = escapeMode && lastKeyDownHandled
-    // record the keypress unless it was handled
-    lastKeyUp = event.key
+    // record the keypress if it was handled
+    lastKeyUp = lastKeyDownHandled ? event.key : ""
   }
 
   function keyDownHandler(event: KeyboardEvent) {
@@ -47,25 +49,24 @@
         trigger.key == key &&
         trigger.isShift == shiftKey &&
         trigger.isCtrl == ctrlKey &&
-        trigger.isAlt == altKey
+        trigger.isAlt == altKey &&
+        (trigger.editMode || escapeMode)
 
       if (match && trigger.preamble) {
         match = trigger.preamble == lastKeyUp
       }
+
       return match
     })
 
     if (!potentialActions.length) {
       // do any commands have a matching preamble?
       const matchingPreamble = $commands.filter((action) => {
-        if (!lastKeyUp) return false
         const { trigger } = action
-        if (!trigger) return false
-        const { preamble } = trigger
-        if (!preamble) return false
-        return action.trigger?.preamble == key
+        let match = trigger.preamble == key && (trigger.editMode || escapeMode)
+        return match
       })
-      if (matchingPreamble) {
+      if (matchingPreamble.length) {
         event.preventDefault()
         event.stopPropagation()
         lastKeyDownHandled = true
@@ -97,7 +98,7 @@
     addCommand({
       name: "toggle-escape-mode",
       title: "Toggle Escape Mode",
-      trigger: { key: "Escape" },
+      trigger: { key: "Escape", editMode: true },
       execute: () => {
         escapeMode = !escapeMode
         return true

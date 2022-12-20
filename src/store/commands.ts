@@ -11,6 +11,7 @@ export type Command = {
         isAlt?: boolean
         isCtrl?: boolean
         preamble?: string
+        editMode?: boolean
     }
     execute?: (command: Command) => boolean | void;
 }
