@@ -8,7 +8,7 @@ class Collage {
     get(id: string): Promise<CollageData>;
     async get(id?: string) {
         if (!id) {
-            const resp = await fetch(`${this.api.baseUrl}/collage`, {})
+            const resp = await fetch(`${this.api.baseUrl}/collage/`, {})
             if (!resp.ok) throw new Error(resp.statusText)
             return await resp.json() as Array<string>;
         } else {
@@ -19,7 +19,7 @@ class Collage {
     }
 
     async create(collage: CollageData) {
-        const resp = await fetch(`${this.api.baseUrl}/collage`, {
+        const resp = await fetch(`${this.api.baseUrl}/collage/`, {
             method: "POST",
             body: JSON.stringify(collage),
             headers: {
