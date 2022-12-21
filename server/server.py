@@ -5,6 +5,28 @@ from flask_restful import Api
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 
+from google.auth.transport import requests
+from google.oauth2 import id_token
+
+# Specify the CLIENT_ID of the app that accesses the backend:
+CLIENT_ID = "YOUR_CLIENT_ID"
+API_KEY = "YOUR_API_KEY"
+
+# if the configuration file does not exist, create it
+# read the client id from the file system
+try:
+    with open('./configuration.json', 'r') as f:
+        data = json.load(f)
+        CLIENT_ID = data['client_id']
+        API_KEY = data['api_key']
+except:
+    print("configuration file not found")
+    # create the configuration file
+    data = {'client_id': CLIENT_ID, 'api_key': API_KEY}
+    with open('./configuration.json', 'w') as f:
+        json.dump(data, f)
+
+
 # start a webapi
 app = Flask(__name__)
 
@@ -13,10 +35,6 @@ CORS(app)
 
 # Response to preflight request doesn't pass access control check: Redirect is not allowed for a preflight request.
 app.config['CORS_SUPPORTS_CREDENTIALS'] = True
-
-
-# Flask-WTF requires an encryption key - the string can be anything
-app.config['SECRET_KEY'] = "fdd89hf3809fdjkhidf409ruvn-0q325873-4 hfg"
 
 # Either 'SQLALCHEMY_DATABASE_URI' or 'SQLALCHEMY_BINDS' must be set
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///jbc.sqlite'
@@ -112,6 +130,34 @@ def create_collage():
         db.session.merge(match)
         db.session.commit()
         return jsonify({"message": "collage updated"}), 200
+
+
+@app.route('/client_id', methods=['GET'])
+def getClientId():
+    return jsonify({'client_id': CLIENT_ID})
+
+
+@app.route('/login', methods=['POST'])
+def validateRequest():
+    # Specify the CLIENT_ID of the app that accesses the backend:
+    print(f"validateRequest")
+    requestData = request.get_json()
+    print(f"requestData: {requestData}")
+    idtoken = requestData['credential']
+    idinfo = id_token.verify_oauth2_token(
+        idtoken, requests.Request(), CLIENT_ID)
+    print(f"idinfo: {idinfo}")
+    if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+        raise ValueError('Wrong issuer.')
+    # ID token is valid. Get the user's Google Account ID from the decoded token.
+    userid = idinfo['sub']
+    print(f"userid: {userid}")
+    picture = idinfo['picture']
+    email = idinfo['email']
+
+    # convert the picture, email, userid into a json object
+    # and return it to the client
+    return jsonify({'picture': picture, 'email': email, 'userid': userid, 'apiKey': API_KEY})
 
 
 with app.app_context():

@@ -18,6 +18,8 @@
     isSignedIn = false
     dispatch("signedout")
   }
+
+  setTimeout(() => handleSigninClick(), 1000)
 </script>
 
 <section class="toolbar">

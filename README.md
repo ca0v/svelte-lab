@@ -29,6 +29,20 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 * DGN: Instead of storing the 'known' image list in local storage, save it to the collage server in photos
 * DGN: Often exceeding per-minute quota...how to cache better?
 
+## Authentication and Authorization
+
+I store the CLIENT_ID and API_KEY on the server, but the client needs them to for authentication and to access Photos.
+
+The `CLIENT_ID` is used to authenticate the user.
+
+The `API_KEY` is used to obtain an access token to the Google Photos service.
+
+Once authenticated, the user identity is validated on the `stories/collage` server and the `API_KEY` is returned.
+
+Once the client has the `API_KEY` the user provides consent to access their photos.
+
+Identifying the user on the server was a necessary step to ensure no users share storage.  Although this app is intended for me along, it is going to be on a public IP address and I don't want to lose my work.
+
 ## References
 
 * [svelte cheet sheet](https://sveltesociety.dev/cheatsheet)

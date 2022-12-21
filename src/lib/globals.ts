@@ -3,6 +3,7 @@ import { PhotoDB } from "./indexdb"
 const photoDB = new PhotoDB();
 await photoDB.initialize();
 
+let client_id = "";
 
 export function range(size: number) {
     return new Array(size).fill(0).map((_, i) => i);
@@ -40,9 +41,30 @@ const getPhotoUrl = async () => {
     if (photoUrl) {
         return photoUrl
     }
-    const newPhotoUrl = promptUser('Please enter your photo url')
-    newPhotoUrl && setLocalStorage('photoServerUrl', newPhotoUrl)
-    return newPhotoUrl
+
+    while (true) {
+        const newPhotoUrl = promptUser('Please enter your photo url')
+        if (!newPhotoUrl) return;
+        newPhotoUrl && setLocalStorage('photoServerUrl', newPhotoUrl)
+
+        // verify the url by getting the client id
+        try {
+            client_id = "";
+            client_id = await getClientId();
+            return newPhotoUrl
+        } catch (ex) {
+            reportError(ex);
+        }
+    }
+}
+
+export async function getClientId() {
+    if (!client_id) {
+        const photoUrl = await getPhotoUrl();
+        const response = await fetch(`${photoUrl}/client_id`);
+        client_id = (await response.json()).client_id;
+    }
+    return client_id
 }
 
 const dummy = document.createElement("div")

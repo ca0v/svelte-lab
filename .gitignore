@@ -4,3 +4,4 @@ node_modules
 !.vscode/extensions.json
 *.sqlite
 server/static
+configuration.json

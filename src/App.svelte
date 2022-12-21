@@ -57,6 +57,8 @@
   }
 
   async function handleAuthClick() {
+    // get the google auth2 object
+
     photos = await getPhotosFor2022()
     photos.sort((a, b) => a.created.localeCompare(b.created))
     console.log({ photos })
