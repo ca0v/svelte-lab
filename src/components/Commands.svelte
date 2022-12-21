@@ -12,7 +12,7 @@
 
   const dispatcher = createEventDispatcher()
   let lastKeyDownHandled = false
-  let isOpen = false
+  export let isOpen = false
   let escapeMode = false
 
   function asMenuItem(action: Command) {
@@ -94,6 +94,14 @@
   onMount(() => {
     watch?.addEventListener("keydown", keyDownHandler)
     watch?.addEventListener("keyup", keyUpHandler)
+
+    document.addEventListener("execute_command", (event: CustomEvent) => {
+      debugger
+      const { detail } = event
+      const { eventName } = detail
+      const command = $commands.find((c) => c.event == eventName)
+      command && executeCommand(command)
+    })
 
     addCommand({
       name: "toggle-escape-mode",

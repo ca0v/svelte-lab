@@ -90,3 +90,33 @@ export function shortcut(node: HTMLElement, shortcut: string) {
     }
 }
 
+export function command(node: HTMLButtonElement, eventName: string) {
+
+    let cmd: Command;
+
+    commands.update(v => v.map(c => {
+        if (c.event === eventName) {
+            cmd = c
+        }
+        return c
+    }))
+
+    const doit = () => {
+        const event = new Event("execute_command")
+        event["detail"] = { eventName }
+        document.dispatchEvent(event)
+    };
+
+    node.addEventListener("click", doit)
+    if (!node.innerText) {
+        node.innerText = cmd.name
+        node.title = cmd.title
+    }
+
+    return {
+        destroy() {
+            node.removeEventListener("click", doit)
+        }
+    }
+}
+

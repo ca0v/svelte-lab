@@ -5,14 +5,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 5174 --strictPort --cors",
+    "dev": "vite --port 5500 --strictPort --cors",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist",
     "start-image-server": "python3 ./server/server.py",
     "generate-api": "npx swagger-typescript-api -p http://localhost:5000/swagger/v1/swagger.json -o ./src/data",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "pip": "pip3 install -r ./server/requirements.txt"
+    "pip": "pip3 install -r ./server/requirements.txt",
+    "start": "npm run dev & npm run start-image-server"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.1.0",

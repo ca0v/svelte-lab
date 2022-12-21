@@ -12,11 +12,16 @@
   import { addDays, getLocalStorage, setLocalStorage } from "./lib/globals"
   import type { CollageData, Photo } from "./d.ts/index"
   import Toaster from "./components/Toaster.svelte"
-  import { reportExceptions, toast } from "./store/toasts"
-  import { addCommand, removeCommand, shortcut } from "./store/commands"
-  import { signin, signout } from "./lib/googleApi"
+  import { toast } from "./store/toasts"
+  import {
+    addCommand,
+    command,
+    removeCommand,
+    shortcut,
+  } from "./store/commands"
   import { refreshBaseurl } from "./store/photos"
   import { writable } from "svelte/store"
+  import GoogleSignin from "./components/GoogleSignin.svelte"
 
   let photos: Array<Photo> = []
   let photosToShow: Array<Photo> = []
@@ -27,11 +32,14 @@
   let activeCollage: CollageData | null = null
 
   let states = {
+    menu: {
+      isOpen: false,
+    },
     saving: false,
     isSignedIn: false,
     editor: {
       editmode: false,
-      width: 100,
+      width: 50,
     },
     titleEditor: {
       edit: false,
@@ -49,19 +57,11 @@
   }
 
   async function handleAuthClick() {
-    await signin()
-    states.isSignedIn = true
-
     photos = await getPhotosFor2022()
     photos.sort((a, b) => a.created.localeCompare(b.created))
     console.log({ photos })
     states.datefilter.from =
       states.datefilter.from || photos[0]?.created.split("T")[0] || ""
-  }
-
-  function handleSignoutClick() {
-    signout()
-    states.isSignedIn = false
   }
 
   // assign images to each image element
@@ -220,12 +220,13 @@
 
   async function getPhotosFor2022() {
     const startDate =
-      (await getLocalStorage("fetchPhotoList:end-date")) || "2021-12-31"
+      (await getLocalStorage("fetchPhotoList:end-date")) || "2022-10-01"
     const endDate = "2022-12-31"
 
     const cachedPhotos: Record<string, Photo> =
       (await getLocalStorage("fetchPhotoList:photos")) || {}
 
+    console.log(`fetching photos from ${startDate} to ${endDate}`)
     const responseIterator = fetchPhotoList(startDate, endDate)
 
     while (true) {
@@ -261,6 +262,7 @@
   <SvgPaths />
   <Commands
     watch={document}
+    bind:isOpen={states.menu.isOpen}
     on:start_new_story={() => {
       const newStory = {
         id: createUniqueId(),
@@ -270,6 +272,9 @@
       stories.update((s) => [newStory, ...s])
       $collageId = newStory.id
       states.titleEditor.edit = true
+      states.editor.editmode = true
+      // "toggle-command-menu"
+      states.menu.isOpen = true
     }}
     on:save_story={async () => {
       states.saving = true
@@ -289,40 +294,28 @@
     on:clear_all_photos={() => clearAllImages()}
   />
 
-  <h1>Just.Be.Collage</h1>
-  <h2>
-    Collage Builder for <google>Google Photos</google>
-  </h2>
-  <section class="toolbar">
-    <input
-      type="button"
-      disabled={!states.isSignedIn}
-      class="google_photos_button"
-      value="Sign out from Google Photos"
-      on:click={handleSignoutClick}
-    />
-    <input
-      type="button"
-      disabled={states.isSignedIn}
-      class="google_photos_button"
-      value="Connect to Google Photos"
-      on:click={reportExceptions(handleAuthClick)}
-    />
-  </section>
+  <GoogleSignin
+    bind:isSignedIn={states.isSignedIn}
+    on:signedin={handleAuthClick}
+  />
 
   {#if states.isSignedIn}
     <div class="frame">
       <div class="two-column">
         <p>S<u>t</u>ories</p>
-        <select
-          bind:value={$collageId}
-          use:shortcut={"Shift>T"}
-          title="Select an existing story"
-        >
-          {#each $stories.sort( (a, b) => a.title.localeCompare(b.title) ) as collage}
-            <option value={collage.id}>{collage.title}</option>
-          {/each}
-        </select>
+        {#if !$stories.length}
+          <button use:command={"start_new_story"} />
+        {:else}
+          <select
+            bind:value={$collageId}
+            use:shortcut={"Shift>T"}
+            title="Select an existing story"
+          >
+            {#each $stories.sort( (a, b) => a.title.localeCompare(b.title) ) as collage}
+              <option value={collage.id}>{collage.title}</option>
+            {/each}
+          </select>
+        {/if}
         {#if activeCollage}
           <p>Title</p>
           <input
@@ -404,9 +397,10 @@
 
 <style>
   main {
-    margin: 0;
+    display: grid;
     margin-left: 5rem;
     width: calc(100vw - 10rem);
+    justify-content: center;
   }
 
   p {
@@ -470,10 +464,6 @@
     justify-content: center;
   }
 
-  .toolbar > input {
-    width: fit-content;
-  }
-
   .spacer {
     height: 1rem;
     width: 1rem;
@@ -487,40 +477,5 @@
     height: 100vh;
     overflow: auto;
     background-color: black;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .google_photos_button {
-      background-color: var(--color-google-gray);
-      color: #ccc;
-    }
-  }
-
-  @media (prefers-color-scheme: light) {
-    .google_photos_button {
-      background-color: var(--color-google-white);
-      color: var(--color-google-gray);
-    }
-  }
-
-  google {
-    font-size: smaller;
-  }
-
-  .google_photos_button {
-    --color-google-white: #ffffff;
-    --color-google-gray: #3c4043;
-    background-image: url(/google_photos_icon.png);
-    background-repeat: no-repeat;
-    background-position: 8px 8px;
-    background-size: 24px 24px;
-    padding-left: calc(8px + 24px + 16px);
-    padding-right: 16px;
-    height: 40px;
-    border-radius: 4px;
-  }
-
-  .google_photos_button:disabled {
-    display: none;
   }
 </style>
