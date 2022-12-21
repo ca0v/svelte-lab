@@ -4,3 +4,4 @@ flask_restful
 flask_sqlalchemy
 google-auth-httplib2 
 google-auth-oauthlib
+flask-session

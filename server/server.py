@@ -2,8 +2,9 @@ import json
 from flask_sqlalchemy import SQLAlchemy
 from dataclasses import dataclass
 from flask_restful import Api
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, session
 from flask_cors import CORS
+from flask_session import Session
 
 from google.auth.transport import requests
 from google.oauth2 import id_token
@@ -29,12 +30,15 @@ except:
 
 # start a webapi
 app = Flask(__name__)
-
-# fix Access to fetch at 'http://localhost:5000/collage' from origin 'http://localhost:5174' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
+# enable CORS...only necessary for development
 CORS(app)
-
-# Response to preflight request doesn't pass access control check: Redirect is not allowed for a preflight request.
 app.config['CORS_SUPPORTS_CREDENTIALS'] = True
+
+# use sessions to store the user id
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_PERMANENT'] = True
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600
+Session(app)
 
 # Either 'SQLALCHEMY_DATABASE_URI' or 'SQLALCHEMY_BINDS' must be set
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///jbc.sqlite'
@@ -78,8 +82,11 @@ class Collage(db.Model):
     title = db.Column(db.Text)
 
 
-@ app.route('/collage/', methods=['GET'])
+@app.route('/collage/', methods=['GET'])
 def collages():
+    if session.get('userid') is None:
+        return jsonify({"error": "user not logged in"}), 401
+
     result = Collage.query.all()
     # limit what is transmitted to just ids
     # result = [{"id": x.id, "title": x.title, "note": x.note} for x in result]
@@ -89,8 +96,11 @@ def collages():
     return response
 
 
-@ app.route('/collage/<string:id>')
+@app.route('/collage/<string:id>')
 def getCollage(id):
+    if session.get('userid') is None:
+        return jsonify({"error": "user not logged in"}), 401
+
     result = Collage.query.filter_by(id=id).first()
 
     data = result.data
@@ -106,8 +116,11 @@ def getCollage(id):
     return jsonify(result)
 
 
-@ app.route('/collage/', methods=['POST'])
+@app.route('/collage/', methods=['POST'])
 def create_collage():
+    if session.get('userid') is None:
+        return jsonify({"error": "user not logged in"}), 401
+
     requestData = request.get_json()
     id = requestData['id']
     note = requestData['note']
@@ -155,6 +168,9 @@ def validateRequest():
     picture = idinfo['picture']
     email = idinfo['email']
 
+    # save the userid in a server side session
+    session['userid'] = userid
+
     # convert the picture, email, userid into a json object
     # and return it to the client
     return jsonify({'picture': picture, 'email': email, 'userid': userid, 'apiKey': API_KEY})
@@ -164,4 +180,4 @@ with app.app_context():
     db.create_all()
 
 # start the server
-app.run(debug=True, host='localhost', port=5000)
+app.run(debug=True, host='localhost', port=5500)

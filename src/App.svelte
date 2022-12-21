@@ -2,7 +2,7 @@
   import { onDestroy, onMount, beforeUpdate } from "svelte"
   import CollageView from "./components/CollageView.svelte"
   import DateRange from "./components/DateRange.svelte"
-  import { stories } from "./store/stories"
+  import { loadAllStories, stories } from "./store/stories"
   import { collageTemplates as transforms } from "./store/transforms"
 
   import Commands from "./components/Commands.svelte"
@@ -58,7 +58,7 @@
 
   async function handleAuthClick() {
     // get the google auth2 object
-
+    await loadAllStories()
     photos = await getPhotosFor2022()
     photos.sort((a, b) => a.created.localeCompare(b.created))
     console.log({ photos })
@@ -115,9 +115,6 @@
       .substring(2, 16 + 2)
   }
 
-  states.datefilter.from &&
-    localStorage.setItem("date_filter", states.datefilter.from)
-
   async function refreshStory(story: CollageData) {
     if (story?.data) {
       await refreshBaseurl(story.data)
@@ -132,6 +129,8 @@
     }
   })
 
+  $: states.datefilter.from &&
+    localStorage.setItem("date_filter", states.datefilter.from)
   $: states.datefilter.to =
     states.datefilter.to || addDays(states.datefilter.from, 1)
 
