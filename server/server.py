@@ -62,8 +62,7 @@ def collage_ux():
         title = request.form['title']
 
         collage = Collage(id=id, note=note, title=title)
-        db.session.add(collage)
-        db.session.commit()
+        return render_template('collage.html', collage=collage)
     return render_template('collage.html')
 
 
@@ -76,6 +75,7 @@ class Collage(db.Model):
     note: str
     title: str
 
+    userid = db.Column(db.Text)
     id = db.Column(db.Text, primary_key=True)
     data = db.Column(db.Text)
     note = db.Column(db.Text)
@@ -84,10 +84,12 @@ class Collage(db.Model):
 
 @app.route('/collage/', methods=['GET'])
 def collages():
-    if session.get('userid') is None:
+    userid = session.get('userid')
+    if userid is None:
         return jsonify({"error": "user not logged in"}), 401
 
-    result = Collage.query.all()
+    result = Collage.query.filter_by(userid=userid)
+
     # limit what is transmitted to just ids
     # result = [{"id": x.id, "title": x.title, "note": x.note} for x in result]
     result = [r.id for r in result]
@@ -98,10 +100,11 @@ def collages():
 
 @app.route('/collage/<string:id>')
 def getCollage(id):
-    if session.get('userid') is None:
+    userid = session.get('userid')
+    if userid is None:
         return jsonify({"error": "user not logged in"}), 401
 
-    result = Collage.query.filter_by(id=id).first()
+    result = Collage.query.filter_by(userid=userid, id=id).first()
 
     data = result.data
     if data is not None:
@@ -118,7 +121,8 @@ def getCollage(id):
 
 @app.route('/collage/', methods=['POST'])
 def create_collage():
-    if session.get('userid') is None:
+    userid = session.get('userid')
+    if userid is None:
         return jsonify({"error": "user not logged in"}), 401
 
     requestData = request.get_json()
@@ -127,9 +131,9 @@ def create_collage():
     title = requestData['title']
     data = json.dumps(requestData['data'])
 
-    collage = Collage(id=id, data=data, note=note, title=title)
+    collage = Collage(userid=userid, id=id, data=data, note=note, title=title)
 
-    match = Collage.query.filter_by(id=id).first()
+    match = Collage.query.filter_by(userid=userid, id=id).first()
 
     if match is None:
         db.session.add(collage)
