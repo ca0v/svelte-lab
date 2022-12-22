@@ -70,7 +70,6 @@
         event.preventDefault()
         event.stopPropagation()
         lastKeyDownHandled = true
-        console.log("preamble found", matchingPreamble)
       }
       return
     }
@@ -96,7 +95,6 @@
     watch?.addEventListener("keyup", keyUpHandler)
 
     document.addEventListener("execute_command", (event: CustomEvent) => {
-      debugger
       const { detail } = event
       const { eventName } = detail
       const command = $commands.find((c) => c.event == eventName)
@@ -104,11 +102,22 @@
     })
 
     addCommand({
-      name: "toggle-escape-mode",
-      title: "Toggle Escape Mode",
-      trigger: { key: "Escape", editMode: true },
+      name: "enter-escape-mode",
+      title: "Enter Escape Mode",
+      trigger: { key: "Control", editMode: true, isCtrl: true },
       execute: () => {
-        escapeMode = !escapeMode
+        escapeMode = true
+        return true
+      },
+    })
+
+    addCommand({
+      name: "exit-escape-mode",
+      title: "Exit Escape Mode",
+      trigger: { key: "Escape", editMode: true, isCtrl: false },
+      execute: () => {
+        escapeMode = false
+        isOpen = false
         return true
       },
     })
