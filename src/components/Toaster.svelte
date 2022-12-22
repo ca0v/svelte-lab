@@ -20,19 +20,19 @@
     left: 0;
     width: 20em;
     max-height: 50vh;
-    background-color: #333;
+    background-color: var(--color-background-2);
     padding: 1rem;
     border-top-right-radius: 1rem;
     line-height: 2rem;
     opacity: 0.8;
     transition-duration: 200ms;
-    border: 1px solid green;
+    border: 1px solid var(--color-border-2);
     border-bottom: none;
     border-left: none;
   }
 
   .toaster:has(.error) {
-    border-color: red;
+    border-color: var(--color-error);
   }
 
   .toaster.empty {

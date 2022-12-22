@@ -1,5 +1,8 @@
 * {
+    --color-error: red;
     --border-radius: 3px;
+    --editor-font-size: clamp(8px, 1.5cqmin, 16px);
+    font-size: clamp(8px, 1cqw, 16px);
 }
 
 @media (prefers-color-scheme: light) {
@@ -11,9 +14,32 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --color-highlight: green;
+        --color-highlight: #f55;
         --color-primary: white;
+        --color-background: #334;
+        --color-background-highlight: var(--color-highlight);
+        --color-background-2: #445;
+        --color-border-2: #555;
+
     }
+}
+
+textarea {
+    font-family: monospace;
+}
+
+h1 {
+    font-size: clamp(8px, 2cqw, 24px);
+}
+
+h2 {
+    font-size: clamp(8px, 1.8cqw, 20px);
+}
+
+h3,
+h2,
+h1 {
+    text-align: center;
 }
 
 body {

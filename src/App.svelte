@@ -451,20 +451,6 @@
     justify-content: center;
   }
 
-  h3,
-  h2,
-  h1 {
-    text-align: center;
-  }
-
-  h1 {
-    font-size: clamp(8px, 2cqw, 24px);
-  }
-
-  h2 {
-    font-size: clamp(8px, 1.8cqw, 20px);
-  }
-
   .two-column {
     display: grid;
     grid-template-columns: 5rem auto;
@@ -489,10 +475,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  * {
-    font-size: clamp(8px, 1cqw, 16px);
   }
 
   .toolbar {

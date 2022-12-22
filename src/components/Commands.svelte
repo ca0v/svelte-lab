@@ -249,18 +249,16 @@
   }
 
   details[open] {
-    color: white;
-    background-color: #333;
+    color: var(--color-primary);
+    background-color: var(--color-background-2);
     border-bottom-left-radius: 1rem;
-    outline: 1px solid #666;
+    outline: 1px solid var(--color-border-2);
   }
 
   details > summary {
-    color: white;
     padding: 0.5rem;
     border-radius: 4px;
     list-style: none;
-    font-size: 2em;
   }
 
   details[open] > summary {
@@ -269,7 +267,7 @@
   }
 
   details > summary.escape-mode {
-    color: green;
+    color: var(--color-highlight);
   }
 
   .two-columns {
@@ -281,13 +279,13 @@
   input {
     width: calc(100% - 1rem);
     padding: 0.5rem;
-    border: 1px solid #666;
-    border-radius: 4px;
+    border: 1px solid var(--color-border-2);
+    border-radius: var(--border-radius);
     margin: 0.5rem 0;
   }
 
   .highlight {
-    background-color: #666;
+    background-color: var(--color-background-highlight);
   }
 
   button.editmode {

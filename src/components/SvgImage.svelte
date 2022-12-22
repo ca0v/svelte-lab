@@ -213,7 +213,6 @@
 
   .selector {
     fill: #fff;
-    font-size: 0.5em;
     stroke-width: 0.25px;
     stroke: #fff;
     text-anchor: middle;
