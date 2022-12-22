@@ -162,7 +162,7 @@ def validateRequest():
     print(f"requestData: {requestData}")
     idtoken = requestData['credential']
     idinfo = id_token.verify_oauth2_token(
-        idtoken, requests.Request(), CLIENT_ID)
+        idtoken, requests.Request(), CLIENT_ID, clock_skew_in_seconds=6000)
     print(f"idinfo: {idinfo}")
     if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
         raise ValueError('Wrong issuer.')
