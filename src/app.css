@@ -1,5 +1,19 @@
 * {
-    --color-highlight: green;
+    --border-radius: 3px;
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --color-highlight: green;
+        --color-primary: white;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-highlight: green;
+        --color-primary: white;
+    }
 }
 
 body {

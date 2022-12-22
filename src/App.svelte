@@ -412,10 +412,6 @@
 <Toaster />
 
 <style>
-  :root {
-    --border-radius: 3px;
-  }
-
   @media (prefers-color-scheme: dark) {
     :root {
       --color-background: rgb(60, 64, 67);

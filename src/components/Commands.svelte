@@ -177,6 +177,16 @@
     removeCommand("toggle-command-menu")
     removeCommand("search-commands")
   })
+
+  function isFilterMatch(searchFilter: string, command: Command) {
+    const tokens = searchFilter.toUpperCase().split(" ")
+    const match = (command.title + asMenuItem(command)).toUpperCase()
+    return tokens.reduce((b, t) => (b < 0 ? b : match.indexOf(t, b)), 0) > -1
+  }
+
+  function getFilteredCommands(searchFilter: string) {
+    $commands.find((c) => isFilterMatch(searchFilter, c))
+  }
 </script>
 
 <aside class="commands">
@@ -191,9 +201,7 @@
       on:keydown={(e) => {
         if (e.key !== "Enter") return
         // execute the first command that matches the search filter
-        const command = $commands.find((c) =>
-          c.title.toUpperCase().includes(searchFilter.toUpperCase())
-        )
+        const command = getFilteredCommands(searchFilter)[0]
         if (command) {
           executeCommand(command)
           isOpen = false
@@ -203,9 +211,7 @@
     <div class="two-columns">
       {#each $commands as command}
         <div
-          class:highlight={command.title
-            .toUpperCase()
-            .includes(searchFilter.toUpperCase())}
+          class:highlight={isFilterMatch(searchFilter, command)}
           title={command.name}
         >
           {command.title}
@@ -288,7 +294,7 @@
     color: var(--color-highlight);
   }
 
-  button.escapemode::before {
-    content: ": ";
+  button.escapemode {
+    color: var(--color-primary);
   }
 </style>
