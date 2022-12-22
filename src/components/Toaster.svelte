@@ -43,6 +43,6 @@
   }
 
   .toaster > .error {
-    color: red;
+    border-color: var(--color-error);
   }
 </style>

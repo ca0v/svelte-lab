@@ -211,6 +211,7 @@
     <div class="two-columns">
       {#each $commands as command}
         <div
+          class="title"
           class:highlight={isFilterMatch(searchFilter, command)}
           title={command.name}
         >
@@ -238,7 +239,6 @@
   }
 
   details {
-    color: transparent;
     padding: 1rem;
     padding-top: 0;
     overflow: hidden;
@@ -249,7 +249,6 @@
   }
 
   details[open] {
-    color: var(--color-primary);
     background-color: var(--color-background-2);
     border-bottom-left-radius: 1rem;
     outline: 1px solid var(--color-border-2);
@@ -285,6 +284,7 @@
   }
 
   .highlight {
+    color: var(--color-highlight);
     background-color: var(--color-background-highlight);
   }
 
@@ -294,5 +294,10 @@
 
   button.escapemode {
     color: var(--color-primary);
+  }
+
+  .title {
+    padding: 0.5rem;
+    margin-right: 0.5rem;
   }
 </style>

@@ -415,22 +415,6 @@
 <Toaster />
 
 <style>
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --color-background: rgb(60, 64, 67);
-      --color-text: rgb(220, 220, 220);
-      --color-border: rgb(220, 220, 220);
-    }
-  }
-
-  @media (prefers-color-scheme: light) {
-    :root {
-      --color-background: rgb(220, 220, 220);
-      --color-text: rgb(60, 64, 67);
-      --color-border: rgb(60, 64, 67);
-    }
-  }
-
   main {
     display: grid;
     justify-content: center;
@@ -466,7 +450,7 @@
 
   .border {
     padding: 0.25rem;
-    border-radius: 0.25rem;
+    border-radius: var(--border-radius);
     border: 1px solid var(--color-border);
   }
 
@@ -496,7 +480,6 @@
     width: 100vw;
     height: 100vh;
     overflow: auto;
-    background-color: black;
   }
 
   .work-area {

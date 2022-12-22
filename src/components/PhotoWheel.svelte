@@ -112,6 +112,6 @@
     width: 100%;
     max-height: 10vh;
     object-fit: contain;
-    border-radius: 3px;
+    border-radius: var(--border-radius);
   }
 </style>

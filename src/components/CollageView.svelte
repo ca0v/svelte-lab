@@ -325,7 +325,7 @@
   }
 
   svg.border {
-    outline: 1px solid green;
+    outline: 1px solid var(--color-border);
   }
 
   section {

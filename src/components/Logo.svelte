@@ -69,21 +69,21 @@
 
 <style>
   @media (prefers-color-scheme: dark) {
-    :root {
+    .applogo {
       --color-background: rgb(60, 64, 67);
       --color-text: rgb(220, 220, 220);
     }
   }
 
   @media (prefers-color-scheme: light) {
-    :root {
+    .applogo {
       --color-background: rgb(220, 220, 220);
       --color-text: rgb(60, 64, 67);
     }
   }
 
   @media (prefers-contrast: more) {
-    :root {
+    .applogo {
       --color-text: rgb(0, 255, 0);
     }
   }

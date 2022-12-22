@@ -1,31 +1,45 @@
 * {
     --color-error: red;
     --border-radius: 3px;
-    --editor-font-size: clamp(8px, 1.5cqmin, 16px);
-    font-size: clamp(8px, 1cqw, 16px);
+    --editor-font-size: clamp(8px, 2cqmin, 16px);
+    font-family: system-ui;
+    font-size: clamp(8px, 1.5cqmin, 20px);
 }
 
 @media (prefers-color-scheme: light) {
     :root {
-        --color-highlight: green;
-        --color-primary: white;
+        --color-highlight: hsl(230, 90%, 50%);
+        --color-primary: hsl(230, 100%, 10%);
+        --color-background: hsl(230, 80%, 80%);
+        --color-background-highlight: hsl(230, 800%, 90%);
+        --color-background-2: hsl(230, 80%, 75%);
+        --color-border: hsl(230, 80%, 50%);
+        --color-border-2: hsl(230, 80%, 30%);
     }
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --color-highlight: #f55;
+        --color-highlight: #555;
         --color-primary: white;
         --color-background: #334;
-        --color-background-highlight: var(--color-highlight);
         --color-background-2: #445;
-        --color-border-2: #555;
-
+        --color-background-highlight: #ccf;
+        --color-border: #555;
+        --color-border-2: #666;
     }
 }
 
-textarea {
-    font-family: monospace;
+body {
+    container-type: inline-size;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    border-radius: var(--border-radius);
+    color: var(--color-primary);
+    background-color: var(--color-background);
 }
 
 h1 {
@@ -40,15 +54,4 @@ h3,
 h2,
 h1 {
     text-align: center;
-}
-
-body {
-    container-type: inline-size;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    width: 100vw;
-    border-radius: var(--border-radius);
-    background-color: var(--color-background);
 }
