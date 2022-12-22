@@ -195,7 +195,7 @@
         title: `Use the "${name}" transform`,
         trigger: {
           key: (i >= 40 ? "" : (i % 10) + 1) + "",
-          preamble: "t",
+          preamble: "x",
           isCtrl: i >= 10 && i < 20,
           isAlt: i >= 20 && i < 30,
           isShift: i >= 30 && i < 40,
@@ -522,7 +522,7 @@
     container-type: inline-size;
     padding: 1cqmin;
     overflow: auto;
-    height: 80cqh;
-    width: 80cqw;
+    height: calc(100cqh - 10rem);
+    width: max(320px, 80cqw);
   }
 </style>

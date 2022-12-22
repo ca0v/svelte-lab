@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount, onDestroy } from "svelte"
+  import { createEventDispatcher, onMount, onDestroy, tick } from "svelte"
   import {
     addCommand,
     commands,
@@ -14,17 +14,38 @@
   let lastKeyDownHandled = false
   export let isOpen = false
   let escapeMode = false
+  let searchFilter = "create"
+  let searchInput: HTMLInputElement
 
   function asMenuItem(action: Command) {
     if (!action.trigger) return "<none>"
     const { key, preamble, isShift, isCtrl, isAlt } = action.trigger
-    const modifiers = `${isShift ? "Shift+" : ""}${isCtrl ? "Ctrl+" : ""}${
-      isAlt ? "Alt+" : ""
-    }`
+    const keyNameMap = {
+      ArrowUp: "↑",
+      ArrowDown: "↓",
+      ArrowLeft: "←",
+      ArrowRight: "→",
+      Shift: "Shift",
+      Control: "Ctrl",
+      Alt: "Alt",
+      Escape: "Esc",
+      Enter: "Enter",
+      " ": "Space",
+    }
+    const modifiers = [
+      isShift && keyNameMap.Shift,
+      isCtrl && keyNameMap.Control,
+      isAlt && keyNameMap.Alt,
+      key ? keyNameMap[key] || key.toUpperCase() : "",
+    ]
+      .filter(Boolean)
+      .join("+")
 
-    return `${preamble ? preamble.toUpperCase() + " " : ""}${
-      modifiers + key.toUpperCase()
-    }`
+    if (preamble) {
+      return `${keyNameMap[preamble] || preamble.toUpperCase()} ${modifiers}`
+    } else {
+      return modifiers
+    }
   }
 
   let lastKeyUp = ""
@@ -46,7 +67,7 @@
       trigger.isShift = trigger.isShift || false
 
       let match =
-        trigger.key == key &&
+        (trigger.key == key || !trigger.key) &&
         trigger.isShift == shiftKey &&
         trigger.isCtrl == ctrlKey &&
         trigger.isAlt == altKey &&
@@ -104,7 +125,7 @@
     addCommand({
       name: "enter-escape-mode",
       title: "Enter Escape Mode",
-      trigger: { key: "Control", editMode: true, isCtrl: true },
+      trigger: { key: ":", editMode: true, isCtrl: true, isShift: true },
       execute: () => {
         escapeMode = true
         return true
@@ -114,7 +135,7 @@
     addCommand({
       name: "exit-escape-mode",
       title: "Exit Escape Mode",
-      trigger: { key: "Escape", editMode: true, isCtrl: false },
+      trigger: { key: "Escape" },
       execute: () => {
         escapeMode = false
         isOpen = false
@@ -130,14 +151,31 @@
         isOpen = !isOpen
       },
     })
+
+    addCommand({
+      name: "search-commands",
+      title: "Search for a command",
+      trigger: { key: "F", isCtrl: true, isShift: true, editMode: true },
+      execute: () => {
+        isOpen = true
+        escapeMode = false
+        tick().then(() => {
+          searchInput?.focus()
+          searchInput?.select()
+        })
+        return true
+      },
+    })
   })
 
   onDestroy(() => {
     watch?.removeEventListener("keydown", keyDownHandler)
     watch?.removeEventListener("keyup", keyUpHandler)
 
-    removeCommand("toggle-escape-mode")
+    removeCommand("exit-escape-mode")
+    removeCommand("enter-escape-mode")
     removeCommand("toggle-command-menu")
+    removeCommand("search-commands")
   })
 </script>
 
@@ -145,10 +183,38 @@
   <details bind:open={isOpen}>
     <summary class:escape-mode={escapeMode}>☰</summary>
     <slot />
+    <input
+      type="text"
+      placeholder="search..."
+      bind:this={searchInput}
+      bind:value={searchFilter}
+      on:keydown={(e) => {
+        if (e.key !== "Enter") return
+        // execute the first command that matches the search filter
+        const command = $commands.find((c) =>
+          c.title.toUpperCase().includes(searchFilter.toUpperCase())
+        )
+        if (command) {
+          executeCommand(command)
+          isOpen = false
+        }
+      }}
+    />
     <div class="two-columns">
       {#each $commands as command}
-        <div title={command.name}>{command.title}</div>
-        <button on:click={() => executeCommand(command)}>
+        <div
+          class:highlight={command.title
+            .toUpperCase()
+            .includes(searchFilter.toUpperCase())}
+          title={command.name}
+        >
+          {command.title}
+        </div>
+        <button
+          on:click={() => executeCommand(command)}
+          class:editmode={command.trigger.editMode}
+          class:escapemode={!command.trigger.editMode}
+        >
           {asMenuItem(command)}
         </button>
       {/each}
@@ -163,7 +229,6 @@
     right: 1rem;
     z-index: 100;
     cursor: pointer;
-    font-size: 2em;
   }
 
   details {
@@ -189,6 +254,7 @@
     padding: 0.5rem;
     border-radius: 4px;
     list-style: none;
+    font-size: 2em;
   }
 
   details[open] > summary {
@@ -204,5 +270,25 @@
     display: grid;
     grid-template-columns: 3fr 1fr;
     gap: 0.25rem;
+  }
+
+  input {
+    width: calc(100% - 1rem);
+    padding: 0.5rem;
+    border: 1px solid #666;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+  }
+
+  .highlight {
+    background-color: #666;
+  }
+
+  button.editmode {
+    color: var(--color-highlight);
+  }
+
+  button.escapemode::before {
+    content: ": ";
   }
 </style>

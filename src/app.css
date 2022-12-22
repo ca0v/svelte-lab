@@ -1,3 +1,7 @@
+* {
+    --color-highlight: green;
+}
+
 body {
     container-type: inline-size;
     box-sizing: border-box;
