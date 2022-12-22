@@ -2,8 +2,11 @@
     --color-error: red;
     --border-radius: 3px;
     --editor-font-size: clamp(8px, 2cqmin, 16px);
-    font-family: system-ui;
-    font-size: clamp(8px, 1.5cqmin, 20px);
+    --font-size: clamp(8px, 1.5cqmin, 20px);
+    --font-family: system-ui;
+
+    font-family: var(--font-family);
+    font-size: var(--font-size);
 }
 
 @media (prefers-color-scheme: light) {

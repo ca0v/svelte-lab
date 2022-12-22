@@ -34,13 +34,13 @@
 
   let states = {
     menu: {
-      isOpen: true,
+      isOpen: false,
     },
     saving: false,
-    isSignedIn: true,
+    isSignedIn: false,
     editor: {
       editmode: true,
-      width: 50,
+      width: 80,
       widthUnits: "cqw",
     },
     titleEditor: {

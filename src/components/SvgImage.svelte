@@ -220,6 +220,8 @@
     translate: 0 12px;
     user-select: none;
     visibility: hidden;
+    /* svg text already scales with container, may need media query, unclear */
+    font-size: max(3px, min(1vmin, 5px));
   }
 
   .selector.editmode {

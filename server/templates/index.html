@@ -4,24 +4,24 @@
     }
 </style>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/picocss/1.5.2/pico.classless.min.css"
+    integrity="sha512-1KIM7mOO1p5JYbTBHhMzLaTROMspznAqgAmq//PVXDf0bUP8F9hBGXFqGNfYVqoN0bWIDbEYhGTIXl4HfZGnJQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-{% block title %}
-Just.Be.Collage Web API
-{% endblock %}
+<link rel="icon" href="./assets/favicon.ico" /> <!-- how to reference resources -->
 
+<title>Just.Be.Collage</title>
 
-{% block content %}
-
-<div class="container">
-    <div class="row">
+<main>
+    <div>
         <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
             <h1 class="pt-5 pb-2">Just.Be.Collage Web API</h1>
-            <p class="lead">UX for the Web API</p>
-            <a href="./collage">List all collages (API)</a>
-            <a href="./collage.html">Collage (UX)</a>
-            <a href="./static/svelte-lab/index.html">Collage Builder (UX)</a>
+            <h2>UX for the Web API</h2>
+            <ul>
+                <li><a href="./collage">List Collages (API)</a>
+                <li><a href="./collage.html">Sample Collage Form (UX)</a>
+                <li><a href="./static/svelte-lab/index.html">Collage Builder (UX)</a>
+            </ul>
         </div>
     </div>
-</div>
-
-{% endblock %}
+</main>

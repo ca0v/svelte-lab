@@ -88,9 +88,6 @@
     }
   }
 
-  @media (min-width: 50rem) {
-  }
-
   .applogo {
     --blue: rgb(30, 10, 180);
     --lite-smoke: rgb(220, 220, 220);
@@ -107,10 +104,11 @@
 
   .applogo {
     display: grid;
+    grid-template-rows: 20cqh 10cqh auto 5rem;
     align-items: center;
     padding: 2rem;
     border-radius: 2em;
-    width: min(80vw, 25em);
+    width: min(80vmin, 50em);
     margin: 0 auto;
     container-type: inline-size;
   }
