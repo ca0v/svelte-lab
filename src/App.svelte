@@ -61,18 +61,18 @@
     await loadAllStories()
     photos = await getPhotosFor2022()
     photos.sort((a, b) => a.created.localeCompare(b.created))
-    console.log({ photos })
     states.datefilter.from =
       states.datefilter.from || photos[0]?.created.split("T")[0] || ""
   }
 
   // assign images to each image element
-  function autoAssignImages(photos: Photo[]) {
+  async function autoAssignImages(photos: Photo[]) {
     let j = 0
     activeCollage.data.some((transform) => {
       if (j >= photos.length) return true
       transform.id = transform.id || photos[j++].id
     })
+    await refreshStory(activeCollage)
     activeCollage = activeCollage
   }
 
@@ -126,6 +126,7 @@
 
     if (states.isSignedIn && $collageId) {
       activeCollage = $stories.find((h) => h.id === $collageId)
+      await refreshStory(activeCollage)
     }
   })
 
@@ -280,7 +281,6 @@
     on:save_story={async () => {
       states.saving = true
       try {
-        console.log("save", activeCollage)
         setLocalStorage(`${activeCollage.id}`, activeCollage)
         await saveCollage({ ...activeCollage })
         toast("Saved")
@@ -338,29 +338,25 @@
       </div>
       <div class="spacer" />
       {#if activeCollage && states.isSignedIn}
-        {#await refreshStory(activeCollage)}
-          <p>Loading...</p>
-        {:then}
-          <CollageView
-            width={states.editor.width + "vw"}
-            bind:this={collageView}
-            transforms={activeCollage}
-            bind:editmode={states.editor.editmode}
-            on:save={async () => {
-              throw "not supported, remove"
-            }}
-            sources={photosToShow.map((p) => ({ id: p.id, url: p.baseurl }))}
-          >
-            <div class="spacer" />
-            <div class="toolbar">
-              <DateRange
-                bind:date_filter_from={states.datefilter.from}
-                bind:date_filter_to={states.datefilter.to}
-              />
-              <p>{photosToShow.length} of {photos.length} photo(s)</p>
-            </div>
-          </CollageView>
-        {/await}
+        <CollageView
+          width={states.editor.width + "vw"}
+          bind:this={collageView}
+          transforms={activeCollage}
+          bind:editmode={states.editor.editmode}
+          on:save={async () => {
+            throw "not supported, remove"
+          }}
+          sources={photosToShow.map((p) => ({ id: p.id, url: p.baseurl }))}
+        >
+          <div class="spacer" />
+          <div class="toolbar">
+            <DateRange
+              bind:date_filter_from={states.datefilter.from}
+              bind:date_filter_to={states.datefilter.to}
+            />
+            <p>{photosToShow.length} of {photos.length} photo(s)</p>
+          </div>
+        </CollageView>
       {/if}
     </div>
   {/if}

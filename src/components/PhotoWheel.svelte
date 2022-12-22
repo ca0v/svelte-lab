@@ -69,12 +69,8 @@
     <button
       draggable="true"
       on:dragstart={(e) => {
-        console.log("dragstart", e)
         e.dataTransfer.dropEffect = "copy"
         e.dataTransfer.setData("application/json", JSON.stringify(source))
-      }}
-      on:dragend={(e) => {
-        console.log("dragend", e)
       }}
       on:focus={(event) => {
         // keep track of the last focused element

@@ -20,7 +20,6 @@ async function useGooglePhotos(): Promise<{ access_token: string, expires_at: nu
                     reject(response.error);
                     return;
                 }
-                console.log("tokenClient", response)
                 // expires_in is in seconds
                 const expires_at = (Date.now() + 1000 * parseInt(response.expires_in));
                 resolve({ expires_at, ...response });
@@ -45,14 +44,12 @@ async function useGooglePhotos(): Promise<{ access_token: string, expires_at: nu
  */
 async function useGapi() {
     return new Promise<void>(async (good, bad) => {
-        console.log("useGapi")
         const client_id = await getClientId();
         const photoUrl = await getPhotoUrl();
         google.accounts.id.initialize({
             client_id,
             auto_select: true,
             callback: async (result) => {
-                console.log(result)
                 const { credential } = result;
                 // sign into the photo server
                 const response = await fetch(`${photoUrl}/login`, {
@@ -64,7 +61,6 @@ async function useGapi() {
                     body: JSON.stringify({ credential }),
                 });
                 const responseData = await response.json();
-                console.log(responseData)
 
                 gapi.load("client", async () => {
                     await gapi.client.init({
@@ -109,17 +105,13 @@ function initializeGoogleAccount() {
 }
 
 export async function signin() {
-    console.log("signin")
-    if (signedIn) return console.log("already signed in");
+    if (signedIn) throw "already signed in";
     await useGapi();
     await useGooglePhotos();
     signedIn = true;
-    console.log({ signedIn });
 }
 
 export async function signout() {
-    console.log("signout")
-    if (!signedIn) return console.log("not signed in");
+    if (!signedIn) throw "not signed in";
     signedIn = false;
-    console.log({ signedIn });
 }

@@ -6,7 +6,7 @@
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
   import type { CollageCellState, CollageData, Photo } from "../d.ts/index"
-  import { reportExceptions } from "../store/toasts"
+  import { reportExceptions, toast } from "../store/toasts"
 
   export let sources: Array<{ id: string; url: string }> = []
   export let readonly = false
@@ -102,7 +102,6 @@
           image.parentElement.parentElement.appendChild(image.parentElement)
           return handled()
         case "Delete":
-          console.log("delete", sourceTransform)
           sourceTransform.id = ""
           sourceTransform.baseurl = ""
           transforms = transforms
@@ -204,13 +203,13 @@
     const { mode, target1, target2 } = e.detail
     const t1 = transforms.data.find((i) => i.target === target1)
     if (!t1) {
-      console.log("no target image")
+      toast("no target image")
       return
     }
 
     const t2 = transforms.data.find((i) => i.target === target2)
     if (!t2) {
-      console.log("no active image")
+      toast("no active image")
       return
     }
 
@@ -255,7 +254,6 @@
             height={transform.height}
             on:swap={swapHandler}
             on:drop={(e) => {
-              console.log("drop", e.detail)
               const { id, url } = e.detail
               transform.id = id
               transform.baseurl = url
