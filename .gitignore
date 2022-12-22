@@ -1,4 +1,5 @@
 server/flask_session
+server/__pycache__
 dist
 node_modules
 .vscode/*

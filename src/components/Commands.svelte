@@ -144,6 +144,7 @@
 <aside class="commands">
   <details bind:open={isOpen}>
     <summary class:escape-mode={escapeMode}>☰</summary>
+    <slot />
     <div class="two-columns">
       {#each $commands as command}
         <div title={command.name}>{command.title}</div>
@@ -158,10 +159,11 @@
 <style>
   aside {
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 1rem;
+    right: 1rem;
     z-index: 100;
     cursor: pointer;
+    font-size: 2em;
   }
 
   details {

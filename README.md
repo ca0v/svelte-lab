@@ -41,7 +41,7 @@ Once authenticated, the user identity is validated on the `stories/collage` serv
 
 Once the client has the `API_KEY` the user provides consent to access their photos.
 
-Identifying the user on the server was a necessary step to ensure no users share storage.  Although this app is intended for me along, it is going to be on a public IP address and I don't want to lose my work.
+Identifying the user on the server was a necessary step to ensure no users share storage.  Although this app is intended for me alone, it is going to be on a public IP address and I don't want to lose my work.
 
 ## References
 

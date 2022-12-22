@@ -99,7 +99,8 @@
       let resize = false
       switch (e.key) {
         case "Enter":
-          image.parentElement.parentElement.appendChild(image.parentElement)
+          swapWithNextSibling(image.parentElement)
+          image.focus()
           return handled()
         case "Delete":
           sourceTransform.id = ""
@@ -229,6 +230,16 @@
   }
 
   //$: reportExceptions(() => transforms && refreshTransforms(transforms.data))()
+
+  function swapWithNextSibling(node: HTMLElement) {
+    const parent = node.parentElement
+    if (!parent) return
+    const nextSibling = node.nextElementSibling
+    if (nextSibling) {
+      parent.insertBefore(nextSibling, node)
+      console.log("swap", node, nextSibling)
+    }
+  }
 </script>
 
 <div class={scope + " workarea"} on:keydown={reportExceptions(keyDownHandler)}>
@@ -271,38 +282,38 @@
       {/if}
     </svg>
   </section>
-  {#if !readonly && editmode && transforms}
-    <slot />
-    <PhotoWheel
-      {sources}
-      bind:this={photoWheel}
-      on:goto={(data) => {
-        const { key } = data.detail
-        const index = ID_MAP.indexOf(key.toLocaleUpperCase())
-        if (index < 0) return
-        const transform = transforms.data[index]
-        if (transform) {
-          focusTarget(transform.target)
-        }
-      }}
-      on:keydown={(data) => {
-        const { key, source } = data.detail
-        const index = ID_MAP.indexOf(key.toLocaleUpperCase())
-        if (index < 0) return
-        const targetImage = transforms.data[index]
-        if (targetImage) {
-          targetImage.id = source.id
-          targetImage.baseurl = source.url
-          // forces a render
-          transforms = transforms
-        }
-      }}
-    />
-  {/if}
   {#if !readonly}
     <div class="clone" class:dragging={false}>Clone Here</div>
   {/if}
 </div>
+{#if !readonly && editmode && transforms}
+  <slot />
+  <PhotoWheel
+    {sources}
+    bind:this={photoWheel}
+    on:goto={(data) => {
+      const { key } = data.detail
+      const index = ID_MAP.indexOf(key.toLocaleUpperCase())
+      if (index < 0) return
+      const transform = transforms.data[index]
+      if (transform) {
+        focusTarget(transform.target)
+      }
+    }}
+    on:keydown={(data) => {
+      const { key, source } = data.detail
+      const index = ID_MAP.indexOf(key.toLocaleUpperCase())
+      if (index < 0) return
+      const targetImage = transforms.data[index]
+      if (targetImage) {
+        targetImage.id = source.id
+        targetImage.baseurl = source.url
+        // forces a render
+        transforms = transforms
+      }
+    }}
+  />
+{/if}
 
 <style>
   svg {
@@ -310,6 +321,7 @@
     position: relative;
     overflow: visible;
     overflow: hidden;
+    width: 100%;
   }
 
   svg.border {
@@ -353,6 +365,7 @@
   }
 
   .workarea {
+    container-type: inline-size;
     width: var(--workarea-width);
     margin: 0 auto;
   }

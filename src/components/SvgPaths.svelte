@@ -18,3 +18,12 @@
     {/each}
   </defs>
 </svg>
+
+<style>
+  svg {
+    /* do not take up any screen realestate */
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+</style>

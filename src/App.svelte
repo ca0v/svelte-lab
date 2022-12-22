@@ -2,6 +2,7 @@
   import { onDestroy, onMount, beforeUpdate } from "svelte"
   import CollageView from "./components/CollageView.svelte"
   import DateRange from "./components/DateRange.svelte"
+  import Logo from "./components/Logo.svelte"
   import { loadAllStories, stories } from "./store/stories"
   import { collageTemplates as transforms } from "./store/transforms"
 
@@ -33,13 +34,14 @@
 
   let states = {
     menu: {
-      isOpen: false,
+      isOpen: true,
     },
     saving: false,
-    isSignedIn: false,
+    isSignedIn: true,
     editor: {
-      editmode: false,
+      editmode: true,
       width: 50,
+      widthUnits: "cqw",
     },
     titleEditor: {
       edit: false,
@@ -260,104 +262,121 @@
   }
 </script>
 
-<main>
-  <SvgPaths />
-  <Commands
-    watch={document}
-    bind:isOpen={states.menu.isOpen}
-    on:start_new_story={() => {
-      const newStory = {
-        id: createUniqueId(),
-        title: states.datefilter.from,
-        data: [],
-      }
-      stories.update((s) => [newStory, ...s])
-      $collageId = newStory.id
-      states.titleEditor.edit = true
-      states.editor.editmode = true
-      // "toggle-command-menu"
-      states.menu.isOpen = true
-    }}
-    on:save_story={async () => {
-      states.saving = true
-      try {
-        setLocalStorage(`${activeCollage.id}`, activeCollage)
-        await saveCollage({ ...activeCollage })
-        toast("Saved")
-      } catch (ex) {
-        reportError(ex)
-        toast(`Error: ${ex}`)
-      } finally {
-        states.saving = false
-      }
-    }}
-    on:auto_assign_photos={() => autoAssignImages(photosToShow)}
-    on:clear_all_photos={() => clearAllImages()}
-  />
-
+<Commands
+  watch={document}
+  bind:isOpen={states.menu.isOpen}
+  on:start_new_story={() => {
+    const newStory = {
+      id: createUniqueId(),
+      title: states.datefilter.from,
+      data: [],
+    }
+    stories.update((s) => [newStory, ...s])
+    $collageId = newStory.id
+    states.titleEditor.edit = true
+    states.editor.editmode = true
+    // "toggle-command-menu"
+    states.menu.isOpen = true
+  }}
+  on:save_story={async () => {
+    states.saving = true
+    try {
+      setLocalStorage(`${activeCollage.id}`, activeCollage)
+      await saveCollage({ ...activeCollage })
+      toast("Saved")
+    } catch (ex) {
+      reportError(ex)
+      toast(`Error: ${ex}`)
+    } finally {
+      states.saving = false
+    }
+  }}
+  on:auto_assign_photos={() => autoAssignImages(photosToShow)}
+  on:clear_all_photos={() => clearAllImages()}
+>
   <GoogleSignin
     bind:isSignedIn={states.isSignedIn}
     on:signedin={handleAuthClick}
   />
+</Commands>
+
+<main>
+  {#if states.isSignedIn}
+    <div>
+      <h1>just.be.collage</h1>
+      <h2>Collage Builder</h2>
+    </div>
+    <SvgPaths />
+  {:else}
+    <Logo>
+      <GoogleSignin
+        bind:isSignedIn={states.isSignedIn}
+        on:signedin={handleAuthClick}
+      /></Logo
+    >
+  {/if}
 
   {#if states.isSignedIn}
     <div class="frame">
-      <div class="two-column">
-        <p>S<u>t</u>ories</p>
-        {#if !$stories.length}
-          <button use:command={"start_new_story"} />
-        {:else}
-          <select
-            bind:value={$collageId}
-            use:shortcut={"Shift>T"}
-            title="Select an existing story"
+      <div class="work-area">
+        {#if activeCollage && states.isSignedIn}
+          <CollageView
+            width={states.editor.width + states.editor.widthUnits}
+            bind:this={collageView}
+            transforms={activeCollage}
+            bind:editmode={states.editor.editmode}
+            on:save={async () => {
+              throw "not supported, remove"
+            }}
+            sources={photosToShow.map((p) => ({ id: p.id, url: p.baseurl }))}
           >
-            {#each $stories.sort( (a, b) => a.title.localeCompare(b.title) ) as collage}
-              <option value={collage.id}>{collage.title}</option>
-            {/each}
-          </select>
+            <div class="spacer" />
+            <div class="toolbar">
+              <DateRange
+                bind:date_filter_from={states.datefilter.from}
+                bind:date_filter_to={states.datefilter.to}
+              />
+              <p>{photosToShow.length} of {photos.length} photo(s)</p>
+            </div>
+          </CollageView>
         {/if}
-        {#if activeCollage}
-          <p>Title</p>
-          <input
-            type="text"
-            bind:value={activeCollage.title}
-            title="Edit the title for this story"
-            disabled={!activeCollage}
-          />
-          <p><u>N</u>otes</p>
-          <Notes shortcut="Shift>N" bind:note={activeCollage.note} />
-          <p>Zoom Level</p>
-          <input
-            type="range"
-            bind:value={states.editor.width}
-            min="10"
-            max="90"
-          />
-        {/if}
-      </div>
-      <div class="spacer" />
-      {#if activeCollage && states.isSignedIn}
-        <CollageView
-          width={states.editor.width + "vw"}
-          bind:this={collageView}
-          transforms={activeCollage}
-          bind:editmode={states.editor.editmode}
-          on:save={async () => {
-            throw "not supported, remove"
-          }}
-          sources={photosToShow.map((p) => ({ id: p.id, url: p.baseurl }))}
-        >
-          <div class="spacer" />
-          <div class="toolbar">
-            <DateRange
-              bind:date_filter_from={states.datefilter.from}
-              bind:date_filter_to={states.datefilter.to}
+        <div class="two-column">
+          {#if activeCollage}
+            <p>Zoom Level</p>
+            <input
+              type="range"
+              bind:value={states.editor.width}
+              min="10"
+              max="90"
             />
-            <p>{photosToShow.length} of {photos.length} photo(s)</p>
-          </div>
-        </CollageView>
-      {/if}
+          {/if}
+          <p>S<u>t</u>ories</p>
+          {#if !$stories.length}
+            <button use:command={"start_new_story"} />
+          {:else}
+            <select
+              bind:value={$collageId}
+              use:shortcut={"Shift>T"}
+              title="Select an existing story"
+            >
+              {#each $stories.sort( (a, b) => a.title.localeCompare(b.title) ) as collage}
+                <option value={collage.id}>{collage.title}</option>
+              {/each}
+            </select>
+          {/if}
+          {#if activeCollage}
+            <p>Title</p>
+            <input
+              type="text"
+              bind:value={activeCollage.title}
+              title="Edit the title for this story"
+              disabled={!activeCollage}
+            />
+            <p><u>N</u>otes</p>
+            <Notes shortcut="Shift>N" bind:note={activeCollage.note} />
+          {/if}
+        </div>
+      </div>
     </div>
   {/if}
 
@@ -393,11 +412,34 @@
 <Toaster />
 
 <style>
+  :root {
+    --border-radius: 3px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-background: rgb(60, 64, 67);
+      --color-text: rgb(220, 220, 220);
+      --color-border: rgb(220, 220, 220);
+    }
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --color-background: rgb(220, 220, 220);
+      --color-text: rgb(60, 64, 67);
+      --color-border: rgb(60, 64, 67);
+    }
+  }
+
   main {
     display: grid;
-    margin-left: 5rem;
-    width: calc(100vw - 10rem);
     justify-content: center;
+    background-color: var(--color-background);
+    width: calc(100cqw - 2px);
+    height: calc(100cqh - 2px);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
   }
 
   p {
@@ -440,7 +482,7 @@
   .border {
     padding: 0.25rem;
     border-radius: 0.25rem;
-    background-color: #333;
+    border: 1px solid var(--color-border);
   }
 
   .fit {
@@ -474,5 +516,13 @@
     height: 100vh;
     overflow: auto;
     background-color: black;
+  }
+
+  .work-area {
+    container-type: inline-size;
+    padding: 1cqmin;
+    overflow: auto;
+    height: 80cqh;
+    width: 80cqw;
   }
 </style>
