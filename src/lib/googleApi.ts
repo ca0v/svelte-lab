@@ -57,6 +57,7 @@ async function useGapi() {
                 // sign into the photo server
                 const response = await fetch(`${photoUrl}/login`, {
                     method: 'POST',
+                    credentials: "include",
                     headers: {
                         'Content-Type': 'application/json'
                     },

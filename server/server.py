@@ -31,8 +31,8 @@ except:
 # start a webapi
 app = Flask(__name__)
 # enable CORS...only necessary for development
-CORS(app)
-app.config['CORS_SUPPORTS_CREDENTIALS'] = True
+CORS(app, supports_credentials=True)
+
 
 # use sessions to store the user id
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -175,6 +175,9 @@ def validateRequest():
     # save the userid in a server side session
     session['userid'] = userid
 
+    # make the session work across cross-origin requests
+    session.permanent = True
+
     # convert the picture, email, userid into a json object
     # and return it to the client
     return jsonify({'picture': picture, 'email': email, 'userid': userid, 'apiKey': API_KEY})
@@ -194,4 +197,4 @@ def create_app():
 
 if __name__ == '__main__':
     # start the server
-    create_app().run(debug=True, host='localhost', port=5500)
+    create_app().run(debug=True, host='localhost', port=5000)

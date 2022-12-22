@@ -61,7 +61,7 @@ const getPhotoUrl = async () => {
 export async function getClientId() {
     if (!client_id) {
         const photoUrl = await getPhotoUrl();
-        const response = await fetch(`${photoUrl}/client_id`);
+        const response = await fetch(`${photoUrl}/client_id`, { credentials: "include" });
         client_id = (await response.json()).client_id;
     }
     return client_id
