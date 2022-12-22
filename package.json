@@ -13,7 +13,8 @@
     "generate-api": "npx swagger-typescript-api -p http://localhost:5000/swagger/v1/swagger.json -o ./src/data",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "pip": "pip3 install -r ./server/requirements.txt",
-    "start": "npm run dev & npm run start-image-server"
+    "start": "npm run dev & npm run start-image-server",
+    "digital-ocean": "chmod u+x ./server/start.sh"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.1.0",
