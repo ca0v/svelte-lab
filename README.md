@@ -28,6 +28,18 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 * LRN: Make use of 'use', '#key', '#await', 'click|once|preventDefault', named &lt;slot&gt;, &lt;svelte:fragment&gt;, $$slots, svelte:self
 * DGN: Instead of storing the 'known' image list in local storage, save it to the collage server in photos
 * DGN: Often exceeding per-minute quota...how to cache better?
+* BUG: "Enter" not executing from command search
+* BUG: Hamburger in 'highlight' mode looks disabled
+* BUG: Pressing "Enter" does not toggle the command menu (collage or search input focused)
+* BUG: Stories are not loading pics until interaction
+* BUG: Updating a note is causing a complete screen update (too fast to notice, but try to fix)
+* BUG: Heavily zoomed images should increase the resolution using google photos API (presently using default 512?)
+* BUG: Warn if changes were made and not saved..auto save?
+* BUG: No way to clone from one cell into another using kbd (shift-drag)
+* BUG: The drag-template is out-of-position (just rotated my screen)
+* BUG: "Enter" was a bad choice for open/close menu..."Esc" maybe?
+* FTR: Need to be able to adjust width/height independently (change top (ctrl+up), bottom, left, right)
+* ^^^: But 1st, consolidate remaining commands that are presently baked into the CollageView
 
 ## Authentication and Authorization
 
