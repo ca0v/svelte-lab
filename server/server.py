@@ -183,5 +183,15 @@ def validateRequest():
 with app.app_context():
     db.create_all()
 
-# start the server
-app.run(debug=True, host='localhost', port=5500)
+############################################
+# waitress-serve --port=5500 --call 'server:create_app'
+############################################
+
+
+def create_app():
+    return app
+
+
+if __name__ == '__main__':
+    # start the server
+    create_app().run(debug=True, host='localhost', port=5500)
