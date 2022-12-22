@@ -1,8 +1,8 @@
 [Unit]
-Description=Test Service
+Description=Stories Web API
 
 [Service]
-ExecStart=[path-to]/start.sh
+ExecStart=/home/ca/code/svelte-lab/server/start.sh
 
 [Install]
 WantedBy=multi-user.target
