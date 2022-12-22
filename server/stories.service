@@ -1,0 +1,8 @@
+[Unit]
+Description=Test Service
+
+[Service]
+ExecStart=[path-to]/start.sh
+
+[Install]
+WantedBy=multi-user.target
