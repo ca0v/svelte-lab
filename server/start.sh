@@ -1,2 +1,2 @@
 #!/bin/bash
-waitress-serve --call server:create_app
+waitress-serve --port=5500 --call server:create_app
