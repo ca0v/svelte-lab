@@ -356,7 +356,7 @@
           {:else}
             <select
               bind:value={$collageId}
-              use:shortcut={"Shift>T"}
+              use:shortcut={{ key: "t", isAlt: true, editmode: true }}
               title="Select an existing story"
             >
               {#each $stories.sort( (a, b) => a.title.localeCompare(b.title) ) as collage}
@@ -373,7 +373,10 @@
               disabled={!activeCollage}
             />
             <p><u>N</u>otes</p>
-            <Notes shortcut="Shift>N" bind:note={activeCollage.note} />
+            <Notes
+              shortcut={{ key: "n", isAlt: true, editmode: true }}
+              bind:note={activeCollage.note}
+            />
           {/if}
         </div>
       </div>

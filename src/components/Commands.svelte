@@ -71,7 +71,7 @@
         trigger.isShift == shiftKey &&
         trigger.isCtrl == ctrlKey &&
         trigger.isAlt == altKey &&
-        (trigger.editMode || escapeMode)
+        (trigger.editmode || escapeMode)
 
       if (match && trigger.preamble) {
         match = trigger.preamble == lastKeyUp
@@ -84,7 +84,7 @@
       // do any commands have a matching preamble?
       const matchingPreamble = $commands.filter((action) => {
         const { trigger } = action
-        let match = trigger.preamble == key && (trigger.editMode || escapeMode)
+        let match = trigger.preamble == key && (trigger.editmode || escapeMode)
         return match
       })
       if (matchingPreamble.length) {
@@ -125,7 +125,7 @@
     addCommand({
       name: "enter-escape-mode",
       title: "Enter Escape Mode",
-      trigger: { key: ":", editMode: true, isCtrl: true, isShift: true },
+      trigger: { key: ":", editmode: true, isCtrl: true, isShift: true },
       execute: () => {
         escapeMode = true
         return true
@@ -145,7 +145,7 @@
 
     addCommand({
       name: "toggle-command-menu",
-      title: "Close This Menu",
+      title: "Toggle command menu",
       trigger: { key: "Enter" },
       execute: () => {
         isOpen = !isOpen
@@ -155,7 +155,7 @@
     addCommand({
       name: "search-commands",
       title: "Search for a command",
-      trigger: { key: "F", isCtrl: true, isShift: true, editMode: true },
+      trigger: { key: "F", isCtrl: true, isShift: true, editmode: true },
       execute: () => {
         isOpen = true
         escapeMode = false
@@ -218,8 +218,8 @@
         </div>
         <button
           on:click={() => executeCommand(command)}
-          class:editmode={command.trigger.editMode}
-          class:escapemode={!command.trigger.editMode}
+          class:editmode={command.trigger.editmode}
+          class:escapemode={!command.trigger.editmode}
         >
           {asMenuItem(command)}
         </button>

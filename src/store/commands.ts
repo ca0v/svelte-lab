@@ -1,18 +1,20 @@
 import { writable } from "svelte/store"
 
+export type CommandTrigger = {
+    key?: string
+    isShift?: boolean
+    isAlt?: boolean
+    isCtrl?: boolean
+    preamble?: string
+    editmode?: boolean
+}
+
 export type Command = {
     name: string;
     event?: string;
     title?: string;
     icon?: string;
-    trigger?: {
-        key?: string
-        isShift?: boolean
-        isAlt?: boolean
-        isCtrl?: boolean
-        preamble?: string
-        editMode?: boolean
-    }
+    trigger?: CommandTrigger;
     execute?: (command: Command) => boolean | void;
 }
 
@@ -63,17 +65,23 @@ export function removeCommand(commandName: string) {
 }
 
 // svelte action
-export function shortcut(node: HTMLElement, shortcut: string) {
-    const tokens = shortcut.split(">").reverse()
-    const command = {
-        name: `goto-${node.title}`,
-        title: node.title,
-        trigger: {
+export function shortcut(node: HTMLElement, shortcut: string | CommandTrigger) {
+    let trigger: CommandTrigger;
+    if (typeof shortcut === "string") {
+        const tokens = shortcut.split(">").reverse()
+        trigger = {
             key: tokens[0],
             isShift: tokens.includes("Shift"),
             isCtrl: tokens.includes("Ctrl"),
             isAlt: tokens.includes("Alt"),
-        },
+        }
+    } else {
+        trigger = shortcut
+    }
+    const command = {
+        name: `goto-${node.title}`,
+        title: node.title,
+        trigger,
         execute: () => {
             node.focus()
             return true
@@ -82,7 +90,7 @@ export function shortcut(node: HTMLElement, shortcut: string) {
     addCommand(command)
     return {
         destroy() {
-            //unregisterShortcuts(node)
+            removeCommand(command.name)
         },
     }
 }
