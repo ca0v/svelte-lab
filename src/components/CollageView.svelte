@@ -319,7 +319,7 @@
           editmode: true,
         },
         disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: 1, width: 1 }),
+        execute: createMoveHandler({ x: 1, width: 2 }),
       })
 
       addCommand({
@@ -332,7 +332,7 @@
           editmode: true,
         },
         disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: -1, width: -1 }),
+        execute: createMoveHandler({ x: -1, width: -2 }),
       })
 
       addCommand({
@@ -344,7 +344,7 @@
           editmode: true,
         },
         disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: -1, width: 1 }),
+        execute: createMoveHandler({ x: -1, width: 2 }),
       })
 
       addCommand({
@@ -357,7 +357,7 @@
           editmode: true,
         },
         disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: 1, width: -1 }),
+        execute: createMoveHandler({ x: 1, width: -2 }),
       })
 
       addCommand({
@@ -369,7 +369,7 @@
           editmode: true,
         },
         disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ y: 1, height: 1 }),
+        execute: createMoveHandler({ y: 1, height: 2 }),
       })
 
       addCommand({
@@ -382,7 +382,7 @@
           editmode: true,
         },
         disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ y: -1, height: -1 }),
+        execute: createMoveHandler({ y: -1, height: -2 }),
       })
 
       addCommand({
@@ -394,7 +394,7 @@
           editmode: true,
         },
         disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ y: -1, height: 1 }),
+        execute: createMoveHandler({ y: -1, height: 2 }),
       })
 
       addCommand({
@@ -407,7 +407,7 @@
           editmode: true,
         },
         disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ y: 1, height: -1 }),
+        execute: createMoveHandler({ y: 1, height: -2 }),
       })
 
       addCommand({
