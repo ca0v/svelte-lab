@@ -1,7 +1,7 @@
 <script lang="ts">
   const ID_MAP = "QWERTASDFGYUIOPHJKLZXCVBNM1234568790".split("")
 
-  import { getEffectiveTransform } from "../lib/globals"
+  import { getEffectiveTransform, hasFocus } from "../lib/globals"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
@@ -16,6 +16,7 @@
   export let transforms: CollageData
 
   let photoWheel: PhotoWheel
+  let svgElement: SVGSVGElement
 
   let scope = `hexagon_spiral`
 
@@ -536,7 +537,7 @@
           isShift: false,
           editmode: true,
         },
-        disabled: () => !getLastActiveCell(),
+        disabled: () => !hasFocus(svgElement) || !getLastActiveCell(),
         execute: () => {
           const target = getLastActiveCell()
           if (!target) return
@@ -555,7 +556,7 @@
           isShift: false,
           editmode: true,
         },
-        disabled: () => !getLastActiveCell(),
+        disabled: () => !hasFocus(svgElement) || !getLastActiveCell(),
         execute: () => {
           const target = getLastActiveCell()
           if (!target) return
@@ -581,6 +582,8 @@
     removeCommand("move-up")
     removeCommand("rotate-clockwise")
     removeCommand("rotate-counter-clockwise")
+    removeCommand("rotate-image-clockwise")
+    removeCommand("rotate-image-counter-clockwise")
 
     ID_MAP.forEach((key, index) => {
       removeCommand(`focus-cell-${key}`)
@@ -604,6 +607,7 @@
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <section>
     <svg
+      bind:this={svgElement}
       class:border={editmode}
       viewBox="-100 -100 200 200"
       stroke-width="0"
@@ -646,32 +650,7 @@
 </div>
 {#if !readonly && editmode && transforms}
   <slot />
-  <PhotoWheel
-    {sources}
-    bind:this={photoWheel}
-    on:goto={(data) => {
-      const { key } = data.detail
-      const index = ID_MAP.indexOf(key.toLocaleUpperCase())
-      if (index < 0) return
-      const transform = transforms.data[index]
-      if (transform) {
-        focusTarget(transform.target)
-      }
-    }}
-    on:keydown={(data) => {
-      return // TODO: move into commands
-      const { key, source } = data.detail
-      const index = ID_MAP.indexOf(key.toLocaleUpperCase())
-      if (index < 0) return
-      const targetImage = transforms.data[index]
-      if (targetImage) {
-        targetImage.id = source.id
-        targetImage.baseurl = source.url
-        // forces a render
-        transforms = transforms
-      }
-    }}
-  />
+  <PhotoWheel {sources} bind:this={photoWheel} />
 {/if}
 
 <style>

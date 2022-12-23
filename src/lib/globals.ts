@@ -3,14 +3,14 @@ import { PhotoDB } from "./indexdb"
 const photoDB = new PhotoDB();
 await photoDB.initialize();
 
-let client_id = "";
+let client_id = await getLocalStorage('clientId');
 
 export function range(size: number) {
     return new Array(size).fill(0).map((_, i) => i);
 }
 
 // read data from localstorage
-const getLocalStorage = async (key: string) => {
+async function getLocalStorage(key: string) {
     key = `svelte_lab.${key}`
     let data = await photoDB.getGlobal<any>(key);
     if (data) {
@@ -64,6 +64,7 @@ export async function getClientId() {
         const response = await fetch(`${photoUrl}/client_id`, { credentials: "include" });
         client_id = (await response.json()).client_id;
     }
+    setLocalStorage('clientId', client_id)
     return client_id
 }
 
@@ -88,5 +89,14 @@ export function dow(yyyymmdd: string) {
     const result = new Date(year, month - 1, day).getDay()
     return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][result]
 }
+
+export function hasFocus(container: HTMLElement | SVGElement) {
+    const result =
+        container &&
+        (document.activeElement === container ||
+            container.contains(document.activeElement))
+    return result
+}
+
 
 export { setLocalStorage, getLocalStorage, getPhotoUrl }

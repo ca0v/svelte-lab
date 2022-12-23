@@ -60,19 +60,37 @@
     lastKeyDownHandled = false
     const { key, shiftKey, ctrlKey, altKey } = event
 
-    // if in an input, button, textarea, etc, do not handle if ctrl or alt not pressed
-    if (
-      !ctrlKey &&
-      !altKey &&
-      (event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement ||
-        event.target instanceof HTMLButtonElement)
-    ) {
-      return
-    }
+    if (!escapeMode) {
+      // is it a normal key?
+      if (key.length == 1) {
+        // if in an input do not handle if ctrl or alt not pressed
+        if (
+          !ctrlKey &&
+          !altKey &&
+          (event.target instanceof HTMLInputElement ||
+            event.target instanceof HTMLTextAreaElement)
+        ) {
+          return
+        }
 
-    if (!shiftKey && event.target instanceof HTMLSelectElement) {
-      return
+        if (
+          !ctrlKey &&
+          !altKey &&
+          !shiftKey &&
+          event.target instanceof HTMLSelectElement
+        ) {
+          return
+        }
+      } else {
+        if (event.target instanceof HTMLButtonElement) {
+          switch (key) {
+            case "Enter":
+            case " ":
+            case "Tab":
+              return
+          }
+        }
+      }
     }
 
     const potentialActions = $commands.filter((action) => {
@@ -93,6 +111,8 @@
         match = trigger.preamble == lastKeyUp
       }
 
+      match = match && !isCommandDisabled(action)
+
       return match
     })
 
@@ -111,8 +131,13 @@
       return
     }
 
-    potentialActions.forEach(executeCommand)
-    if (potentialActions.length) {
+    if (
+      0 <
+      potentialActions.reduce(
+        (value, action) => value + (!!executeCommand(action) ? 1 : 0),
+        0
+      )
+    ) {
       event.preventDefault()
       event.stopPropagation()
       lastKeyDownHandled = true
@@ -130,6 +155,8 @@
     } else {
       toast(command.title)
     }
+
+    return handled
   }
 
   onMount(() => {
@@ -144,32 +171,17 @@
     })
 
     addCommand({
-      name: "enter-escape-mode",
-      title: "Enter Escape Mode",
-      trigger: { key: ":", editmode: true, isCtrl: true, isShift: true },
+      name: "toggle-escape-mode",
+      title: "Toggle Escape Mode",
+      trigger: { key: "Escape", editmode: true },
       execute: () => {
-        escapeMode = true
+        searchFilter = ""
+        if (escapeMode) {
+          escapeMode = isOpen = false
+        } else {
+          escapeMode = isOpen = true
+        }
         return true
-      },
-    })
-
-    addCommand({
-      name: "exit-escape-mode",
-      title: "Exit Escape Mode",
-      trigger: { key: "Escape" },
-      execute: () => {
-        escapeMode = false
-        isOpen = false
-        return true
-      },
-    })
-
-    addCommand({
-      name: "toggle-command-menu",
-      title: "Toggle command menu",
-      trigger: { key: "Enter" },
-      execute: () => {
-        isOpen = !isOpen
       },
     })
 
@@ -193,8 +205,7 @@
     watch?.removeEventListener("keydown", keyDownHandler)
     watch?.removeEventListener("keyup", keyUpHandler)
 
-    removeCommand("exit-escape-mode")
-    removeCommand("enter-escape-mode")
+    removeCommand("toggle-escape-mode")
     removeCommand("toggle-command-menu")
     removeCommand("search-commands")
   })
@@ -214,6 +225,10 @@
 
   function getFilteredCommand(searchFilter: string) {
     return $commands.find((c) => isFilterMatch(searchFilter, c))
+  }
+
+  function isCommandDisabled(a: Command) {
+    return a.disabled && a.disabled()
   }
 </script>
 
@@ -256,7 +271,8 @@
           class:editmode={command.trigger.editmode}
           class:escapemode={!command.trigger.editmode}
         >
-          {asMenuItem(command)}
+          {(command.trigger.editmode ? "" : !escapeMode ? "Esc " : "") +
+            asMenuItem(command)}
         </button>
       {/each}
     </div>

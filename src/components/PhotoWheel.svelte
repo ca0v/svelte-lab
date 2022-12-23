@@ -4,12 +4,14 @@
     url: string
   }
 
-  import { createEventDispatcher } from "svelte"
+  import { createEventDispatcher, onDestroy, onMount } from "svelte"
+  import { hasFocus } from "../lib/globals"
   import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
+  import { addCommand, removeCommand } from "../store/commands"
   const dispatch = createEventDispatcher()
+
   export let sources: Array<Source> = []
   let container: HTMLElement
-
   let lastFocusedElement: any = null
 
   export const focus = () => {
@@ -20,35 +22,44 @@
     }
   }
 
-  function keyDownHandler(
-    e: KeyboardEvent & { currentTarget: EventTarget & HTMLButtonElement },
-    source: Source
-  ) {
-    if (e.shiftKey && e.key !== "Shift") {
-      dispatch("goto", { key: e.key })
-      return
-    }
-    switch (e.key) {
-      case ",":
-      case "<": {
-        const target = e.currentTarget.previousElementSibling as HTMLElement
+  onMount(() => {
+    addCommand({
+      event: "goto-next-photo",
+      name: "Next photo",
+      trigger: {
+        key: ".",
+        editmode: true,
+      },
+      disabled: () => !hasFocus(container),
+      execute: () => {
+        const target = lastFocusedElement.nextElementSibling as HTMLElement
         if (!target) return
         target.focus()
-        e.preventDefault()
-        break
-      }
-      case ".":
-      case ">": {
-        const target = e.currentTarget.nextElementSibling as HTMLElement
+        return true
+      },
+    })
+
+    addCommand({
+      event: "goto-previous-photo",
+      name: "Previous photo",
+      trigger: {
+        key: ",",
+        editmode: true,
+      },
+      disabled: () => !hasFocus(container),
+      execute: () => {
+        const target = lastFocusedElement.previousElementSibling as HTMLElement
         if (!target) return
         target.focus()
-        e.preventDefault()
-        break
-      }
-      default:
-        dispatch("keydown", { key: e.key, source })
-    }
-  }
+        return true
+      },
+    })
+  })
+
+  onDestroy(() => {
+    removeCommand("goto-next-photo")
+    removeCommand("goto-previous-photo")
+  })
 </script>
 
 <container bind:this={container}>
@@ -79,9 +90,6 @@
       on:click={() => {
         // emit a click event so the parent can handle it
         dispatch("click", source)
-      }}
-      on:keydown={(e) => {
-        keyDownHandler(e, source)
       }}
     >
       <img src={source.url} alt="" />

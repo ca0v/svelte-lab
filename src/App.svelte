@@ -37,7 +37,7 @@
       isOpen: false,
     },
     saving: false,
-    isSignedIn: false,
+    isSignedIn: true,
     editor: {
       editmode: true,
       width: 20,
@@ -186,7 +186,8 @@
       title: "Focus the PhotoWheel",
       trigger: {
         key: "p",
-        isShift: true,
+        isAlt: true,
+        editmode: true,
       },
       execute: () => {
         collageView.focusPhotoWheel()
@@ -307,6 +308,7 @@
     states.editor.editmode = true
     // "toggle-command-menu"
     states.menu.isOpen = true
+    toast("New Story Created")
   }}
   on:save_story={async () => {
     states.saving = true
