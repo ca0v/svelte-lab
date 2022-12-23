@@ -9,11 +9,12 @@
   } from "../store/commands"
   import { toast } from "../store/toasts"
 
+  const dispatcher = createEventDispatcher()
+
+  export let isOpen = false
   export let watch: Document | Element
 
-  const dispatcher = createEventDispatcher()
   let lastKeyDownHandled = false
-  export let isOpen = false
   let escapeMode = false
   let searchFilter = ""
   let searchInput: HTMLInputElement
@@ -299,8 +300,6 @@
     padding-top: 0;
     overflow: hidden;
     overflow-y: auto;
-    width: 40vh;
-    height: 80vh;
     transition-duration: 300ms;
   }
 
@@ -308,6 +307,8 @@
     background-color: var(--color-background-2);
     border-bottom-left-radius: 1rem;
     outline: 1px solid var(--color-border-2);
+    width: 40vh;
+    height: 80vh;
   }
 
   details > summary {
