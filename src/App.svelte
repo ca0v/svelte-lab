@@ -37,7 +37,7 @@
       isOpen: false,
     },
     saving: false,
-    isSignedIn: true,
+    isSignedIn: false,
     editor: {
       editmode: true,
       width: 20,

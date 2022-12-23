@@ -85,6 +85,14 @@
           return log("not handling keydown in select")
         }
       } else {
+        if (event.target instanceof HTMLSelectElement) {
+          switch (key) {
+            case "ArrowUp":
+            case "ArrowDown":
+            case "Tab":
+              return log("not handling up/down and tab in select")
+          }
+        }
         if (event.target instanceof HTMLButtonElement) {
           switch (key) {
             case "Enter":
@@ -307,7 +315,7 @@
     background-color: var(--color-background-2);
     border-bottom-left-radius: 1rem;
     outline: 1px solid var(--color-border-2);
-    width: 40vh;
+    width: clamp(25rem, 40vh, 35rem);
     height: 80vh;
   }
 

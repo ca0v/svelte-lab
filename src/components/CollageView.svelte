@@ -93,18 +93,6 @@
     target?.focus()
   }
 
-  //$: reportExceptions(() => transforms && refreshTransforms(transforms.data))()
-
-  function swapWithNextSibling(node: HTMLElement) {
-    const parent = node.parentElement
-    if (!parent) return
-    const nextSibling = node.nextElementSibling
-    if (nextSibling) {
-      parent.insertBefore(nextSibling, node)
-      console.log("swap", node, nextSibling)
-    }
-  }
-
   $: setWorkareaWidthCssVariable(width)
 
   // this need get reset at some point...
@@ -217,10 +205,22 @@
       },
       disabled: () => !getLastActiveCell(),
       execute: () => {
-        const image = getLastActiveCell()
-        if (!image) return
-        swapWithNextSibling(image.parentElement)
-        image.focus()
+        // need to swap the identity, as that is what determines the order on reload
+        const sourceTransform = getSourceTransform()
+        if (!sourceTransform) return
+
+        const index = transforms.data.findIndex(
+          (d) => d.target === sourceTransform.target
+        )
+        const targetTransform = transforms.data[index + 1]
+        if (!targetTransform) return
+
+        const id = targetTransform.id
+        targetTransform.id = sourceTransform.id
+        sourceTransform.id = id
+
+        // redraw
+        transforms = transforms
         return true
       },
     })
