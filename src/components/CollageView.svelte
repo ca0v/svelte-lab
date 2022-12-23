@@ -7,6 +7,8 @@
   import SvgImage from "./SvgImage.svelte"
   import type { CollageCellState, CollageData, Photo } from "../d.ts/index"
   import { reportExceptions, toast } from "../store/toasts"
+  import { onMount } from "svelte"
+  import { addCommand } from "../store/commands"
 
   export let sources: Array<{ id: string; url: string }> = []
   export let readonly = false
@@ -33,6 +35,7 @@
     if (!editmode) return
     if (e.altKey) return
     if (e.metaKey) return
+    if (e.ctrlKey) return
 
     function handled() {
       e.preventDefault()
@@ -50,45 +53,6 @@
     const sourceTransform =
       sourceTransformIndex >= 0 && transforms.data[sourceTransformIndex]
 
-    if (e.ctrlKey) {
-      switch (e.key) {
-        case "d":
-          // create a duplicate of the svgImage
-          if (sourceTransformIndex >= 0) {
-            const newId = transforms.data.length + 1
-            let clone = sourceTransform
-            clone = JSON.parse(JSON.stringify(clone))
-            clone.target = "i" + newId
-            clone.transform = `translate(10px, 10px) ${clone.transform}`
-            transforms.data.splice(sourceTransformIndex + 1, 0, clone)
-            transforms = transforms
-          }
-          return handled()
-      }
-      return
-    }
-
-    if (sourceTransform) {
-      let rotation = 0
-      switch (e.key) {
-        case "<":
-        case ",":
-          rotation -= 15
-          break
-        case ">":
-        case ".":
-          rotation += 15
-          break
-      }
-      if (rotation) {
-        const currentStyle = getEffectiveTransform(sourceTransform.transform)
-        sourceTransform.transform = `${currentStyle} rotate(${rotation}deg)`
-        transforms = transforms
-
-        return handled()
-      }
-    }
-
     if (sourceTransform && image) {
       let { width: w0 } = sourceTransform
       let x = 0
@@ -98,15 +62,6 @@
 
       let resize = false
       switch (e.key) {
-        case "Enter":
-          swapWithNextSibling(image.parentElement)
-          image.focus()
-          return handled()
-        case "Delete":
-          sourceTransform.id = ""
-          sourceTransform.baseurl = ""
-          transforms = transforms
-          return handled()
         case "ArrowUp":
           y -= 1
           resize = true
@@ -239,6 +194,134 @@
       parent.insertBefore(nextSibling, node)
       console.log("swap", node, nextSibling)
     }
+  }
+
+  onMount(async () => {
+    function getSourceTransform() {
+      const target = getFocusCellIdentifier()
+      if (!target) return
+
+      return transforms?.data?.find((d) => d.target === target)
+    }
+
+    addCommand({
+      event: "delete-cell",
+      name: "Delete Cell",
+      trigger: {
+        key: "Delete",
+        editmode: true,
+      },
+      disabled: () => {
+        debugger
+        return !getSourceTransform()
+      },
+      execute: () => {
+        const sourceTransform = getSourceTransform()
+        if (!sourceTransform) return
+        sourceTransform.id = ""
+        sourceTransform.baseurl = ""
+        transforms = transforms
+        return true
+      },
+    })
+
+    addCommand({
+      event: "swap-cell-up",
+      name: "Bring Toward Top",
+      trigger: {
+        key: "Enter",
+        isCtrl: true,
+        editmode: true,
+      },
+      execute: () => {
+        const image = document.activeElement as SVGImageElement
+        swapWithNextSibling(image.parentElement)
+        image.focus()
+        return true
+      },
+    })
+
+    // clone the current cell
+    addCommand({
+      name: "clone",
+      event: "clone-cell",
+      title: "Clone Current Cell",
+      trigger: {
+        key: "d",
+        isCtrl: true,
+        editmode: true,
+      },
+      execute: () => {
+        // get the image that is currently focused
+        const target = getFocusCellIdentifier()
+        if (!target) return
+
+        const sourceTransformIndex = transforms?.data?.findIndex(
+          (d) => d.target === target
+        )
+
+        if (sourceTransformIndex < 0) return
+
+        const clone = deepClone(transforms.data[sourceTransformIndex])
+        clone.target = "i" + (transforms.data.length + 1)
+        transforms.data.splice(sourceTransformIndex + 1, 0, clone)
+        transforms = transforms
+        return true
+      },
+    })
+
+    {
+      function rotate(cell: CollageCellState, rotation: number) {
+        const currentStyle = getEffectiveTransform(cell.transform)
+        cell.transform = `${currentStyle} rotate(${rotation}deg)`
+      }
+
+      addCommand({
+        name: "Rotate Clockwise",
+        event: "rotate-clockwise",
+        trigger: {
+          key: ">",
+          isShift: true,
+          editmode: true,
+        },
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const rotation = 15
+          rotate(sourceTransform, rotation)
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        name: "Rotate Counter-Clockwise",
+        event: "rotate-counter-clockwise",
+        trigger: {
+          key: "<",
+          isShift: true,
+          editmode: true,
+        },
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const rotation = -15
+          rotate(sourceTransform, rotation)
+          transforms = transforms
+          return true
+        },
+      })
+    }
+  })
+
+  function getFocusCellIdentifier() {
+    const image = document.activeElement as SVGImageElement
+    const target = image.parentElement.dataset.target
+    return target
+  }
+
+  function deepClone<T>(data: T): T {
+    return JSON.parse(JSON.stringify(data))
   }
 </script>
 

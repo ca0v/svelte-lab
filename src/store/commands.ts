@@ -16,6 +16,7 @@ export type Command = {
     icon?: string;
     trigger?: CommandTrigger;
     execute?: (command: Command) => boolean | void;
+    disabled?: () => boolean;
 }
 
 const initialCommands: Array<Command> = [
@@ -57,6 +58,7 @@ const initialCommands: Array<Command> = [
 export const commands = writable<Array<Command>>(initialCommands);
 
 export function addCommand(command: Command) {
+    command.title = command.title || command.name
     commands.update(v => [...v, command]);
 }
 

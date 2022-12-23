@@ -14,7 +14,7 @@
   let lastKeyDownHandled = false
   export let isOpen = false
   let escapeMode = false
-  let searchFilter = "create"
+  let searchFilter = "clone"
   let searchInput: HTMLInputElement
 
   function asMenuItem(action: Command) {
@@ -104,9 +104,14 @@
   }
 
   function executeCommand(command: Command) {
-    const handled = !!command.execute && command.execute(command)
+    const handled =
+      (!command.disabled || !command.disabled()) &&
+      !!command.execute &&
+      command.execute(command)
+
     if (!handled) {
       dispatcher(command.event, { action: command })
+    } else {
       toast(command.title)
     }
   }
@@ -209,16 +214,22 @@
       }}
     />
     <div class="two-columns">
-      {#each $commands as command}
+      {#each $commands.filter((c) => (!c.disabled || !c.disabled()) && isFilterMatch(searchFilter, c)) as command}
         <div
-          class="title"
-          class:highlight={isFilterMatch(searchFilter, command)}
+          class={`title ${
+            !searchFilter
+              ? ""
+              : isFilterMatch(searchFilter, command)
+              ? "filter-hit"
+              : "filter-miss"
+          }`}
           title={command.name}
         >
           {command.title}
         </div>
         <button
           on:click={() => executeCommand(command)}
+          disabled={command.disabled && command.disabled()}
           class:editmode={command.trigger.editmode}
           class:escapemode={!command.trigger.editmode}
         >
@@ -243,8 +254,8 @@
     padding-top: 0;
     overflow: hidden;
     overflow-y: auto;
-    width: auto;
-    max-height: 80vh;
+    width: 40vh;
+    height: 80vh;
     transition-duration: 300ms;
   }
 
@@ -273,6 +284,7 @@
     display: grid;
     grid-template-columns: 3fr 1fr;
     gap: 0.25rem;
+    transition-delay: 300ms width;
   }
 
   input {
@@ -283,16 +295,20 @@
     margin: 0.5rem 0;
   }
 
-  .highlight {
+  .filter-hit {
     color: var(--color-highlight);
     background-color: var(--color-background-highlight);
   }
 
-  button.editmode {
+  .filter-miss {
+    display: none;
+  }
+
+  button.editmode:not(:disabled) {
     color: var(--color-highlight);
   }
 
-  button.escapemode {
+  button.escapemode:not(:disabled) {
     color: var(--color-primary);
   }
 
@@ -300,4 +316,9 @@
     padding: 0.5rem;
     margin-right: 0.5rem;
   }
+
+  /* title with a sibling button that is diabled, works but reported as error */
+  /* .title:has(+ button:disabled) {
+    color: var(--color-disabled);
+  } */
 </style>

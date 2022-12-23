@@ -30,14 +30,14 @@
   let collageId = writable<string>("")
   let collageView: CollageView
 
-  let activeCollage: CollageData | null = null
+  let activeCollage: CollageData | null = {}
 
   let states = {
     menu: {
-      isOpen: false,
+      isOpen: true,
     },
     saving: false,
-    isSignedIn: false,
+    isSignedIn: true,
     editor: {
       editmode: true,
       width: 80,

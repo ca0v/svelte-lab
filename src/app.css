@@ -14,7 +14,7 @@
         --color-highlight: hsl(230, 90%, 50%);
         --color-primary: hsl(230, 100%, 10%);
         --color-background: hsl(230, 80%, 80%);
-        --color-background-highlight: hsl(230, 800%, 90%);
+        --color-background-highlight: hsl(230, 80%, 90%);
         --color-background-2: hsl(230, 80%, 75%);
         --color-border: hsl(230, 80%, 50%);
         --color-border-2: hsl(230, 80%, 30%);
@@ -23,13 +23,14 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --color-highlight: #555;
-        --color-primary: white;
-        --color-background: #334;
-        --color-background-2: #445;
-        --color-background-highlight: #ccf;
-        --color-border: #555;
-        --color-border-2: #666;
+        --color-highlight: hsl(400, 90%, 50%);
+        --color-primary: hsl(400, 0%, 90%);
+        --color-background: hsl(400, 20%, 20%);
+        --color-background-2: hsl(400, 20%, 20%);
+        --color-background-highlight: hsl(400, 20%, 10%);
+        --color-border: hsl(400, 20%, 50%);
+        --color-border-2: hsl(400, 20%, 70%);
+        --color-disabled: hsl(400, 70%, 20%);
     }
 }
 

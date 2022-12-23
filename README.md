@@ -38,8 +38,10 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 * BUG: No way to clone from one cell into another using kbd (shift-drag)
 * BUG: The drag-template is out-of-position (just rotated my screen)
 * BUG: "Enter" was a bad choice for open/close menu..."Esc" maybe?
+* FTR: Hide commands that do not match filter
 * FTR: Need to be able to adjust width/height independently (change top (ctrl+up), bottom, left, right)
 * ^^^: But 1st, consolidate remaining commands that are presently baked into the CollageView
+* BUG: Set-Cookie has to be set with SameSite=None (session=7de662eb-dca4-434c-95a3-7ec7b21b2e96; Expires=Fri, 23 Dec 2022 01:01:51 GMT; HttpOnly; Path=/), my dev site is http.
 
 ## Authentication and Authorization
 
