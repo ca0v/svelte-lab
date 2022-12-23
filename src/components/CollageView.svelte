@@ -1,11 +1,16 @@
 <script lang="ts">
   const ID_MAP = "QWERTASDFGYUIOPHJKLZXCVBNM1234568790".split("")
 
-  import { getEffectiveTransform, hasFocus } from "../lib/globals"
+  import { getEffectiveTransform, hasFocus, log } from "../lib/globals"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
-  import type { CollageCellState, CollageData, Photo } from "../d.ts/index"
+  import type {
+    BBox,
+    CollageCellState,
+    CollageData,
+    Photo,
+  } from "../d.ts/index"
   import { reportExceptions, toast } from "../store/toasts"
   import { onDestroy, onMount } from "svelte"
   import { addCommand, removeCommand } from "../store/commands"
@@ -246,10 +251,164 @@
         cell.style.transform = `${currentStyle} rotate(${rotation}deg)`
       }
 
-      function move(cell: CollageCellState, x: number, y: number) {
-        cell.x += x
-        cell.y += y
+      function move(cell: CollageCellState, box: BBox) {
+        cell.x += box.x || 0
+        cell.y += box.y || 0
+        cell.width += box.width || 0
+        cell.height += box.height || 0
       }
+
+      function zoom(cell: CollageCellState, scale: { dx: number; dy: number }) {
+        const { x: x0, y: y0, width: w0, height: h0 } = cell
+        const { dx, dy } = scale
+        const dw = w0 * (dx / x0)
+        const dh = h0 * (dy / y0)
+        move(cell, { x: dx, y: dy, width: dw, height: dh })
+      }
+
+      function createMoveHandler(box: BBox) {
+        return () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+
+          const moveImage = false
+          if (moveImage) {
+            move(sourceTransform, box)
+          } else {
+            let { x, y, width, height } = box
+            x = x || 0
+            y = y || 0
+            width = width || 0
+            height = height || 0
+
+            const w0 = sourceTransform.width
+            const h0 = sourceTransform.height
+
+            const currentStyle = getEffectiveTransform(
+              sourceTransform.transform
+            )
+
+            const translateTransform = `translate(${x}px, ${y}px)`
+            let scaleTransform = "scale(1,1)"
+
+            if (width < 0) {
+              scaleTransform += ` scale(${w0 / (w0 - width)}, 1)`
+            } else if (width > 0) {
+              scaleTransform += ` scale(${(w0 + width) / w0}, 1)`
+            }
+
+            if (height < 0) {
+              scaleTransform += ` scale(1, ${h0 / (h0 - height)})`
+            } else if (height > 0) {
+              scaleTransform += ` scale(1, ${(h0 + height) / h0})`
+            }
+
+            sourceTransform.transform = `${currentStyle} ${scaleTransform} ${translateTransform}`
+          }
+          transforms = transforms
+          return true
+        }
+      }
+
+      addCommand({
+        event: "grow-image-right",
+        name: "Grow Image Right",
+        trigger: {
+          key: "ArrowRight",
+          isAlt: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ x: 1, width: 1 }),
+      })
+
+      addCommand({
+        event: "shrink-image-right",
+        name: "Shrink Image Right",
+        trigger: {
+          key: "ArrowLeft",
+          isAlt: true,
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ x: -1, width: -1 }),
+      })
+
+      addCommand({
+        event: "grow-image-left",
+        name: "Grow Image Left",
+        trigger: {
+          key: "ArrowLeft",
+          isAlt: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ x: -1, width: 1 }),
+      })
+
+      addCommand({
+        event: "shrink-image-left",
+        name: "Shrink Image Left",
+        trigger: {
+          key: "ArrowRight",
+          isAlt: true,
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ x: 1, width: -1 }),
+      })
+
+      addCommand({
+        event: "grow-image-down",
+        name: "Grow Image Down",
+        trigger: {
+          key: "ArrowDown",
+          isAlt: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ y: 1, height: 1 }),
+      })
+
+      addCommand({
+        event: "shrink-image-down",
+        name: "Shrink Image Down",
+        trigger: {
+          key: "ArrowUp",
+          isAlt: true,
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ y: -1, height: -1 }),
+      })
+
+      addCommand({
+        event: "grow-image-up",
+        name: "Grow Image Up",
+        trigger: {
+          key: "ArrowUp",
+          isAlt: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ y: -1, height: 1 }),
+      })
+
+      addCommand({
+        event: "shrink-image-up",
+        name: "Shrink Image Up",
+        trigger: {
+          key: "ArrowDown",
+          isAlt: true,
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ y: 1, height: -1 }),
+      })
 
       addCommand({
         event: "zoom-image-in",
@@ -262,8 +421,9 @@
         execute: () => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
-          sourceTransform.width += 1
-          sourceTransform.height += 1
+          const dx = -1
+          const dy = -1
+          zoom(sourceTransform, { dx, dy })
           transforms = transforms
           return true
         },
@@ -280,8 +440,9 @@
         execute: () => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
-          sourceTransform.width -= 1
-          sourceTransform.height -= 1
+          const dx = 1
+          const dy = 1
+          zoom(sourceTransform, { dx, dy })
           transforms = transforms
           return true
         },
@@ -296,21 +457,7 @@
           editmode: true,
         },
         disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const width = sourceTransform.width
-
-          const currentTransform = getEffectiveTransform(
-            sourceTransform.transform
-          )
-          sourceTransform.transform = `scale(${
-            (1 + width) / width
-          }) ${currentTransform}`
-
-          transforms = transforms
-          return true
-        },
+        execute: createMoveHandler({ width: 1, height: 1 }),
       })
 
       addCommand({
@@ -322,21 +469,7 @@
           editmode: true,
         },
         disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const width = sourceTransform.width
-
-          const currentTransform = getEffectiveTransform(
-            sourceTransform.transform
-          )
-          sourceTransform.transform = `scale(${
-            width / (width + 1)
-          }) ${currentTransform}`
-
-          transforms = transforms
-          return true
-        },
+        execute: createMoveHandler({ width: -1, height: -1 }),
       })
 
       addCommand({
@@ -428,7 +561,7 @@
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
           const y = -1
-          move(sourceTransform, 0, y)
+          move(sourceTransform, { y })
           transforms = transforms
           return true
         },
@@ -447,7 +580,7 @@
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
           const y = 1
-          move(sourceTransform, 0, y)
+          move(sourceTransform, { y })
           transforms = transforms
           return true
         },
@@ -466,7 +599,7 @@
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
           const x = -1
-          move(sourceTransform, x, 0)
+          move(sourceTransform, { x })
           transforms = transforms
           return true
         },
@@ -485,7 +618,7 @@
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
           const x = 1
-          move(sourceTransform, x, 0)
+          move(sourceTransform, { x })
           transforms = transforms
           return true
         },
@@ -572,6 +705,10 @@
   onDestroy(() => {
     removeCommand("clone-cell")
     removeCommand("delete-cell")
+    removeCommand("grow-image-down")
+    removeCommand("grow-image-left")
+    removeCommand("grow-image-right")
+    removeCommand("grow-image-up")
     removeCommand("move-down")
     removeCommand("move-image-down")
     removeCommand("move-image-left")
@@ -584,6 +721,14 @@
     removeCommand("rotate-counter-clockwise")
     removeCommand("rotate-image-clockwise")
     removeCommand("rotate-image-counter-clockwise")
+    removeCommand("shrink-image-down")
+    removeCommand("shrink-image-left")
+    removeCommand("shrink-image-right")
+    removeCommand("shrink-image-up")
+    removeCommand("zoom-image-in")
+    removeCommand("zoom-image-out")
+    removeCommand("zoom-in")
+    removeCommand("zoom-out")
 
     ID_MAP.forEach((key, index) => {
       removeCommand(`focus-cell-${key}`)
