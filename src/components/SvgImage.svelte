@@ -2,6 +2,7 @@
 
 <script lang="ts">
   import { createEventDispatcher } from "svelte"
+  import { log } from "../lib/globals"
   const dispatch = createEventDispatcher()
 
   export let target = "center"
@@ -46,10 +47,13 @@
     // what is the svelte way of accessing the clone element?
     const cloneElement = document.querySelector(".clone") as HTMLDivElement
 
+    cloneElement.style.width = thisImage.getAttribute("width")
+    cloneElement.style.height = thisImage.getAttribute("height")
+    cloneElement.style.backgroundImage = `url(${href})`
+
     const width = cloneElement.offsetWidth
     const height = cloneElement.offsetHeight
     let [x, y] = [e.pageX - width / 2, e.pageY - height / 2]
-    cloneElement.style.backgroundImage = `url(${href})`
 
     const hoverElements = []
 
@@ -57,6 +61,8 @@
       cloneElement.classList.add("dragging")
       const dx = e.screenX - startX
       const dy = e.screenY - startY
+
+      log({ dx, dy, x, y })
       cloneElement.style.top = y + dy + "px"
       cloneElement.style.left = x + dx + "px"
 

@@ -99,4 +99,8 @@ export function hasFocus(container: HTMLElement | SVGElement) {
 }
 
 
+export function log(...args: any[]) {
+    console.log(...args)
+}
+
 export { setLocalStorage, getLocalStorage, getPhotoUrl }

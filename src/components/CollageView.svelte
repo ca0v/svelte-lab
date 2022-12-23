@@ -644,9 +644,6 @@
       {/if}
     </svg>
   </section>
-  {#if !readonly}
-    <div class="clone" class:dragging={false}>Clone Here</div>
-  {/if}
 </div>
 {#if !readonly && editmode && transforms}
   <slot />
@@ -671,28 +668,6 @@
     grid-auto-flow: row;
     grid-template-columns: 80cqmin;
     justify-content: center;
-  }
-
-  .clone {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 128px;
-    width: 128px;
-    background-size: cover;
-    opacity: 0.5;
-    /* center text vertically */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* prevent selection */
-    user-select: none;
-    visibility: hidden;
-    clip-path: url(#clip2);
-  }
-
-  .clone.dragging {
-    visibility: visible;
   }
 
   .toolbar {

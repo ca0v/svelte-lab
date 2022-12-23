@@ -19,11 +19,33 @@
     google {
       font-size: smaller;
     }
+
+    .clone {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 128px;
+      width: 128px;
+      background-size: cover;
+      opacity: 0.5;
+      /* center text vertically */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* prevent selection */
+      user-select: none;
+      visibility: hidden;
+    }
+
+    .clone.dragging {
+      visibility: visible;
+    }
   </style>
 </head>
 
 <body>
   <div id="app"></div>
+  <div class="clone" class:dragging={false}>Clone Here</div>
   <script type="module" src="/src/main.ts"></script>
   <script src="https://accounts.google.com/gsi/client"></script>
   <script src="https://apis.google.com/js/api.js"></script>
