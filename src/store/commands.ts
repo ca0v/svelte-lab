@@ -63,7 +63,7 @@ export function addCommand(command: Command) {
 }
 
 export function removeCommand(commandName: string) {
-    commands.update(v => v.filter(c => c.name !== commandName));
+    commands.update(v => v.filter(c => c.event !== commandName));
 }
 
 // svelte action

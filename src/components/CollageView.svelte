@@ -31,73 +31,7 @@
     photoWheel?.focus()
   }
 
-  function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {
-    if (!editmode) return
-    if (e.altKey) return
-    if (e.metaKey) return
-    if (e.ctrlKey) return
-
-    function handled() {
-      e.preventDefault()
-      e.stopPropagation()
-    }
-
-    // get the image that is currently focused
-    const image = getLastActiveCell()
-    if (!image) return
-    const target = image.parentElement.dataset.target
-    // get the svgImage from this
-
-    const sourceTransformIndex = transforms?.data?.findIndex(
-      (d) => d.target === target
-    )
-    const sourceTransform =
-      sourceTransformIndex >= 0 && transforms.data[sourceTransformIndex]
-
-    if (sourceTransform && image) {
-      let { width: w0 } = sourceTransform
-      let x = 0
-      let y = 0
-      let width = 0
-      let height = 0
-
-      let resize = false
-      switch (e.key) {
-        default:
-          if (!ID_MAP.includes(e.key.toLocaleUpperCase())) break
-          const index = ID_MAP.indexOf(e.key.toLocaleUpperCase())
-          const targetImage = transforms.data[index]
-          if (!targetImage) break
-          if (e.shiftKey) {
-            focusTarget(targetImage.target)
-            return handled()
-          } else {
-            swap(targetImage, sourceTransform)
-            return handled()
-          }
-      }
-
-      if (sourceTransform && image && resize) {
-        if (e.shiftKey) {
-          const currentTransform = getEffectiveTransform(
-            sourceTransform.transform
-          )
-          const newTransform = `scale(${
-            1 + width / w0
-          }) ${currentTransform} translate(${x}px, ${y}px)`
-          sourceTransform.transform = newTransform
-        } else {
-          sourceTransform.x += x || -width / 2
-          sourceTransform.y += y || -height / 2
-          sourceTransform.width += width
-          sourceTransform.height += height
-        }
-        // force update
-        transforms = transforms
-        return handled()
-      }
-    }
-  }
+  function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {}
 
   function copy(from: CollageCellState, into: CollageCellState) {
     into.id = from.id
@@ -179,17 +113,53 @@
       return transforms?.data?.find((d) => d.target === target)
     }
 
+    ID_MAP.forEach((key, index) => {
+      addCommand({
+        event: `swap-with-cell-${key}`,
+        name: `Swap with ${key}`,
+        trigger: {
+          key: key.toLocaleLowerCase(),
+          editmode: true,
+        },
+        disabled: () => !transforms?.data?.[index],
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const targetImage = transforms.data[index]
+          swap(targetImage, sourceTransform)
+          focusTarget(targetImage.target)
+          getFocusCellIdentifier()
+          return true
+        },
+      })
+
+      addCommand({
+        event: `focus-cell-${key}`,
+        name: `Focus ${key}`,
+        trigger: {
+          key: key.toLocaleUpperCase(),
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !transforms?.data?.[index],
+        execute: () => {
+          const targetImage = transforms.data[index]
+          focusTarget(targetImage.target)
+          getLastActiveCell()
+          return true
+        },
+      })
+    })
+
     addCommand({
       event: "delete-cell",
       name: "Delete Cell",
       trigger: {
         key: "Delete",
+        isShift: true,
         editmode: true,
       },
-      disabled: () => {
-        debugger
-        return !getSourceTransform()
-      },
+      disabled: () => !getFocusCellIdentifier(),
       execute: () => {
         const sourceTransform = getSourceTransform()
         if (!sourceTransform) return
@@ -256,6 +226,11 @@
       function translate(cell: CollageCellState, x: number, y: number) {
         const currentStyle = getEffectiveTransform(cell.transform)
         cell.transform = `${currentStyle} translate(${x}px, ${y}px)`
+      }
+
+      function rotateImage(cell: SVGImageElement, rotation: number) {
+        const currentStyle = getEffectiveTransform(cell.style.transform)
+        cell.style.transform = `${currentStyle} rotate(${rotation}deg)`
       }
 
       function move(cell: CollageCellState, x: number, y: number) {
@@ -540,10 +515,49 @@
           return true
         },
       })
+
+      addCommand({
+        name: "Rotate Image Clockwise",
+        event: "rotate-image-clockwise",
+        trigger: {
+          key: ".",
+          isShift: false,
+          editmode: true,
+        },
+        disabled: () => !getLastActiveCell(),
+        execute: () => {
+          const target = getLastActiveCell()
+          if (!target) return
+          const rotation = 6
+          rotateImage(target, rotation)
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        name: "Rotate Image Counter-Clockwise",
+        event: "rotate-image-counter-clockwise",
+        trigger: {
+          key: ",",
+          isShift: false,
+          editmode: true,
+        },
+        disabled: () => !getLastActiveCell(),
+        execute: () => {
+          const target = getLastActiveCell()
+          if (!target) return
+          const rotation = -6
+          rotateImage(target, rotation)
+          transforms = transforms
+          return true
+        },
+      })
     }
   })
 
   onDestroy(() => {
+    removeCommand("delete-cell")
     removeCommand("move-up")
     removeCommand("move-down")
     removeCommand("move-left")
@@ -554,6 +568,11 @@
     removeCommand("move-image-right")
     removeCommand("rotate-clockwise")
     removeCommand("rotate-counter-clockwise")
+
+    ID_MAP.forEach((key, index) => {
+      removeCommand(`focus-cell-${key}`)
+      removeCommand(`swap-with-cell-${key}`)
+    })
   })
 
   let lastActiveCell: SVGImageElement
