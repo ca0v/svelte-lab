@@ -34,13 +34,13 @@
 
   let states = {
     menu: {
-      isOpen: true,
+      isOpen: false,
     },
     saving: false,
     isSignedIn: true,
     editor: {
       editmode: true,
-      width: 80,
+      width: 20,
       widthUnits: "cqw",
     },
     titleEditor: {
@@ -154,6 +154,34 @@
     $collageId = localStorage.getItem("collage_name") || ""
 
     addCommand({
+      event: "zoom-in-workarea",
+      name: "Zoom Workarea In",
+      trigger: {
+        key: "+",
+        isShift: true,
+        isAlt: true,
+      },
+      execute: () => {
+        states.editor.width = Math.min(states.editor.width + 10, 90)
+        return true
+      },
+    })
+
+    addCommand({
+      event: "zoom-out-workarea",
+      name: "Zoom Workarea Out",
+      trigger: {
+        key: "_",
+        isShift: true,
+        isAlt: true,
+      },
+      execute: () => {
+        states.editor.width = Math.max(states.editor.width - 10, 10)
+        return true
+      },
+    })
+
+    addCommand({
       name: "goto-photowheel",
       title: "Focus the PhotoWheel",
       trigger: {
@@ -212,6 +240,8 @@
     removeCommand("Preview")
     removeCommand("Toggle Edit Mode")
     removeCommand("goto-photowheel")
+    removeCommand("zoom-in-workarea")
+    removeCommand("zoom-out-workarea")
 
     Object.keys($transforms).forEach(removeCommand)
 
@@ -348,6 +378,7 @@
               bind:value={states.editor.width}
               min="10"
               max="90"
+              step="1"
             />
           {/if}
           <p>S<u>t</u>ories</p>

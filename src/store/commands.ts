@@ -58,6 +58,8 @@ const initialCommands: Array<Command> = [
 export const commands = writable<Array<Command>>(initialCommands);
 
 export function addCommand(command: Command) {
+    command.event = command.event || command.name
+    command.name = command.name || command.event
     command.title = command.title || command.name
     commands.update(v => [...v, command]);
 }

@@ -14,7 +14,7 @@
   let lastKeyDownHandled = false
   export let isOpen = false
   let escapeMode = false
-  let searchFilter = "clone"
+  let searchFilter = ""
   let searchInput: HTMLInputElement
 
   function asMenuItem(action: Command) {
@@ -59,6 +59,22 @@
   function keyDownHandler(event: KeyboardEvent) {
     lastKeyDownHandled = false
     const { key, shiftKey, ctrlKey, altKey } = event
+
+    // if in an input, button, textarea, etc, do not handle if ctrl or alt not pressed
+    if (
+      !ctrlKey &&
+      !altKey &&
+      (event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        event.target instanceof HTMLButtonElement)
+    ) {
+      return
+    }
+
+    if (!shiftKey && event.target instanceof HTMLSelectElement) {
+      return
+    }
+
     const potentialActions = $commands.filter((action) => {
       const { trigger } = action
       if (!trigger) return false
@@ -186,11 +202,18 @@
   function isFilterMatch(searchFilter: string, command: Command) {
     const tokens = searchFilter.toUpperCase().split(" ")
     const match = (command.title + asMenuItem(command)).toUpperCase()
-    return tokens.reduce((b, t) => (b < 0 ? b : match.indexOf(t, b)), 0) > -1
+    return (
+      tokens.reduce((b, t) => {
+        if (b < 0) return b // nothing to find, abort
+        const i = match.indexOf(t, b)
+        if (i < 0) return i // not found, abort
+        return i + t.length // found, continue after last token
+      }, 0) > -1
+    )
   }
 
-  function getFilteredCommands(searchFilter: string) {
-    $commands.find((c) => isFilterMatch(searchFilter, c))
+  function getFilteredCommand(searchFilter: string) {
+    return $commands.find((c) => isFilterMatch(searchFilter, c))
   }
 </script>
 
@@ -206,7 +229,7 @@
       on:keydown={(e) => {
         if (e.key !== "Enter") return
         // execute the first command that matches the search filter
-        const command = getFilteredCommands(searchFilter)[0]
+        const command = getFilteredCommand(searchFilter)
         if (command) {
           executeCommand(command)
           isOpen = false
@@ -269,6 +292,7 @@
     padding: 0.5rem;
     border-radius: 4px;
     list-style: none;
+    text-align: right;
   }
 
   details[open] > summary {

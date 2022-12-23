@@ -21,8 +21,6 @@
 
   export let width = "auto"
 
-  $: setWorkareaWidthCssVariable(width)
-
   function setWorkareaWidthCssVariable(value: string) {
     document.documentElement.style.setProperty("--workarea-width", `${value}`)
   }
@@ -30,8 +28,6 @@
   export function focusPhotoWheel() {
     photoWheel?.focus()
   }
-
-  function keyDownHandler(e: KeyboardEvent & { currentTarget: HTMLElement }) {}
 
   function copy(from: CollageCellState, into: CollageCellState) {
     into.id = from.id
@@ -105,6 +101,20 @@
     }
   }
 
+  $: setWorkareaWidthCssVariable(width)
+
+  // this need get reset at some point...
+  let lastActiveCell: SVGImageElement
+
+  function getLastActiveCell() {
+    const image = document.activeElement as SVGImageElement
+    if (image instanceof SVGImageElement) {
+      lastActiveCell = image
+      return image
+    }
+    return lastActiveCell
+  }
+
   onMount(async () => {
     function getSourceTransform() {
       const target = getFocusCellIdentifier()
@@ -121,7 +131,9 @@
           key: key.toLocaleLowerCase(),
           editmode: true,
         },
-        disabled: () => !transforms?.data?.[index],
+        disabled: () =>
+          !transforms?.data?.[index] ||
+          transforms.data[index] == getSourceTransform(),
         execute: () => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
@@ -159,7 +171,7 @@
         isShift: true,
         editmode: true,
       },
-      disabled: () => !getFocusCellIdentifier(),
+      disabled: () => !getSourceTransform(),
       execute: () => {
         const sourceTransform = getSourceTransform()
         if (!sourceTransform) return
@@ -557,15 +569,16 @@
   })
 
   onDestroy(() => {
+    removeCommand("clone-cell")
     removeCommand("delete-cell")
-    removeCommand("move-up")
     removeCommand("move-down")
-    removeCommand("move-left")
-    removeCommand("move-right")
-    removeCommand("move-image-up")
     removeCommand("move-image-down")
     removeCommand("move-image-left")
     removeCommand("move-image-right")
+    removeCommand("move-image-up")
+    removeCommand("move-left")
+    removeCommand("move-right")
+    removeCommand("move-up")
     removeCommand("rotate-clockwise")
     removeCommand("rotate-counter-clockwise")
 
@@ -574,17 +587,6 @@
       removeCommand(`swap-with-cell-${key}`)
     })
   })
-
-  let lastActiveCell: SVGImageElement
-
-  function getLastActiveCell() {
-    const image = document.activeElement as SVGImageElement
-    if (image instanceof SVGImageElement) {
-      lastActiveCell = image
-      return image
-    }
-    return lastActiveCell
-  }
 
   function getFocusCellIdentifier() {
     const image = getLastActiveCell()
@@ -598,7 +600,7 @@
   }
 </script>
 
-<div class={scope + " workarea"} on:keydown={reportExceptions(keyDownHandler)}>
+<div class={scope + " workarea"}>
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <section>
     <svg
@@ -657,6 +659,7 @@
       }
     }}
     on:keydown={(data) => {
+      return // TODO: move into commands
       const { key, source } = data.detail
       const index = ID_MAP.indexOf(key.toLocaleUpperCase())
       if (index < 0) return
