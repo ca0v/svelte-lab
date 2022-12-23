@@ -43,7 +43,8 @@
     }
 
     // get the image that is currently focused
-    const image = document.activeElement as SVGImageElement
+    const image = getLastActiveCell()
+    if (!image) return
     const target = image.parentElement.dataset.target
     // get the svgImage from this
 
@@ -62,32 +63,6 @@
 
       let resize = false
       switch (e.key) {
-        case "ArrowUp":
-          y -= 1
-          resize = true
-          break
-        case "ArrowDown":
-          y += 1
-          resize = true
-          break
-        case "ArrowLeft":
-          x -= 1
-          resize = true
-          break
-        case "ArrowRight":
-          x += 1
-          resize = true
-          break
-        case "+":
-          width += 2
-          height += 2
-          resize = true
-          break
-        case "-":
-          width -= 2
-          height -= 2
-          resize = true
-          break
         default:
           if (!ID_MAP.includes(e.key.toLocaleUpperCase())) break
           const index = ID_MAP.indexOf(e.key.toLocaleUpperCase())
@@ -233,8 +208,10 @@
         isCtrl: true,
         editmode: true,
       },
+      disabled: () => !getLastActiveCell(),
       execute: () => {
-        const image = document.activeElement as SVGImageElement
+        const image = getLastActiveCell()
+        if (!image) return
         swapWithNextSibling(image.parentElement)
         image.focus()
         return true
@@ -276,6 +253,256 @@
         cell.transform = `${currentStyle} rotate(${rotation}deg)`
       }
 
+      function translate(cell: CollageCellState, x: number, y: number) {
+        const currentStyle = getEffectiveTransform(cell.transform)
+        cell.transform = `${currentStyle} translate(${x}px, ${y}px)`
+      }
+
+      function move(cell: CollageCellState, x: number, y: number) {
+        cell.x += x
+        cell.y += y
+      }
+
+      addCommand({
+        event: "zoom-image-in",
+        name: "Zoom Image In",
+        trigger: {
+          key: "+",
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          sourceTransform.width += 1
+          sourceTransform.height += 1
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        event: "zoom-image-out",
+        name: "Zoom Image Out",
+        trigger: {
+          key: "-",
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          sourceTransform.width -= 1
+          sourceTransform.height -= 1
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        event: "zoom-in",
+        name: "Zoom In",
+        trigger: {
+          key: "+",
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const width = sourceTransform.width
+
+          const currentTransform = getEffectiveTransform(
+            sourceTransform.transform
+          )
+          sourceTransform.transform = `scale(${
+            (1 + width) / width
+          }) ${currentTransform}`
+
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        event: "zoom-out",
+        name: "Zoom Out",
+        trigger: {
+          key: "-",
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const width = sourceTransform.width
+
+          const currentTransform = getEffectiveTransform(
+            sourceTransform.transform
+          )
+          sourceTransform.transform = `scale(${
+            width / (width + 1)
+          }) ${currentTransform}`
+
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        event: "move-up",
+        name: "Move Up",
+        trigger: {
+          key: "ArrowUp",
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const y = -1
+          translate(sourceTransform, 0, y)
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        event: "move-down",
+        name: "Move Down",
+        trigger: {
+          key: "ArrowDown",
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const y = 1
+          translate(sourceTransform, 0, y)
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        event: "move-left",
+        name: "Move Left",
+        trigger: {
+          key: "ArrowLeft",
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const x = -1
+          translate(sourceTransform, x, 0)
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        event: "move-right",
+        name: "Move Right",
+        trigger: {
+          key: "ArrowRight",
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const x = 1
+          translate(sourceTransform, x, 0)
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        event: "move-image-up",
+        name: "Move Image Up",
+        trigger: {
+          key: "ArrowUp",
+          isShift: false,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const y = -1
+          move(sourceTransform, 0, y)
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        event: "move-image-down",
+        name: "Move Image Down",
+        trigger: {
+          key: "ArrowDown",
+          isShift: false,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const y = 1
+          move(sourceTransform, 0, y)
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        event: "move-image-left",
+        name: "Move Image Left",
+        trigger: {
+          key: "ArrowLeft",
+          isShift: false,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const x = -1
+          move(sourceTransform, x, 0)
+          transforms = transforms
+          return true
+        },
+      })
+
+      addCommand({
+        event: "move-image-right",
+        name: "Move Image Right",
+        trigger: {
+          key: "ArrowRight",
+          isShift: false,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const x = 1
+          move(sourceTransform, x, 0)
+          transforms = transforms
+          return true
+        },
+      })
+
       addCommand({
         name: "Rotate Clockwise",
         event: "rotate-clockwise",
@@ -284,6 +511,7 @@
           isShift: true,
           editmode: true,
         },
+        disabled: () => !getSourceTransform(),
         execute: () => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
@@ -302,6 +530,7 @@
           isShift: true,
           editmode: true,
         },
+        disabled: () => !getSourceTransform(),
         execute: () => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
@@ -314,8 +543,20 @@
     }
   })
 
-  function getFocusCellIdentifier() {
+  let lastActiveCell: SVGImageElement
+
+  function getLastActiveCell() {
     const image = document.activeElement as SVGImageElement
+    if (image instanceof SVGImageElement) {
+      lastActiveCell = image
+      return image
+    }
+    return lastActiveCell
+  }
+
+  function getFocusCellIdentifier() {
+    const image = getLastActiveCell()
+    if (!image) return
     const target = image.parentElement.dataset.target
     return target
   }
