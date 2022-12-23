@@ -1,17 +1,15 @@
 <script lang="ts">
-  const ID_MAP = "QWERTASDFGYUIOPHJKLZXCVBNM1234568790".split("")
+  const ID_MAP = {
+    SHIFT: "QWERTASDFGYUIOPHJKLZXCVBNM".split(""),
+    ALT: "1234568790".split(""),
+  }
 
-  import { getEffectiveTransform, hasFocus, log } from "../lib/globals"
+  import { getEffectiveTransform, hasFocus } from "../lib/globals"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
-  import type {
-    BBox,
-    CollageCellState,
-    CollageData,
-    Photo,
-  } from "../d.ts/index"
-  import { reportExceptions, toast } from "../store/toasts"
+  import type { BBox, CollageCellState, CollageData } from "../d.ts/index"
+  import { toast } from "../store/toasts"
   import { onDestroy, onMount } from "svelte"
   import { addCommand, removeCommand } from "../store/commands"
 
@@ -129,7 +127,7 @@
       return transforms?.data?.find((d) => d.target === target)
     }
 
-    ID_MAP.forEach((key, index) => {
+    ID_MAP.SHIFT.forEach((key, index) => {
       addCommand({
         event: `swap-with-cell-${key}`,
         name: `Swap with ${key}`,
@@ -751,7 +749,7 @@
     removeCommand("zoom-in")
     removeCommand("zoom-out")
 
-    ID_MAP.forEach((key, index) => {
+    ID_MAP.SHIFT.forEach((key, index) => {
       removeCommand(`copy-into-cell-${key}`)
       removeCommand(`focus-cell-${key}`)
       removeCommand(`swap-with-cell-${key}`)
@@ -800,7 +798,7 @@
               transforms = transforms
             }}
             target={`${transform.target}`}
-            hotkey={ID_MAP[i]}
+            hotkey={ID_MAP.SHIFT[i]}
             style={transform.transform}
             background={{
               stroke: transform.background?.stroke || "none",

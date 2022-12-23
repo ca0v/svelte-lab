@@ -127,8 +127,10 @@
     localStorage.setItem("collage_name", $collageId)
 
     if (states.isSignedIn && $collageId) {
-      activeCollage = $stories.find((h) => h.id === $collageId)
-      await refreshStory(activeCollage)
+      const storyToLoad = $stories.find((h) => h.id === $collageId)
+      toast("Refreshing story urls with Google Photos...")
+      await refreshStory(storyToLoad)
+      activeCollage = storyToLoad
     }
   })
 
