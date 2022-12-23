@@ -35,7 +35,6 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 * BUG: Updating a note is causing a complete screen update (too fast to notice, but try to fix)
 * BUG: Heavily zoomed images should increase the resolution using google photos API (presently using default 512?)
 * BUG: Warn if changes were made and not saved..auto save?
-* BUG: No way to clone from one cell into another using kbd (shift-drag)
 * BUG: Set-Cookie has to be set with SameSite=None (session=7de662eb-dca4-434c-95a3-7ec7b21b2e96; Expires=Fri, 23 Dec 2022 01:01:51 GMT; HttpOnly; Path=/), my dev site is http.
 
 ## Authentication and Authorization

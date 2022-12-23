@@ -152,6 +152,27 @@
       })
 
       addCommand({
+        event: `copy-into-cell-${key}`,
+        name: `Copy to ${key}`,
+        trigger: {
+          key: key.toLocaleUpperCase(),
+          isShift: true,
+          isCtrl: true,
+          isAlt: true,
+          editmode: true,
+        },
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const targetImage = transforms.data[index]
+          copy(sourceTransform, targetImage)
+          focusTarget(targetImage.target)
+          getFocusCellIdentifier()
+          return true
+        },
+      })
+
+      addCommand({
         event: `focus-cell-${key}`,
         name: `Focus ${key}`,
         trigger: {
@@ -731,6 +752,7 @@
     removeCommand("zoom-out")
 
     ID_MAP.forEach((key, index) => {
+      removeCommand(`copy-into-cell-${key}`)
       removeCommand(`focus-cell-${key}`)
       removeCommand(`swap-with-cell-${key}`)
     })

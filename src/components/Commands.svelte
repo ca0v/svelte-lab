@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, onDestroy, tick } from "svelte"
+  import { log } from "../lib/globals"
   import {
     addCommand,
     commands,
@@ -59,6 +60,7 @@
   function keyDownHandler(event: KeyboardEvent) {
     lastKeyDownHandled = false
     const { key, shiftKey, ctrlKey, altKey } = event
+    log({ key, shiftKey, ctrlKey, altKey, lastKeyUp })
 
     if (!escapeMode) {
       // is it a normal key?
@@ -70,7 +72,7 @@
           (event.target instanceof HTMLInputElement ||
             event.target instanceof HTMLTextAreaElement)
         ) {
-          return
+          return log("not handling keydown in input")
         }
 
         if (
@@ -79,7 +81,7 @@
           !shiftKey &&
           event.target instanceof HTMLSelectElement
         ) {
-          return
+          return log("not handling keydown in select")
         }
       } else {
         if (event.target instanceof HTMLButtonElement) {
@@ -87,7 +89,7 @@
             case "Enter":
             case " ":
             case "Tab":
-              return
+              return log("not handling keydown in button")
           }
         }
       }
@@ -111,12 +113,16 @@
         match = trigger.preamble == lastKeyUp
       }
 
-      match = match && !isCommandDisabled(action)
+      if (match && isCommandDisabled(action)) {
+        log(`found matching command ${action.name} but it is disabled.`)
+        match = false
+      }
 
       return match
     })
 
     if (!potentialActions.length) {
+      log("no matching commands", { key, shiftKey, ctrlKey, altKey })
       // do any commands have a matching preamble?
       const matchingPreamble = $commands.filter((action) => {
         const { trigger } = action
