@@ -7,8 +7,8 @@
   import SvgImage from "./SvgImage.svelte"
   import type { CollageCellState, CollageData, Photo } from "../d.ts/index"
   import { reportExceptions, toast } from "../store/toasts"
-  import { onMount } from "svelte"
-  import { addCommand } from "../store/commands"
+  import { onDestroy, onMount } from "svelte"
+  import { addCommand, removeCommand } from "../store/commands"
 
   export let sources: Array<{ id: string; url: string }> = []
   export let readonly = false
@@ -515,7 +515,7 @@
         execute: () => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
-          const rotation = 15
+          const rotation = 6
           rotate(sourceTransform, rotation)
           transforms = transforms
           return true
@@ -534,13 +534,26 @@
         execute: () => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
-          const rotation = -15
+          const rotation = -6
           rotate(sourceTransform, rotation)
           transforms = transforms
           return true
         },
       })
     }
+  })
+
+  onDestroy(() => {
+    removeCommand("move-up")
+    removeCommand("move-down")
+    removeCommand("move-left")
+    removeCommand("move-right")
+    removeCommand("move-image-up")
+    removeCommand("move-image-down")
+    removeCommand("move-image-left")
+    removeCommand("move-image-right")
+    removeCommand("rotate-clockwise")
+    removeCommand("rotate-counter-clockwise")
   })
 
   let lastActiveCell: SVGImageElement
