@@ -329,6 +329,7 @@
   on:clear_all_photos={() => clearAllImages()}
 >
   <GoogleSignin
+    autoSignIn={false}
     bind:isSignedIn={states.isSignedIn}
     on:signedin={handleAuthClick}
   />

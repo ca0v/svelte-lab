@@ -1,23 +1,32 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte"
   import { signin, signout } from "@googlePhoto/googleApi"
-  import { reportExceptions } from "../store/toasts"
+  import { reportExceptions, toast } from "../store/toasts"
 
   const dispatch = createEventDispatcher()
 
   export let isSignedIn = false
+  export let autoSignIn = true
 
   async function handleSigninClick() {
-    await signin()
+    if (!isSignedIn) await signin()
     isSignedIn = true
     dispatch("signedin")
   }
 
   function handleSignoutClick() {
-    signout()
-    isSignedIn = false
+    if (isSignedIn) {
+      signout()
+      isSignedIn = false
+    }
     dispatch("signedout")
   }
+
+  autoSignIn &&
+    setTimeout(() => {
+      toast("Automatic sign in to Google Photos")
+      handleSigninClick()
+    }, 1000)
 </script>
 
 <section class="toolbar">
