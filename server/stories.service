@@ -2,6 +2,8 @@
 Description=Stories Web API
 
 [Service]
+WorkingDirectory=/home/ca/code/svelte-lab/server
+User=ca
 ExecStart=/home/ca/code/svelte-lab/server/start.sh
 
 [Install]
