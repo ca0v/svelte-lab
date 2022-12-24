@@ -2,7 +2,7 @@ async function* loadAllPhotos(startDate: gapi.client.photoslibrary.Date, endDate
     const result: Array<gapi.client.photoslibrary.MediaItem> = [
         {
             id: "1",
-            baseUrl: "https://picsum.photos/200/300",
+            baseUrl: "https://picsum.photos/id/237/200",
             filename: "test.jpg",
             mediaMetadata: {
                 creationTime: "2021-01-01",
@@ -19,7 +19,7 @@ async function* loadAllPhotosByIds(ids: Array<string>) {
         const result: gapi.client.photoslibrary.MediaItemResult[] = [{
             mediaItem: {
                 id,
-                baseUrl: "https://picsum.photos/200/300",
+                baseUrl: `https://picsum.photos/id/${Math.floor(10 + 10 * Math.random())}/300`,
                 filename: "test.jpg",
                 mediaMetadata: {
                     creationTime: "2021-01-01",
