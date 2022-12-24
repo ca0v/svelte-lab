@@ -18,6 +18,7 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 
 ## What is next?
 
+* BUG: How to *not* commit "mock" configuration?
 * BUG: errors are silent...e.g. run without services running...no warnings
 * DGN: drag-drop should be handled by CollageView not SvgImage
 * FTR: Can crop and round corners using clip-path: inset() on the svg image (<https://developer.mozilla.org/en-US/docs/Web/CSS/inset>)
@@ -43,6 +44,10 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
             "status": "UNAUTHENTICATED"
         }
 * FTR: Would be nice to multi-select and apply effect to all cells at once (zoom, rotate, border coloring, etc.)
+* FTR: Multi-level undo/redo
+* BUG: Pulling the entire image collection is a bad idea...track what has been pulled and pull in what is missing and necessary (closed to the photo-wheel date)
+* FTR: Multi-select then align-top|bottom|left|right
+* FTR: Group multiple items and "frame" them with a border (fuse them into a single cell)
 
 ## Authentication and Authorization
 
@@ -66,7 +71,7 @@ I am not happy with the command interface.  Instead of meaningless keyboard shor
 | ----- | -------- |
 | A ←   | Rotate active cell CCW |
 | A →   | Rotate active cell CW |
-| C _k_ | Copy the active cell into cell _k_|
+| C *k* | Copy the active cell into cell *k*|
 | E← ←  | Move left edge of active cell left |
 | E← →  | Move left edge of active cell right |
 | E→ ←  | Move right edge of active cell left |
@@ -75,11 +80,11 @@ I am not happy with the command interface.  Instead of meaningless keyboard shor
 | E↑ ↓  | Move top edge of active cell down|
 | E↓ ↑  | Move bottom edge of active cell up |
 | E↓ ↓  | Move bottom edge of active cell down |
-| G _k_ | Goto/Focus/Select cell _k_|
-| S _k_ | swap the active cell with cell _k_|
+| G *k* | Goto/Focus/Select cell *k*|
+| S *k* | swap the active cell with cell *k*|
 | S ↑   | scale-up background of active cell |
 | S ↓   | scale-down background of active cell |
-| T _k_ | toggle selection of cell _k_ |
+| T *k* | toggle selection of cell *k* |
 
 These "prelude" keys put the processor in a context, making it convenient to repeat commands:
 
@@ -94,8 +99,8 @@ This will scale better and be easier to remember.  Example of future expansion:
 
 | key  | Commmand |
 | ---- | -------- |
-| BGC _color_ | Set the background-color of the active cell to _color_ |
-| BC _color_ | Set the border-color of the active cell to _color_ |
+| BGC *color* | Set the background-color of the active cell to *color* |
+| BC *color* | Set the border-color of the active cell to *color* |
 | BW 3 | Sets the border width of the active cell to 3|
 | BS . | Sets the border style of the active cell to to dots|
 
