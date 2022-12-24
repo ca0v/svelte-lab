@@ -43,7 +43,6 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
             "message": "Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See <https://developers.google.com/identity/sign-in/web/devconsole-project>.",
             "status": "UNAUTHENTICATED"
         }
-* BUG: Does not remember last "story" loaded
 * FTR: Would be nice to multi-select and apply effect to all cells at once (zoom, rotate, border coloring, etc.)
 
 ## Authentication and Authorization

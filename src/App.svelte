@@ -124,14 +124,15 @@
   }
 
   collageId.subscribe(async (v) => {
-    localStorage.setItem("collage_name", $collageId)
+    if (!v) return
 
-    if (states.isSignedIn && $collageId) {
-      const storyToLoad = $stories.find((h) => h.id === $collageId)
-      toast("Refreshing story urls with Google Photos...")
-      await refreshStory(storyToLoad)
-      activeCollage = storyToLoad
-    }
+    localStorage.setItem("collage_name", v)
+
+    if (!states.isSignedIn) return
+    const storyToLoad = $stories.find((h) => h.id === $collageId)
+    toast("Acquiring story data...")
+    await refreshStory(storyToLoad)
+    activeCollage = storyToLoad
   })
 
   $: states.datefilter.from &&
