@@ -4,7 +4,7 @@
     ALT: "1234568790".split(""),
   }
 
-  import { getEffectiveTransform, hasFocus } from "../lib/globals"
+  import { getEffectiveTransform, hasFocus, log } from "../lib/globals"
 
   import PhotoWheel from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
@@ -95,16 +95,22 @@
 
   $: setWorkareaWidthCssVariable(width)
 
-  // this need get reset at some point...
   let lastActiveCell: SVGImageElement
-
-  function getLastActiveCell() {
+  document.addEventListener(
+    "focus",
+    () => {
+      log(document.activeElement.tagName)
+      getActiveCell()
+    },
+    true
+  )
+  function getActiveCell() {
     const image = document.activeElement as SVGImageElement
     if (image instanceof SVGImageElement) {
       lastActiveCell = image
       return image
     }
-    return lastActiveCell
+    return null
   }
 
   onMount(async () => {
@@ -115,6 +121,14 @@
       return transforms?.data?.find((d) => d.target === target)
     }
 
+    function isDisabled(index: number): boolean {
+      if (!hasFocus(svgElement)) return true
+      return (
+        !transforms?.data?.[index] ||
+        transforms.data[index] == getSourceTransform()
+      )
+    }
+
     ID_MAP.SHIFT.forEach((key, index) => {
       addCommand({
         event: `swap-with-cell-${key}`,
@@ -123,9 +137,7 @@
           key: key.toLocaleLowerCase(),
           editmode: true,
         },
-        disabled: () =>
-          !transforms?.data?.[index] ||
-          transforms.data[index] == getSourceTransform(),
+        disabled: () => isDisabled(index),
         execute: () => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
@@ -147,6 +159,7 @@
           isAlt: true,
           editmode: true,
         },
+        disabled: () => isDisabled(index),
         execute: () => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
@@ -166,16 +179,32 @@
           isShift: true,
           editmode: true,
         },
-        disabled: () => !transforms?.data?.[index],
+        disabled: () => isDisabled(index),
         execute: () => {
           const targetImage = transforms.data[index]
           focusTarget(targetImage.target)
-          getLastActiveCell()
           return true
         },
       })
     })
 
+    addCommand({
+      event: "focus-work-area",
+      name: "Focus Work Area",
+      trigger: {
+        key: "w",
+        isAlt: true,
+        editmode: true,
+      },
+      execute: () => {
+        if (lastActiveCell) {
+          lastActiveCell.focus()
+        } else {
+          focusTarget("i1")
+        }
+        return true
+      },
+    })
     addCommand({
       event: "delete-cell",
       name: "Delete Cell",
@@ -203,7 +232,7 @@
         isCtrl: true,
         editmode: true,
       },
-      disabled: () => !getLastActiveCell(),
+      disabled: () => !getSourceTransform(),
       execute: () => {
         // need to swap the identity, as that is what determines the order on reload
         const sourceTransform = getSourceTransform()
@@ -689,9 +718,9 @@
           isShift: false,
           editmode: true,
         },
-        disabled: () => !hasFocus(svgElement) || !getLastActiveCell(),
+        disabled: () => !hasFocus(svgElement),
         execute: () => {
-          const target = getLastActiveCell()
+          const target = getActiveCell()
           if (!target) return
           const rotation = 6
           rotateImage(target, rotation)
@@ -708,9 +737,9 @@
           isShift: false,
           editmode: true,
         },
-        disabled: () => !hasFocus(svgElement) || !getLastActiveCell(),
+        disabled: () => !hasFocus(svgElement),
         execute: () => {
-          const target = getLastActiveCell()
+          const target = getActiveCell()
           if (!target) return
           const rotation = -6
           rotateImage(target, rotation)
@@ -757,7 +786,7 @@
   })
 
   function getFocusCellIdentifier() {
-    const image = getLastActiveCell()
+    const image = getActiveCell()
     if (!image) return
     const target = image.parentElement.dataset.target
     return target
@@ -826,6 +855,10 @@
 
   svg.border {
     outline: 1px solid var(--color-border);
+  }
+
+  svg.border:has(*:focus) {
+    outline: 1px solid var(--color-border-focus);
   }
 
   section {

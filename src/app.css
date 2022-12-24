@@ -31,6 +31,7 @@
         --color-border: hsl(400, 20%, 50%);
         --color-border-2: hsl(400, 20%, 70%);
         --color-disabled: hsl(400, 70%, 20%);
+        --color-border-focus: hsl(400, 90%, 50%);
     }
 }
 
