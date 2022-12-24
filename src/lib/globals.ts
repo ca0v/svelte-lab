@@ -3,8 +3,6 @@ import { PhotoDB } from "./indexdb"
 const photoDB = new PhotoDB();
 await photoDB.initialize();
 
-let client_id = await getLocalStorage('clientId');
-
 export function range(size: number) {
     return new Array(size).fill(0).map((_, i) => i);
 }
@@ -31,12 +29,12 @@ const setLocalStorage = (key: string, data: any) => {
 }
 
 // prompt user for value
-const promptUser = (message: string) => {
+export function promptUser(message: string) {
     return prompt(message)
 }
 
 // get the photo url or prompt user for it
-const getPhotoUrl = async () => {
+export async function getPhotoUrl() {
     const photoUrl = await getLocalStorage('photoServerUrl')
     if (photoUrl) {
         return photoUrl
@@ -49,23 +47,13 @@ const getPhotoUrl = async () => {
 
         // verify the url by getting the client id
         try {
-            client_id = "";
-            client_id = await getClientId();
+            this.client_id = "";
+            this.client_id = await this.getClientId();
             return newPhotoUrl
         } catch (ex) {
             reportError(ex);
         }
     }
-}
-
-export async function getClientId() {
-    if (!client_id) {
-        const photoUrl = await getPhotoUrl();
-        const response = await fetch(`${photoUrl}/client_id`, { credentials: "include" });
-        client_id = (await response.json()).client_id;
-    }
-    setLocalStorage('clientId', client_id)
-    return client_id
 }
 
 const dummy = document.createElement("div")
@@ -103,4 +91,4 @@ export function log(...args: any[]) {
     console.log(...args)
 }
 
-export { setLocalStorage, getLocalStorage, getPhotoUrl }
+export { setLocalStorage, getLocalStorage }

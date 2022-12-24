@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte"
-  import { signin, signout } from "../lib/googleApi"
+  import { signin, signout } from "@googlePhoto/googleApi"
   import { reportExceptions } from "../store/toasts"
 
   const dispatch = createEventDispatcher()

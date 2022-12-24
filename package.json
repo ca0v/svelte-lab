@@ -30,6 +30,7 @@
     "@types/gapi": "^0.0.43",
     "@types/gapi.client.photoslibrary": "^1.0.0",
     "gh-pages": "^4.0.0",
-    "swagger-typescript-api": "^12.0.2"
+    "swagger-typescript-api": "^12.0.2",
+    "vite-tsconfig-paths": "^4.0.3"
   }
 }

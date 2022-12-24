@@ -1,15 +1,19 @@
-import { getClientId, getPhotoUrl } from "./globals"
+import { Api } from "@justBeCollage/Api"
+import { getPhotoUrl } from "./globals";
 
 const SCOPES = "https://www.googleapis.com/auth/photoslibrary.readonly"
 const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/photoslibrary/v1/rest";
 
 let signedIn = false;
 
+const baseUrl = await getPhotoUrl();
+const api = new Api({ baseUrl })
+
 /**
  * obtains a google access token to the photos library
  */
 async function useGooglePhotos(): Promise<{ access_token: string, expires_at: number }> {
-    const client_id = await getClientId();
+    const client_id = await api.collage.getClientId();
 
     return new Promise((resolve, reject) => {
         const tokenClient = google.accounts.oauth2.initTokenClient({
@@ -44,7 +48,7 @@ async function useGooglePhotos(): Promise<{ access_token: string, expires_at: nu
  */
 async function useGapi() {
     return new Promise<void>(async (good, bad) => {
-        const client_id = await getClientId();
+        const client_id = await api.collage.getClientId();
         const photoUrl = await getPhotoUrl();
         google.accounts.id.initialize({
             client_id,
@@ -52,15 +56,7 @@ async function useGapi() {
             callback: async (result) => {
                 const { credential } = result;
                 // sign into the photo server
-                const response = await fetch(`${photoUrl}/login`, {
-                    method: 'POST',
-                    credentials: "include",
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ credential }),
-                });
-                const responseData = await response.json();
+                const responseData = await api.collage.login(photoUrl, credential);
 
                 gapi.load("client", async () => {
                     await gapi.client.init({
@@ -104,14 +100,16 @@ function initializeGoogleAccount() {
     })
 }
 
-export async function signin() {
+async function signin() {
     if (signedIn) throw "already signed in";
     await useGapi();
     await useGooglePhotos();
     signedIn = true;
 }
 
-export async function signout() {
+async function signout() {
     if (!signedIn) throw "not signed in";
     signedIn = false;
 }
+
+export { signin, signout }

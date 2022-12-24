@@ -1,9 +1,8 @@
-import type { AudioRecording } from "../lib/db"
-import { getPhotoUrl } from "../lib/globals"
-import { loadAllPhotos, loadAllPhotosByIds, loadMediaItem } from "../lib/googlePhotoApi"
+import { getPhotoUrl } from "@/lib/globals";
+import { loadAllPhotos, loadAllPhotosByIds, loadMediaItem } from "@googlePhoto/googlePhotoApi"
 
 import type { CollageCellState, CollageData, Photo } from "../d.ts/index"
-import { Api } from "./Api";
+import { Api } from "@justBeCollage/Api";
 const baseUrl = await getPhotoUrl();
 const api = new Api({ baseUrl });
 

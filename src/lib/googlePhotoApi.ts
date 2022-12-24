@@ -1,4 +1,4 @@
-import { signin } from "./googleApi";
+import { signin } from "@googlePhoto/googleApi";
 
 const GOOGLE_PHOTO_PAGE_SIZE = 25;
 
