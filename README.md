@@ -33,7 +33,6 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 * BUG: Warn if changes were made and not saved..auto save?
 * DGN: The signin process is janky..eliminate the Google Popup and try to stay signed in? May not be possible.
 * BUG: Set-Cookie has to be set with SameSite=None (session=7de662eb-dca4-434c-95a3-7ec7b21b2e96; Expires=Fri, 23 Dec 2022 01:01:51 GMT; HttpOnly; Path=/), my dev site is http.
-* BUG: Command window is way too wide (in portrait mode)
 * BUG: Cannot focus Wheel (Alt+P)
 * DGN: the collage edit fns should probably be moded. E.g. arrow keys are moving 'focused' cell
 * BUG: lost commands for moving from wheel into collage
