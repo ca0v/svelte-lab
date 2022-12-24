@@ -368,73 +368,35 @@
       }
 
       addCommand({
-        event: "grow-image-right",
-        name: "Grow Image Right",
-        trigger: {
-          key: "ArrowRight",
-          isAlt: true,
-          editmode: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: 1, width: 2 }),
-      })
-
-      addCommand({
-        event: "shrink-image-right",
-        name: "Shrink Image Right",
-        trigger: {
-          key: "ArrowLeft",
-          isAlt: true,
-          isShift: true,
-          editmode: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: -1, width: -2 }),
-      })
-
-      addCommand({
-        event: "grow-image-left",
-        name: "Grow Image Left",
-        trigger: {
-          key: "ArrowLeft",
-          isAlt: true,
-          editmode: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: -1, width: 2 }),
-      })
-
-      addCommand({
-        event: "shrink-image-left",
-        name: "Shrink Image Left",
-        trigger: {
-          key: "ArrowRight",
-          isAlt: true,
-          isShift: true,
-          editmode: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: 1, width: -2 }),
-      })
-
-      addCommand({
-        event: "grow-image-down",
-        name: "Grow Image Down",
-        trigger: {
-          key: "ArrowDown",
-          isAlt: true,
-          editmode: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ y: 1, height: 2 }),
-      })
-
-      addCommand({
-        event: "shrink-image-down",
-        name: "Shrink Image Down",
+        event: "move-top-edge-up",
+        name: "Move Top Edge Up",
         trigger: {
           key: "ArrowUp",
-          isAlt: true,
+          isCtrl: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ y: -1, height: 2 }),
+      })
+
+      addCommand({
+        event: "move-top-edge-down",
+        name: "Move Top Edge Down",
+        trigger: {
+          key: "ArrowDown",
+          isCtrl: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ y: 1, height: -2 }),
+      })
+
+      addCommand({
+        event: "move-bottom-edge-up",
+        name: "Move Bottom Edge Up",
+        trigger: {
+          key: "ArrowUp",
+          isCtrl: true,
           isShift: true,
           editmode: true,
         },
@@ -443,28 +405,66 @@
       })
 
       addCommand({
-        event: "grow-image-up",
-        name: "Grow Image Up",
-        trigger: {
-          key: "ArrowUp",
-          isAlt: true,
-          editmode: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ y: -1, height: 2 }),
-      })
-
-      addCommand({
-        event: "shrink-image-up",
-        name: "Shrink Image Up",
+        event: "move-bottom-edge-down",
+        name: "Move Bottom Edge Down",
         trigger: {
           key: "ArrowDown",
-          isAlt: true,
+          isCtrl: true,
           isShift: true,
           editmode: true,
         },
         disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ y: 1, height: -2 }),
+        execute: createMoveHandler({ y: 1, height: 2 }),
+      })
+
+      addCommand({
+        event: "move-left-edge-left",
+        name: "Move Left Edge Left",
+        trigger: {
+          key: "ArrowLeft",
+          isCtrl: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ x: -1, width: 2 }),
+      })
+
+      addCommand({
+        event: "move-left-edge-right",
+        name: "Move Left Edge Right",
+        trigger: {
+          key: "ArrowRight",
+          isCtrl: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ x: 1, width: -2 }),
+      })
+
+      addCommand({
+        event: "move-right-edge-left",
+        name: "Move Right Edge Left",
+        trigger: {
+          key: "ArrowLeft",
+          isCtrl: true,
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ x: -1, width: -2 }),
+      })
+
+      addCommand({
+        event: "move-right-edge-right",
+        name: "Move Right Edge Right",
+        trigger: {
+          key: "ArrowRight",
+          isCtrl: true,
+          isShift: true,
+          editmode: true,
+        },
+        disabled: () => !getSourceTransform(),
+        execute: createMoveHandler({ x: 1, width: 2 }),
       })
 
       addCommand({
@@ -760,12 +760,17 @@
   })
 
   onDestroy(() => {
+    removeCommand("move-bottom-edge-down")
+    removeCommand("move-bottom-edge-up")
+    removeCommand("move-left-edge-left")
+    removeCommand("move-left-edge-right")
+    removeCommand("move-right-edge-left")
+    removeCommand("move-right-edge-right")
+    removeCommand("move-top-edge-down")
+    removeCommand("move-top-edge-up")
+
     removeCommand("clone-cell")
     removeCommand("delete-cell")
-    removeCommand("grow-image-down")
-    removeCommand("grow-image-left")
-    removeCommand("grow-image-right")
-    removeCommand("grow-image-up")
     removeCommand("move-down")
     removeCommand("move-image-down")
     removeCommand("move-image-left")
