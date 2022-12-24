@@ -34,7 +34,6 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 * DGN: The signin process is janky..eliminate the Google Popup and try to stay signed in? May not be possible.
 * BUG: Set-Cookie has to be set with SameSite=None (session=7de662eb-dca4-434c-95a3-7ec7b21b2e96; Expires=Fri, 23 Dec 2022 01:01:51 GMT; HttpOnly; Path=/), my dev site is http.
 * BUG: lost commands for moving from wheel into collage
-* DGN: I'm running out of shortcuts, need 0..9 added to the cells (1 and Shift+"!" I guess?)
 * DGN: Rethink how I'm dealing with input/button/textarea focus...lots of special keys are applicable (arrow, home, end, etc.)
 * BUG: When enough time goes by...
 

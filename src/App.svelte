@@ -65,6 +65,21 @@
     photos.sort((a, b) => a.created.localeCompare(b.created))
     states.datefilter.from =
       states.datefilter.from || photos[0]?.created.split("T")[0] || ""
+    states.isSignedIn = true
+
+    collageId.subscribe(async (v) => {
+      if (!v) return
+
+      localStorage.setItem("collage_name", v)
+
+      if (!states.isSignedIn) return
+      const storyToLoad = $stories.find((h) => h.id === v)
+      toast("Acquiring story data...")
+      await refreshStory(storyToLoad)
+      activeCollage = storyToLoad
+    })
+
+    $collageId = localStorage.getItem("collage_name") || ""
   }
 
   // assign images to each image element
@@ -123,18 +138,6 @@
     }
   }
 
-  collageId.subscribe(async (v) => {
-    if (!v) return
-
-    localStorage.setItem("collage_name", v)
-
-    if (!states.isSignedIn) return
-    const storyToLoad = $stories.find((h) => h.id === $collageId)
-    toast("Acquiring story data...")
-    await refreshStory(storyToLoad)
-    activeCollage = storyToLoad
-  })
-
   $: states.datefilter.from &&
     localStorage.setItem("date_filter", states.datefilter.from)
   $: states.datefilter.to =
@@ -154,7 +157,6 @@
 
   onMount(async () => {
     states.datefilter.from = localStorage.getItem("date_filter") || ""
-    $collageId = localStorage.getItem("collage_name") || ""
 
     addCommand({
       event: "zoom-in-workarea",
@@ -224,7 +226,7 @@
       addCommand({
         name,
         event: name,
-        title: `Use the "${name}" transform`,
+        title: `Use the "${name}" layout`,
         trigger: {
           key: (i >= 40 ? "" : (i % 10) + 1) + "",
           preamble: "x",
@@ -329,11 +331,7 @@
   on:auto_assign_photos={() => autoAssignImages(photosToShow)}
   on:clear_all_photos={() => clearAllImages()}
 >
-  <GoogleSignin
-    autoSignIn={false}
-    bind:isSignedIn={states.isSignedIn}
-    on:signedin={handleAuthClick}
-  />
+  <GoogleSignin autoSignIn={false} />
 </Commands>
 
 <main>
@@ -345,17 +343,14 @@
     <SvgPaths />
   {:else}
     <Logo>
-      <GoogleSignin
-        bind:isSignedIn={states.isSignedIn}
-        on:signedin={handleAuthClick}
-      /></Logo
+      <GoogleSignin autoSignIn={true} on:signedin={handleAuthClick} /></Logo
     >
   {/if}
 
   {#if states.isSignedIn}
     <div class="frame">
       <div class="work-area">
-        {#if activeCollage && states.isSignedIn}
+        {#if activeCollage}
           <CollageView
             width={states.editor.width + states.editor.widthUnits}
             bind:this={collageView}

@@ -267,7 +267,7 @@
       }}
     />
     <div class="two-columns">
-      {#each $commands.filter((c) => (!c.disabled || !c.disabled()) && isFilterMatch(searchFilter, c)) as command}
+      {#each $commands.filter((c) => isFilterMatch(searchFilter, c)) as command}
         <div
           class={`title ${
             !searchFilter

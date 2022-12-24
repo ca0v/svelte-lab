@@ -3,6 +3,12 @@
     SHIFT: "QWERTASDFGYUIOPHJKLZXCVBNM".split(""),
     ALT: "1234568790".split(""),
   }
+  const ID_MAP_KEYS = [...ID_MAP.SHIFT, ...ID_MAP.ALT]
+
+  function getHotkey(index: number) {
+    const keys = ID_MAP_KEYS
+    return keys[index]
+  }
 
   import { getEffectiveTransform, hasFocus, log } from "../lib/globals"
 
@@ -11,7 +17,7 @@
   import type { BBox, CollageCellState, CollageData } from "../d.ts/index"
   import { toast } from "../store/toasts"
   import { onDestroy, onMount } from "svelte"
-  import { addCommand, removeCommand } from "../store/commands"
+  import { addCommand, command, removeCommand } from "../store/commands"
 
   export let sources: Array<{ id: string; url: string }> = []
   export let readonly = false
@@ -129,7 +135,9 @@
       )
     }
 
-    ID_MAP.SHIFT.forEach((key, index) => {
+    const keys = ID_MAP_KEYS.reverse()
+
+    keys.forEach((key, index) => {
       addCommand({
         event: `swap-with-cell-${key}`,
         name: `Swap with ${key}`,
@@ -154,9 +162,9 @@
         name: `Copy to ${key}`,
         trigger: {
           key: key.toLocaleUpperCase(),
-          isShift: true,
+          isShift: ID_MAP.SHIFT.includes(key),
           isCtrl: true,
-          isAlt: true,
+          isAlt: ID_MAP.ALT.includes(key),
           editmode: true,
         },
         disabled: () => isDisabled(index),
@@ -176,7 +184,8 @@
         name: `Focus ${key}`,
         trigger: {
           key: key.toLocaleUpperCase(),
-          isShift: true,
+          isShift: ID_MAP.SHIFT.includes(key),
+          isAlt: ID_MAP.ALT.includes(key),
           editmode: true,
         },
         disabled: () => isDisabled(index),
@@ -778,7 +787,8 @@
     removeCommand("zoom-in")
     removeCommand("zoom-out")
 
-    ID_MAP.SHIFT.forEach((key, index) => {
+    const keys = ID_MAP_KEYS
+    keys.forEach((key, index) => {
       removeCommand(`copy-into-cell-${key}`)
       removeCommand(`focus-cell-${key}`)
       removeCommand(`swap-with-cell-${key}`)
@@ -800,15 +810,20 @@
 <div class={scope + " workarea"}>
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <section>
-    <svg
-      bind:this={svgElement}
-      class:border={editmode}
-      viewBox="-100 -100 200 200"
-      stroke-width="0"
-      fill="#000"
-    >
-      {#if transforms?.data}
+    {#if !transforms?.data}
+      <button use:command={"search-commands"}
+        >No layout defined, select one</button
+      >
+    {:else}
+      <svg
+        bind:this={svgElement}
+        class:border={editmode}
+        viewBox="-100 -100 200 200"
+        stroke-width="0"
+        fill="#000"
+      >
         {#each transforms.data as transform, i}
+          <b>i</b>
           <SvgImage
             {editmode}
             {readonly}
@@ -827,7 +842,7 @@
               transforms = transforms
             }}
             target={`${transform.target}`}
-            hotkey={ID_MAP.SHIFT[i]}
+            hotkey={getHotkey(i)}
             style={transform.transform}
             background={{
               stroke: transform.background?.stroke || "none",
@@ -835,8 +850,8 @@
             }}
           />
         {/each}
-      {/if}
-    </svg>
+      </svg>
+    {/if}
   </section>
 </div>
 {#if !readonly && editmode && transforms}

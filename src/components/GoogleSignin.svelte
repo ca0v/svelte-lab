@@ -5,8 +5,8 @@
 
   const dispatch = createEventDispatcher()
 
-  export let isSignedIn = false
   export let autoSignIn = true
+  let isSignedIn = false
 
   async function handleSigninClick() {
     if (!isSignedIn) await signin()
