@@ -48,6 +48,7 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 * BUG: Pulling the entire image collection is a bad idea...track what has been pulled and pull in what is missing and necessary (closed to the photo-wheel date)
 * FTR: Multi-select then align-top|bottom|left|right
 * FTR: Group multiple items and "frame" them with a border (fuse them into a single cell)
+* FTR: Build a dynamic toolbar based on last commands search for to facilitate learning
 
 ## Authentication and Authorization
 

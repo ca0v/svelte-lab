@@ -8,17 +8,18 @@ export function range(size: number) {
 }
 
 // read data from localstorage
-async function getLocalStorage(key: string) {
+async function getLocalStorage<T>(key: string, defaultValue?: T) {
     key = `svelte_lab.${key}`
     let data = await photoDB.getGlobal<any>(key);
     if (data) {
-        return data.value;
+        return <T>data.value;
     }
     data = localStorage.getItem(key)
     if (data) {
-        return JSON.parse(data)
+        log("WARNING: still reading from localstorage", key)
+        return <T>JSON.parse(data)
     }
-    return null
+    return defaultValue
 }
 
 // write data to localstorage
@@ -41,7 +42,7 @@ export async function getPhotoUrl() {
     }
 
     while (true) {
-        const newPhotoUrl = promptUser('Please enter your photo url')
+        const newPhotoUrl = promptUser('This is an alpha version of Just Be Collage.  Please check back later.  If you must continue, the answer is "../..",  but we are not ready for you.')
         if (!newPhotoUrl) return;
         newPhotoUrl && setLocalStorage('photoServerUrl', newPhotoUrl)
 

@@ -19,7 +19,7 @@
     bottom: 0;
     left: 0;
     width: 20em;
-    max-height: min(50vh, 30em);
+    max-height: min(50vh, 5em);
     background-color: var(--color-background-2);
     padding: 1rem;
     border-top-right-radius: 1rem;

@@ -1,37 +1,46 @@
-* {
+:root {
+    --theme-hue: 230;
     --color-error: red;
     --border-radius: 3px;
     --editor-font-size: clamp(8px, 2cqmin, 16px);
-    --font-size: clamp(8px, 1.5cqmin, 20px);
+    --font-size: clamp(8px, 2cqmin, 20px);
     --font-family: system-ui;
 
     font-family: var(--font-family);
     font-size: var(--font-size);
 }
 
+input,
+select,
+button {
+    font-size: var(--font-size);
+}
+
 @media (prefers-color-scheme: light) {
     :root {
-        --color-highlight: hsl(230, 90%, 50%);
-        --color-primary: hsl(230, 100%, 10%);
-        --color-background: hsl(230, 80%, 80%);
-        --color-background-highlight: hsl(230, 80%, 90%);
-        --color-background-2: hsl(230, 80%, 75%);
-        --color-border: hsl(230, 80%, 50%);
-        --color-border-2: hsl(230, 80%, 30%);
+        --theme-hue: 230;
+        --color-highlight: hsl(var(--theme-hue), 90%, 50%);
+        --color-primary: hsl(var(--theme-hue), 100%, 10%);
+        --color-background: hsl(var(--theme-hue), 80%, 80%);
+        --color-background-highlight: hsl(var(--theme-hue), 80%, 90%);
+        --color-background-2: hsl(var(--theme-hue), 80%, 75%);
+        --color-border: hsl(var(--theme-hue), 80%, 50%);
+        --color-border-2: hsl(var(--theme-hue), 80%, 30%);
     }
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --color-highlight: hsl(400, 90%, 50%);
-        --color-primary: hsl(400, 0%, 90%);
-        --color-background: hsl(400, 20%, 20%);
-        --color-background-2: hsl(400, 20%, 20%);
-        --color-background-highlight: hsl(400, 20%, 10%);
-        --color-border: hsl(400, 20%, 50%);
-        --color-border-2: hsl(400, 20%, 70%);
-        --color-disabled: hsl(400, 70%, 20%);
-        --color-border-focus: hsl(400, 90%, 50%);
+        --theme-hue: 40;
+        --color-highlight: hsl(var(--theme-hue), 90%, 50%);
+        --color-primary: hsl(var(--theme-hue), 0%, 90%);
+        --color-background: hsl(var(--theme-hue), 20%, 20%);
+        --color-background-2: hsl(var(--theme-hue), 20%, 20%);
+        --color-background-highlight: hsl(var(--theme-hue), 20%, 10%);
+        --color-border: hsl(var(--theme-hue), 20%, 50%);
+        --color-border-2: hsl(var(--theme-hue), 20%, 70%);
+        --color-disabled: hsl(var(--theme-hue), 70%, 20%);
+        --color-border-focus: hsl(var(--theme-hue), 90%, 50%);
     }
 }
 

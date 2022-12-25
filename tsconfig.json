@@ -20,10 +20,10 @@
         "src/*"
       ],
       "@justBeCollage/*": [
-        "src/data/*"
+        "src/mock/data/*"
       ],
       "@googlePhoto/*": [
-        "src/lib/*"
+        "src/mock/lib/*"
       ],
     },
   },

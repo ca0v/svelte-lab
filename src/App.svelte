@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { onDestroy, onMount, beforeUpdate } from "svelte"
+  import { onDestroy, onMount } from "svelte"
+  import { writable } from "svelte/store"
   import CollageView from "./components/CollageView.svelte"
   import DateRange from "./components/DateRange.svelte"
   import Logo from "./components/Logo.svelte"
+  import Toolbar from "./components/Toolbar.svelte"
   import { loadAllStories, stories } from "./store/stories"
   import { collageTemplates as transforms } from "./store/transforms"
 
@@ -21,18 +23,22 @@
     shortcut,
   } from "./store/commands"
   import { refreshBaseurl } from "./store/photos"
-  import { writable } from "svelte/store"
   import GoogleSignin from "./components/GoogleSignin.svelte"
 
   let photos: Array<Photo> = []
   let photosToShow: Array<Photo> = []
 
-  let collageId = writable<string>("")
+  const collageId = writable("")
   let collageView: CollageView
 
   let activeCollage: CollageData | null = {}
 
+  const colorWheelAngle = writable(0)
+
   let states = {
+    app: {
+      showColorWheel: false,
+    },
     menu: {
       isOpen: false,
     },
@@ -158,6 +164,28 @@
   onMount(async () => {
     states.datefilter.from = localStorage.getItem("date_filter") || ""
 
+    $colorWheelAngle = await getLocalStorage("colorwheel_angle", 0)
+    colorWheelAngle.subscribe(async (v) => {
+      toast(`Color wheel angle: ${v}deg`)
+      setLocalStorage("colorwheel_angle", v)
+      document.documentElement.style.setProperty("--theme-hue", `${v}deg`)
+    })
+
+    addCommand({
+      event: "toggle-color-wheel",
+      name: "Toggle Color Wheel",
+      trigger: {
+        key: " ",
+        isShift: true,
+        isAlt: true,
+        isCtrl: true,
+      },
+      execute: () => {
+        states.app.showColorWheel = !states.app.showColorWheel
+        return true
+      },
+    })
+
     addCommand({
       event: "zoom-in-workarea",
       name: "Zoom Workarea In",
@@ -259,8 +287,10 @@
   })
 
   async function getPhotosFor2022() {
-    const startDate =
-      (await getLocalStorage("fetchPhotoList:end-date")) || "2022-10-01"
+    const startDate = await getLocalStorage(
+      "fetchPhotoList:end-date",
+      "2022-10-01"
+    )
     const endDate = "2022-12-31"
 
     const cachedPhotos: Record<string, Photo> =
@@ -341,6 +371,7 @@
       <h2>Collage Builder</h2>
     </div>
     <SvgPaths />
+    <Toolbar />
   {:else}
     <Logo>
       <GoogleSignin autoSignIn={true} on:signedin={handleAuthClick} /></Logo
@@ -370,8 +401,19 @@
               <p>{photosToShow.length} of {photos.length} photo(s)</p>
             </div>
           </CollageView>
+          <br />
         {/if}
         <div class="two-column">
+          {#if states.app.showColorWheel}
+            <p>Color Wheel Angle</p>
+            <input
+              type="range"
+              bind:value={$colorWheelAngle}
+              min="0"
+              max="360"
+              step="1"
+            />
+          {/if}
           {#if activeCollage}
             <p>Zoom Level</p>
             <input
