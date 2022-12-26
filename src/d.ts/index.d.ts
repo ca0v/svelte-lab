@@ -50,11 +50,14 @@ export interface CollageCellState {
     background?: CollageCellBackground;
 }
 
+export type ClipPaths = Record<string, string>
+
 export interface CollageData {
     id?: string | null;
     title?: string | null;
     note?: string | null;
     data?: CollageCellState[] | null;
+    clipPaths?: ClipPaths | null;
 }
 
 export interface Photo {

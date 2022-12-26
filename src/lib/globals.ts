@@ -36,7 +36,7 @@ export function promptUser(message: string) {
 
 // get the photo url or prompt user for it
 export async function getPhotoUrl() {
-    const photoUrl = await getLocalStorage('photoServerUrl')
+    const photoUrl = await getLocalStorage<string>('photoServerUrl')
     if (photoUrl) {
         return photoUrl
     }

@@ -13,8 +13,8 @@
   import Notes from "./components/Notes.svelte"
   import SvgPaths from "./components/SvgPaths.svelte"
   import { fetchPhotoList, saveCollage } from "./data/collageServices"
-  import { addDays, getLocalStorage, setLocalStorage } from "./lib/globals"
-  import type { CollageData, Photo } from "./d.ts/index"
+  import { addDays, getLocalStorage, log, setLocalStorage } from "./lib/globals"
+  import type { ClipPaths, CollageData, Photo } from "./d.ts/index"
   import Toaster from "./components/Toaster.svelte"
   import { toast } from "./store/toasts"
   import {
@@ -26,6 +26,7 @@
   } from "./store/commands"
   import { refreshBaseurl } from "./store/photos"
   import GoogleSignin from "./components/GoogleSignin.svelte"
+  import { getClipPathPoints } from "./lib/paths"
 
   let photos: Array<Photo> = []
   let photosToShow: Array<Photo> = []
@@ -193,6 +194,26 @@
           states.saving = true
           try {
             setLocalStorage(`${activeCollage.id}`, activeCollage)
+            // every distinct clippath used by the collage must be saved
+            const clipPathIds = [
+              ...new Set(
+                activeCollage.data.map((t) => t.clipPath).filter((v) => !!v)
+              ),
+            ]
+
+            log({ clipPathIds })
+
+            const clipPaths = clipPathIds.reduce((result, id) => {
+              result[id] = getClipPathPoints(`clip_${id}`)
+              return result
+            }, <ClipPaths>{})
+
+            log({ clipPaths })
+
+            activeCollage.clipPaths = clipPaths
+
+            log({ activeCollage })
+
             await saveCollage({ ...activeCollage })
             toast("Saved")
           } catch (ex) {
@@ -449,9 +470,6 @@
             bind:this={collageView}
             transforms={activeCollage}
             bind:editmode={states.editor.editmode}
-            on:save={async () => {
-              throw "not supported, remove"
-            }}
             sources={photosToShow.map((p) => ({ id: p.id, url: p.baseurl }))}
           >
             <div class="spacer" />

@@ -92,6 +92,43 @@ function* readPoints(path: string) {
     }
 }
 
+function getClipPathPoints(clipPathId: string) {
+    const clipPath = document.getElementById(clipPathId)
+    const path = clipPath?.querySelector("path")
+    const points = path?.getAttribute("d")
+    return points;
+
+}
+
+function _getClipPathPoints(clipPathId: string) {
+    const clipPath = document.getElementById(clipPathId)
+    if (!clipPath) return;
+
+    const path = clipPath.querySelector("path")
+    if (!path) return;
+
+    const points = path.getAttribute("d")
+    if (!points) return;
+
+    // convert svg path to polygon
+    const iterator = readPoints(points);
+
+    const polygon = [] as Array<[number, number]>
+    while (true) {
+        const x = iterator.next()
+        const y = iterator.next()
+        if (x.done || y.done) {
+            break;
+        }
+
+        let x_val = x.value || 0
+        let y_val = y.value || 0
+        polygon.push([x_val, y_val])
+    }
+    return polygon;
+}
+
+
 function moveClipPath(clipPath: SVGClipPathElement, direction: Direction) {
     const path = clipPath.querySelector("path")
     if (!path) return;
@@ -144,4 +181,4 @@ function moveClipPath(clipPath: SVGClipPathElement, direction: Direction) {
     path.setAttribute("d", new_path)
 }
 
-export { polygonPath, polygonToPath, translatePath, sleep, moveClipPath, duplicateImageClipPath, type ImagePosition, type Direction }
+export { getClipPathPoints, polygonPath, polygonToPath, translatePath, sleep, moveClipPath, duplicateImageClipPath, type ImagePosition, type Direction }
