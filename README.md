@@ -10,7 +10,7 @@ See the [live](https://ca0v.github.io/svelte-lab) site
 
 ## What does it do?
 
-I am building a Svelte components to facilitate creating an animated scrapbook.
+I am building Svelte components to facilitate creating an animated scrapbook.
 
 ## Technical Notes
 
