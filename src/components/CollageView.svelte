@@ -376,7 +376,7 @@
       commander
         .context({
           name: "Top Edge",
-          trigger: { key: "t" },
+          trigger: { key: "t", isShift: true },
         })
         .addCommand({
           event: "move-top-edge-up",
@@ -400,7 +400,7 @@
       commander
         .context({
           name: "Bottom Edge",
-          trigger: { key: "b" },
+          trigger: { key: "B", isShift: true },
         })
         .addCommand({
           event: "move-bottom-edge-up",
@@ -424,13 +424,12 @@
       commander
         .context({
           name: "Left Edge",
-          trigger: { key: "l" },
+          trigger: { key: "L", isShift: true },
         })
         .addCommand({
           event: "move-left-edge-left",
           name: "Move Left Edge Left",
           trigger: {
-            preamble: "l",
             key: "ArrowLeft",
           },
           disabled: () => !getSourceTransform(),
@@ -440,7 +439,6 @@
           event: "move-left-edge-right",
           name: "Move Left Edge Right",
           trigger: {
-            preamble: "l",
             key: "ArrowRight",
           },
           disabled: () => !getSourceTransform(),
@@ -450,13 +448,12 @@
       commander
         .context({
           name: "Right Edge",
-          trigger: { key: "r" },
+          trigger: { key: "R", isShift: true },
         })
         .addCommand({
           event: "move-right-edge-left",
           name: "Move Right Edge Left",
           trigger: {
-            preamble: "r",
             key: "ArrowLeft",
           },
           disabled: () => !getSourceTransform(),
@@ -466,7 +463,6 @@
           event: "move-right-edge-right",
           name: "Move Right Edge Right",
           trigger: {
-            preamble: "r",
             key: "ArrowRight",
           },
           disabled: () => !getSourceTransform(),
@@ -476,7 +472,7 @@
       commander
         .context({
           name: "Zoom Image",
-          trigger: { key: "z" },
+          trigger: { key: "Z", isShift: true },
         })
         .addCommand({
           event: "zoom-image-in",
@@ -536,7 +532,7 @@
       commander
         .context({
           name: "Move Image",
-          trigger: { key: "m" },
+          trigger: { key: "M", isShift: true },
         })
         .addCommand({
           event: "move-up",
@@ -675,7 +671,7 @@
       commander
         .context({
           name: "Rotate Image",
-          trigger: { key: "r", isShift: true },
+          trigger: { key: "A", isShift: true },
         })
         .addCommand({
           name: "Rotate Clockwise",
