@@ -168,7 +168,7 @@
     colorWheelAngle.subscribe(async (v) => {
       toast(`Color wheel angle: ${v}deg`)
       setLocalStorage("colorwheel_angle", v)
-      document.documentElement.style.setProperty("--theme-hue", `${v}deg`)
+      document.documentElement.style.setProperty("--theme-hue", `${v}`)
     })
 
     addCommand({
@@ -271,8 +271,9 @@
   })
 
   onDestroy(() => {
-    removeCommand("Preview")
-    removeCommand("Toggle Edit Mode")
+    removeCommand("preview")
+    removeCommand("toggle_edit_mode")
+    removeCommand("toggle-color-wheel")
     removeCommand("goto-photowheel")
     removeCommand("zoom-in-workarea")
     removeCommand("zoom-out-workarea")

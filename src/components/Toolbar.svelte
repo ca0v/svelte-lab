@@ -1,30 +1,21 @@
+<script type="ts">
+  import { asKeyboardShortcut, commands, command } from "../store/commands"
+</script>
+
 <div class="toolbar">
-  <div class="command-button">
-    <label>Name of Command</label>
-    <input
-      type="button"
-      title="Describe This Command"
-      value="Ctrl+Alt+Shift+P"
-    />
-  </div>
-  <div class="command-button">
-    <label>Name of Command</label>
-    <button title="Describe This Command">Ctrl+Alt+Shift+P</button>
-  </div>
-  <div class="command-button">
-    <label>Name of Command</label>
-    <button title="Describe This Command">Ctrl+Alt+Shift+P</button>
-  </div>
-  <div class="command-button">
-    <label>Name of Command</label>
-    <button title="Describe This Command">Ctrl+Alt+Shift+P</button>
-  </div>
+  {#each $commands.filter((command) => command.showInToolbar) as c, i}
+    <div class="command-button">
+      <p>{c.name}</p>
+      <button use:command={c.event}>{asKeyboardShortcut(c)}</button>
+    </div>
+  {/each}
 </div>
 
 <style>
   .toolbar {
+    --command-width: min(20cqw, 10rem);
     display: grid;
-    grid-template-columns: repeat(auto-fit, min(20cqw, 10rem));
+    grid-template-columns: repeat(auto-fit, var(--command-width));
     column-gap: 2px;
     justify-content: center;
   }
@@ -35,14 +26,9 @@
     row-gap: 2px;
   }
 
-  .command-button label {
-    width: min(20cqw, 10rem);
+  .command-button > * {
+    width: var(--command-width);
     text-align: center;
-  }
-
-  .command-button input[type="button"],
-  .command-button button {
-    width: min(20cqw, 10rem);
     word-wrap: break-word;
   }
 </style>

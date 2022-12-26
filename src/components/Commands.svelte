@@ -3,6 +3,7 @@
   import { log } from "../lib/globals"
   import {
     addCommand,
+    asKeyboardShortcut,
     commands,
     removeCommand,
     type Command,
@@ -18,37 +19,6 @@
   let escapeMode = false
   let searchFilter = ""
   let searchInput: HTMLInputElement
-
-  function asMenuItem(action: Command) {
-    if (!action.trigger) return "<none>"
-    const { key, preamble, isShift, isCtrl, isAlt } = action.trigger
-    const keyNameMap = {
-      ArrowUp: "↑",
-      ArrowDown: "↓",
-      ArrowLeft: "←",
-      ArrowRight: "→",
-      Shift: "Shift",
-      Control: "Ctrl",
-      Alt: "Alt",
-      Escape: "Esc",
-      Enter: "Enter",
-      " ": "Space",
-    }
-    const modifiers = [
-      isShift && keyNameMap.Shift,
-      isCtrl && keyNameMap.Control,
-      isAlt && keyNameMap.Alt,
-      key ? keyNameMap[key] || key.toUpperCase() : "",
-    ]
-      .filter(Boolean)
-      .join("+")
-
-    if (preamble) {
-      return `${keyNameMap[preamble] || preamble.toUpperCase()} ${modifiers}`
-    } else {
-      return modifiers
-    }
-  }
 
   let lastKeyUp = ""
   function keyUpHandler(event: KeyboardEvent) {
@@ -146,32 +116,29 @@
       return
     }
 
-    if (
-      0 <
-      potentialActions.reduce(
-        (value, action) => value + (!!executeCommand(action) ? 1 : 0),
-        0
-      )
-    ) {
-      event.preventDefault()
-      event.stopPropagation()
-      lastKeyDownHandled = true
+    if (potentialActions.length) {
+      potentialActions.forEach((action) => {
+        log(`found matching command ${action.name}`)
+        if (executeCommand(action)) {
+          action.showInToolbar = false
+          $commands = $commands
+          event.preventDefault()
+          event.stopPropagation()
+          lastKeyDownHandled = true
+        }
+      })
     }
   }
 
   function executeCommand(command: Command) {
-    const handled =
-      (!command.disabled || !command.disabled()) &&
-      !!command.execute &&
-      command.execute(command)
-
-    if (!handled) {
-      dispatcher(command.event, { action: command })
-    } else {
+    if (isCommandDisabled(command)) return false
+    if (command.execute && command.execute(command)) {
       toast(command.title)
+      return true
     }
 
-    return handled
+    dispatcher(command.event, { action: command })
+    return true
   }
 
   onMount(() => {
@@ -186,8 +153,8 @@
     })
 
     addCommand({
-      name: "toggle-escape-mode",
-      title: "Toggle Escape Mode",
+      name: "Toggle Escape Mode",
+      event: "toggle-escape-mode",
       trigger: { key: "Escape", editmode: true },
       execute: () => {
         searchFilter = ""
@@ -198,6 +165,7 @@
         }
         return true
       },
+      showInToolbar: true,
     })
 
     addCommand({
@@ -227,7 +195,7 @@
 
   function isFilterMatch(searchFilter: string, command: Command) {
     const tokens = searchFilter.toUpperCase().split(" ")
-    const match = (command.title + asMenuItem(command)).toUpperCase()
+    const match = (command.title + asKeyboardShortcut(command)).toUpperCase()
     return (
       tokens.reduce((b, t) => {
         if (b < 0) return b // nothing to find, abort
@@ -261,8 +229,11 @@
         // execute the first command that matches the search filter
         const command = getFilteredCommand(searchFilter)
         if (command) {
-          executeCommand(command)
-          isOpen = false
+          if (executeCommand(command)) {
+            isOpen = false
+            command.showInToolbar = true
+            $commands = $commands
+          }
         }
       }}
     />
@@ -281,13 +252,17 @@
           {command.title}
         </div>
         <button
-          on:click={() => executeCommand(command)}
+          on:click={() => {
+            if (executeCommand(command)) {
+              command.showInToolbar = true
+            }
+          }}
           disabled={command.disabled && command.disabled()}
           class:editmode={command.trigger.editmode}
           class:escapemode={!command.trigger.editmode}
         >
           {(command.trigger.editmode ? "" : !escapeMode ? "Esc " : "") +
-            asMenuItem(command)}
+            asKeyboardShortcut(command)}
         </button>
       {/each}
     </div>

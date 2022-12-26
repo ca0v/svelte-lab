@@ -17,6 +17,7 @@ export type Command = {
     trigger?: CommandTrigger;
     execute?: (command: Command) => boolean | void;
     disabled?: () => boolean;
+    showInToolbar?: boolean;
 }
 
 const initialCommands: Array<Command> = [
@@ -55,7 +56,7 @@ const initialCommands: Array<Command> = [
 
 ]
 
-export const commands = writable<Array<Command>>(initialCommands);
+export const commands = writable(initialCommands);
 
 export function addCommand(command: Command) {
     command.event = command.event || command.name
@@ -99,7 +100,7 @@ export function shortcut(node: HTMLElement, shortcut: string | CommandTrigger) {
     }
 }
 
-export function command(node: HTMLButtonElement, eventName: string) {
+export function command(node: HTMLButtonElement, eventName: string | Command) {
 
     let cmd: Command;
 
@@ -126,6 +127,37 @@ export function command(node: HTMLButtonElement, eventName: string) {
         destroy() {
             node.removeEventListener("click", doit)
         }
+    }
+}
+
+export function asKeyboardShortcut(action: Command) {
+    if (!action.trigger) return "<none>"
+    const { key, preamble, isShift, isCtrl, isAlt } = action.trigger
+    const keyNameMap = {
+        ArrowUp: "↑",
+        ArrowDown: "↓",
+        ArrowLeft: "←",
+        ArrowRight: "→",
+        Shift: "Shift",
+        Control: "Ctrl",
+        Alt: "Alt",
+        Escape: "Esc",
+        Enter: "Enter",
+        " ": "Space",
+    }
+    const modifiers = [
+        isCtrl && keyNameMap.Control,
+        isAlt && keyNameMap.Alt,
+        isShift && keyNameMap.Shift,
+        key ? keyNameMap[key] || key.toUpperCase() : "",
+    ]
+        .filter(Boolean)
+        .join("+")
+
+    if (preamble) {
+        return `${keyNameMap[preamble] || preamble.toUpperCase()} ${modifiers}`
+    } else {
+        return modifiers
     }
 }
 

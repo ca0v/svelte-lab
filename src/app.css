@@ -32,7 +32,7 @@ button {
 @media (prefers-color-scheme: dark) {
     :root {
         --theme-hue: 40;
-        --color-highlight: hsl(var(--theme-hue), 90%, 50%);
+        --color-highlight: hsl(var(--theme-hue), 100%, 80%);
         --color-primary: hsl(var(--theme-hue), 0%, 90%);
         --color-background: hsl(var(--theme-hue), 20%, 20%);
         --color-background-2: hsl(var(--theme-hue), 20%, 20%);
