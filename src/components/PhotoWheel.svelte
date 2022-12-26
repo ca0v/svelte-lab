@@ -105,7 +105,8 @@
     gap: 2px;
     overflow-x: scroll;
     align-items: top;
-    height: 12vh;
+    height: clamp(8rem, 12vh, 15rem);
+    border: 1px solid white;
   }
 
   container button {

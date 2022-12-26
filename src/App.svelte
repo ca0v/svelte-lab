@@ -372,7 +372,6 @@
       <h2>Collage Builder</h2>
     </div>
     <SvgPaths />
-    <Toolbar />
   {:else}
     <Logo>
       <GoogleSignin autoSignIn={true} on:signedin={handleAuthClick} /></Logo
@@ -382,49 +381,8 @@
   {#if states.isSignedIn}
     <div class="frame">
       <div class="work-area">
-        {#if activeCollage}
-          <CollageView
-            width={states.editor.width + states.editor.widthUnits}
-            bind:this={collageView}
-            transforms={activeCollage}
-            bind:editmode={states.editor.editmode}
-            on:save={async () => {
-              throw "not supported, remove"
-            }}
-            sources={photosToShow.map((p) => ({ id: p.id, url: p.baseurl }))}
-          >
-            <div class="spacer" />
-            <div class="toolbar">
-              <DateRange
-                bind:date_filter_from={states.datefilter.from}
-                bind:date_filter_to={states.datefilter.to}
-              />
-              <p>{photosToShow.length} of {photos.length} photo(s)</p>
-            </div>
-          </CollageView>
-          <br />
-        {/if}
+        <Toolbar />
         <div class="two-column">
-          {#if states.app.showColorWheel}
-            <p>Color Wheel Angle</p>
-            <input
-              type="range"
-              bind:value={$colorWheelAngle}
-              min="0"
-              max="360"
-              step="1"
-            />
-          {/if}
-          {#if activeCollage}
-            <p>Zoom Level</p>
-            <input
-              type="range"
-              bind:value={states.editor.width}
-              min="10"
-              max="90"
-              step="1"
-            />
-          {/if}
           <p>S<u>t</u>ories</p>
           {#if !$stories.length}
             <button use:command={"start_new_story"} />
@@ -451,6 +409,49 @@
             <Notes
               shortcut={{ key: "n", isAlt: true, editmode: true }}
               bind:note={activeCollage.note}
+            />
+          {/if}
+        </div>
+        {#if activeCollage}
+          <div class="two-column">
+            <p>Zoom Level</p>
+            <input
+              type="range"
+              bind:value={states.editor.width}
+              min="10"
+              max="90"
+              step="1"
+            />
+          </div>
+          <CollageView
+            width={states.editor.width + states.editor.widthUnits}
+            bind:this={collageView}
+            transforms={activeCollage}
+            bind:editmode={states.editor.editmode}
+            on:save={async () => {
+              throw "not supported, remove"
+            }}
+            sources={photosToShow.map((p) => ({ id: p.id, url: p.baseurl }))}
+          >
+            <div class="spacer" />
+            <div class="toolbar">
+              <DateRange
+                bind:date_filter_from={states.datefilter.from}
+                bind:date_filter_to={states.datefilter.to}
+              />
+              <p>{photosToShow.length} of {photos.length} photo(s)</p>
+            </div>
+          </CollageView>
+        {/if}
+        <div class="two-column">
+          {#if states.app.showColorWheel}
+            <p>Color Wheel Angle</p>
+            <input
+              type="range"
+              bind:value={$colorWheelAngle}
+              min="0"
+              max="360"
+              step="1"
             />
           {/if}
         </div>
@@ -558,10 +559,13 @@
   }
 
   .work-area {
+    display: grid;
+    gap: 1rem;
     container-type: inline-size;
     padding: 1cqmin;
     overflow: auto;
     height: calc(100cqh - 10rem);
+    justify-content: center;
     width: max(320px, 80cqw);
   }
 </style>

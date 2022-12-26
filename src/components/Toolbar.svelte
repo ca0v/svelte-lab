@@ -22,7 +22,7 @@
 
   .command-button {
     display: grid;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: auto auto;
     row-gap: 2px;
   }
 
