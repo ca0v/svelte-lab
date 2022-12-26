@@ -1,13 +1,20 @@
 <script type="ts">
+  import { log } from "@/lib/globals"
   import { asKeyboardShortcut, command, commander } from "../store/commands"
+
+  // how to know when the commander commands have changed?
+  let commands = commander.getCommands().filter((c) => c.showInToolbar)
+  commander.subscribe(() => {
+    commands = commander.getCommands().filter((c) => c.showInToolbar)
+    log({ commands })
+  })
 </script>
 
 <div class="toolbar">
-  {#each commander.getCommands().filter((c) => c.showInToolbar) as c, i}
-    <div class="command-button">
-      <p>{c.name}</p>
-      <button use:command={c.event}>{asKeyboardShortcut(c.trigger)}</button>
-    </div>
+  {#each commands as c, i}
+    <button title={c.title} use:command={c.event}
+      >{asKeyboardShortcut(c.trigger)}</button
+    >
   {/each}
 </div>
 
@@ -18,17 +25,6 @@
     grid-template-columns: repeat(auto-fit, var(--command-width));
     column-gap: 2px;
     justify-content: center;
-  }
-
-  .command-button {
-    display: grid;
-    grid-template-rows: auto auto;
-    row-gap: 2px;
-  }
-
-  .command-button > * {
-    width: var(--command-width);
-    text-align: center;
-    word-wrap: break-word;
+    height: 3rem;
   }
 </style>

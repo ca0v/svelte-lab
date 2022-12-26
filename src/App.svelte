@@ -48,7 +48,7 @@
     isSignedIn: false,
     editor: {
       editmode: true,
-      width: 20,
+      width: 100,
       widthUnits: "cqw",
     },
     titleEditor: {
@@ -164,8 +164,46 @@
   }
 
   onMount(async () => {
-    const initialCommands: Array<Command> = [
-      {
+    commander
+      .context({ name: "File", trigger: { key: "F", isShift: true } })
+      .action({
+        event: "auto_assign_photos",
+        name: "Auto Assign Photos",
+        trigger: {
+          key: "a",
+        },
+        execute: async () => autoAssignImages(photosToShow),
+      })
+      .action({
+        event: "clear_all_photos",
+        name: "Clear All Photos",
+        trigger: {
+          key: "c",
+        },
+        execute: () => clearAllImages(),
+      })
+      .action({
+        event: "save_story",
+        name: "Save",
+        title: "Save story",
+        trigger: {
+          key: "s",
+        },
+        execute: async () => {
+          states.saving = true
+          try {
+            setLocalStorage(`${activeCollage.id}`, activeCollage)
+            await saveCollage({ ...activeCollage })
+            toast("Saved")
+          } catch (ex) {
+            reportError(ex)
+            toast(`Error: ${ex}`)
+          } finally {
+            states.saving = false
+          }
+        },
+      })
+      .action({
         event: "start_new_story",
         name: "Create",
         title: "Create a new story",
@@ -186,48 +224,18 @@
           states.menu.isOpen = true
           toast("New Story Created")
         },
-      },
-      {
-        event: "save_story",
-        name: "Save",
-        title: "Save story",
+      })
+      .action({
+        name: "Toggle Edit Mode",
+        event: "toggle_edit_mode",
+        title: "Toggle Edit Mode",
         trigger: {
-          key: "s",
+          key: "e",
         },
-        execute: async () => {
-          states.saving = true
-          try {
-            setLocalStorage(`${activeCollage.id}`, activeCollage)
-            await saveCollage({ ...activeCollage })
-            toast("Saved")
-          } catch (ex) {
-            reportError(ex)
-            toast(`Error: ${ex}`)
-          } finally {
-            states.saving = false
-          }
+        execute: () => {
+          states.editor.editmode = !states.editor.editmode
         },
-      },
-      {
-        event: "auto_assign_photos",
-        name: "Auto Assign",
-        title: "Auto assign photos",
-        trigger: {
-          key: "a",
-        },
-        execute: async () => autoAssignImages(photosToShow),
-      },
-      {
-        event: "clear_all_photos",
-        name: "Clear All Photos",
-        title: "Clear all photos",
-        trigger: {
-          key: "c",
-        },
-        execute: () => clearAllImages(),
-      },
-    ]
-    initialCommands.forEach(addCommand)
+      })
     commander.listen()
 
     states.datefilter.from = localStorage.getItem("date_filter") || ""
@@ -258,12 +266,11 @@
       event: "zoom-in-workarea",
       name: "Zoom Workarea In",
       trigger: {
-        key: "+",
-        isShift: true,
-        isAlt: true,
+        preamble: "w",
+        key: "ArrowUp",
       },
       execute: () => {
-        states.editor.width = Math.min(states.editor.width + 10, 90)
+        states.editor.width = Math.min(states.editor.width + 1, 200)
         return true
       },
     })
@@ -272,12 +279,11 @@
       event: "zoom-out-workarea",
       name: "Zoom Workarea Out",
       trigger: {
-        key: "_",
-        isShift: true,
-        isAlt: true,
+        preamble: "w",
+        key: "ArrowDown",
       },
       execute: () => {
-        states.editor.width = Math.max(states.editor.width - 10, 10)
+        states.editor.width = Math.max(states.editor.width - 1, 25)
         return true
       },
     })
@@ -305,18 +311,6 @@
       execute: () => (states.preview.visible = !states.preview.visible),
     })
 
-    addCommand({
-      name: "Toggle Edit Mode",
-      event: "toggle_edit_mode",
-      title: "Toggle Edit Mode",
-      trigger: {
-        key: "/",
-      },
-      execute: () => {
-        states.editor.editmode = !states.editor.editmode
-      },
-    })
-
     Object.keys($transforms).forEach((name, i) => {
       addCommand({
         name,
@@ -338,6 +332,7 @@
   })
 
   onDestroy(() => {
+    commander.unlisten()
     removeCommand("preview")
     removeCommand("toggle_edit_mode")
     removeCommand("toggle-color-wheel")
@@ -448,16 +443,6 @@
           {/if}
         </div>
         {#if activeCollage}
-          <div class="two-column">
-            <p>Zoom Level</p>
-            <input
-              type="range"
-              bind:value={states.editor.width}
-              min="10"
-              max="90"
-              step="1"
-            />
-          </div>
           <CollageView
             width={states.editor.width + states.editor.widthUnits}
             bind:this={collageView}

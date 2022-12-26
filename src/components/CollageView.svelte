@@ -17,7 +17,12 @@
   import type { BBox, CollageCellState, CollageData } from "../d.ts/index"
   import { toast } from "../store/toasts"
   import { onDestroy, onMount } from "svelte"
-  import { addCommand, command, removeCommand } from "../store/commands"
+  import {
+    addCommand,
+    command,
+    commander,
+    removeCommand,
+  } from "../store/commands"
 
   export let sources: Array<{ id: string; url: string }> = []
   export let readonly = false
@@ -97,6 +102,8 @@
     const target = document.querySelector(`[data-target="${targetName}"] image`)
     // @ts-ignore
     target?.focus()
+    // scroll the target into view
+    target?.scrollIntoView({ behavior: "smooth", block: "center" })
   }
 
   $: setWorkareaWidthCssVariable(width)
@@ -142,14 +149,15 @@
         event: `swap-with-cell-${key}`,
         name: `Swap with ${key}`,
         trigger: {
+          preamble: "s",
           key: key.toLocaleLowerCase(),
-          isCtrl: true,
         },
         disabled: () => isDisabled(index),
         execute: () => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
           const targetImage = transforms.data[index]
+          if (!targetImage) return
           swap(targetImage, sourceTransform)
           focusTarget(targetImage.target)
           getFocusCellIdentifier()
@@ -157,42 +165,43 @@
         },
       })
 
-      addCommand({
-        event: `copy-into-cell-${key}`,
-        name: `Copy to ${key}`,
-        trigger: {
-          key: key.toLocaleUpperCase(),
-          isShift: ID_MAP.SHIFT.includes(key),
-          isCtrl: true,
-          isAlt: ID_MAP.ALT.includes(key),
-        },
-        disabled: () => isDisabled(index),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const targetImage = transforms.data[index]
-          copy(sourceTransform, targetImage)
-          focusTarget(targetImage.target)
-          getFocusCellIdentifier()
-          return true
-        },
-      })
+      commander
+        .context({ name: "Copy Into", trigger: { key: "c" } })
+        .addCommand({
+          event: `copy-into-cell-${key}`,
+          name: `Copy to ${key}`,
+          trigger: {
+            key: key.toLocaleUpperCase(),
+          },
+          disabled: () => isDisabled(index),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const targetImage = transforms.data[index]
+            if (!targetImage) return
+            copy(sourceTransform, targetImage)
+            focusTarget(targetImage.target)
+            getFocusCellIdentifier()
+            return true
+          },
+        })
 
-      addCommand({
-        event: `focus-cell-${key}`,
-        name: `Focus ${key}`,
-        trigger: {
-          key: key.toLocaleUpperCase(),
-          isShift: ID_MAP.SHIFT.includes(key),
-          isAlt: ID_MAP.ALT.includes(key),
-        },
-        disabled: () => isDisabled(index),
-        execute: () => {
-          const targetImage = transforms.data[index]
-          focusTarget(targetImage.target)
-          return true
-        },
-      })
+      commander
+        .context({ name: "Focus Cell", trigger: { key: "g" } })
+        .addCommand({
+          event: `focus-cell-${key}`,
+          name: `Focus ${key}`,
+          trigger: {
+            key: key.toLocaleUpperCase(),
+          },
+          disabled: () => isDisabled(index),
+          execute: () => {
+            const targetImage = transforms.data[index]
+            if (!targetImage) return
+            focusTarget(targetImage.target)
+            return true
+          },
+        })
     })
 
     addCommand({
@@ -201,7 +210,6 @@
       trigger: {
         key: "w",
         isAlt: true,
-        editmode: true,
       },
       execute: () => {
         if (lastActiveCell) {
@@ -218,7 +226,6 @@
       trigger: {
         key: "Delete",
         isShift: true,
-        editmode: true,
       },
       disabled: () => !getSourceTransform(),
       execute: () => {
@@ -262,32 +269,33 @@
     })
 
     // clone the current cell
-    addCommand({
-      name: "clone",
-      event: "clone-cell",
-      title: "Clone Current Cell",
-      trigger: {
-        key: "d",
-        preamble: "f",
-      },
-      execute: () => {
-        // get the image that is currently focused
-        const target = getFocusCellIdentifier()
-        if (!target) return
+    commander
+      .context({ name: "File", trigger: { key: "F", isShift: true } })
+      .action({
+        name: "clone",
+        event: "clone-cell",
+        title: "Clone Current Cell",
+        trigger: {
+          key: "d",
+        },
+        execute: () => {
+          // get the image that is currently focused
+          const target = getFocusCellIdentifier()
+          if (!target) return
 
-        const sourceTransformIndex = transforms?.data?.findIndex(
-          (d) => d.target === target
-        )
+          const sourceTransformIndex = transforms?.data?.findIndex(
+            (d) => d.target === target
+          )
 
-        if (sourceTransformIndex < 0) return
+          if (sourceTransformIndex < 0) return
 
-        const clone = deepClone(transforms.data[sourceTransformIndex])
-        clone.target = "i" + (transforms.data.length + 1)
-        transforms.data.splice(sourceTransformIndex + 1, 0, clone)
-        transforms = transforms
-        return true
-      },
-    })
+          const clone = deepClone(transforms.data[sourceTransformIndex])
+          clone.target = "i" + (transforms.data.length + 1)
+          transforms.data.splice(sourceTransformIndex + 1, 0, clone)
+          transforms = transforms
+          return true
+        },
+      })
 
     {
       function rotate(cell: CollageCellState, rotation: number) {
@@ -368,9 +376,8 @@
         event: "move-top-edge-up",
         name: "Move Top Edge Up",
         trigger: {
+          preamble: "t",
           key: "ArrowUp",
-          isCtrl: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: createMoveHandler({ y: -1, height: 2 }),
@@ -380,9 +387,8 @@
         event: "move-top-edge-down",
         name: "Move Top Edge Down",
         trigger: {
+          preamble: "t",
           key: "ArrowDown",
-          isCtrl: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: createMoveHandler({ y: 1, height: -2 }),
@@ -392,10 +398,8 @@
         event: "move-bottom-edge-up",
         name: "Move Bottom Edge Up",
         trigger: {
+          preamble: "b",
           key: "ArrowUp",
-          isCtrl: true,
-          isShift: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: createMoveHandler({ y: -1, height: -2 }),
@@ -405,10 +409,8 @@
         event: "move-bottom-edge-down",
         name: "Move Bottom Edge Down",
         trigger: {
+          preamble: "b",
           key: "ArrowDown",
-          isCtrl: true,
-          isShift: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: createMoveHandler({ y: 1, height: 2 }),
@@ -418,9 +420,8 @@
         event: "move-left-edge-left",
         name: "Move Left Edge Left",
         trigger: {
+          preamble: "l",
           key: "ArrowLeft",
-          isCtrl: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: createMoveHandler({ x: -1, width: 2 }),
@@ -430,9 +431,8 @@
         event: "move-left-edge-right",
         name: "Move Left Edge Right",
         trigger: {
+          preamble: "l",
           key: "ArrowRight",
-          isCtrl: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: createMoveHandler({ x: 1, width: -2 }),
@@ -442,10 +442,8 @@
         event: "move-right-edge-left",
         name: "Move Right Edge Left",
         trigger: {
+          preamble: "r",
           key: "ArrowLeft",
-          isCtrl: true,
-          isShift: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: createMoveHandler({ x: -1, width: -2 }),
@@ -455,10 +453,8 @@
         event: "move-right-edge-right",
         name: "Move Right Edge Right",
         trigger: {
+          preamble: "r",
           key: "ArrowRight",
-          isCtrl: true,
-          isShift: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: createMoveHandler({ x: 1, width: 2 }),
@@ -468,8 +464,8 @@
         event: "zoom-image-in",
         name: "Zoom Image In",
         trigger: {
-          key: "+",
-          editmode: true,
+          preamble: "z",
+          key: "ArrowUp",
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -487,8 +483,8 @@
         event: "zoom-image-out",
         name: "Zoom Image Out",
         trigger: {
-          key: "-",
-          editmode: true,
+          preamble: "z",
+          key: "ArrowDown",
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -506,9 +502,9 @@
         event: "zoom-in",
         name: "Zoom In",
         trigger: {
-          key: "+",
+          preamble: "z",
+          key: "ArrowUp",
           isShift: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: createMoveHandler({ width: 1, height: 1 }),
@@ -518,9 +514,9 @@
         event: "zoom-out",
         name: "Zoom Out",
         trigger: {
-          key: "-",
+          preamble: "z",
+          key: "ArrowDown",
           isShift: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: createMoveHandler({ width: -1, height: -1 }),
@@ -530,9 +526,9 @@
         event: "move-up",
         name: "Move Up",
         trigger: {
+          preamble: "m",
           key: "ArrowUp",
           isShift: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -549,9 +545,9 @@
         event: "move-down",
         name: "Move Down",
         trigger: {
+          preamble: "m",
           key: "ArrowDown",
           isShift: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -568,9 +564,9 @@
         event: "move-left",
         name: "Move Left",
         trigger: {
+          preamble: "m",
           key: "ArrowLeft",
           isShift: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -587,9 +583,9 @@
         event: "move-right",
         name: "Move Right",
         trigger: {
+          preamble: "m",
           key: "ArrowRight",
           isShift: true,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -606,9 +602,8 @@
         event: "move-image-up",
         name: "Move Image Up",
         trigger: {
+          preamble: "m",
           key: "ArrowUp",
-          isShift: false,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -625,9 +620,8 @@
         event: "move-image-down",
         name: "Move Image Down",
         trigger: {
+          preamble: "m",
           key: "ArrowDown",
-          isShift: false,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -644,9 +638,8 @@
         event: "move-image-left",
         name: "Move Image Left",
         trigger: {
+          preamble: "m",
           key: "ArrowLeft",
-          isShift: false,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -663,9 +656,8 @@
         event: "move-image-right",
         name: "Move Image Right",
         trigger: {
+          preamble: "m",
           key: "ArrowRight",
-          isShift: false,
-          editmode: true,
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -682,9 +674,8 @@
         name: "Rotate Clockwise",
         event: "rotate-clockwise",
         trigger: {
-          key: ">",
-          isShift: true,
-          editmode: true,
+          preamble: "z",
+          key: "ArrowRight",
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -701,9 +692,8 @@
         name: "Rotate Counter-Clockwise",
         event: "rotate-counter-clockwise",
         trigger: {
-          key: "<",
-          isShift: true,
-          editmode: true,
+          preamble: "z",
+          key: "ArrowLeft",
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
@@ -720,8 +710,9 @@
         name: "Rotate Image Clockwise",
         event: "rotate-image-clockwise",
         trigger: {
-          preamble: "r",
-          key: ".",
+          preamble: "z",
+          key: "ArrowRight",
+          isShift: true,
         },
         disabled: () => !hasFocus(svgElement),
         execute: () => {
@@ -738,8 +729,9 @@
         name: "Rotate Image Counter-Clockwise",
         event: "rotate-image-counter-clockwise",
         trigger: {
-          preamble: "r",
-          key: ",",
+          preamble: "z",
+          key: "ArrowLeft",
+          isShift: true,
         },
         disabled: () => !hasFocus(svgElement),
         execute: () => {

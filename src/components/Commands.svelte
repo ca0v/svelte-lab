@@ -21,7 +21,6 @@
 
   export let isOpen = false
 
-  let escapeMode = false
   let searchFilter = ""
   let searchInput: HTMLInputElement
 
@@ -45,31 +44,26 @@
     })
 
     addCommand({
-      name: "Toggle Escape Mode",
-      event: "toggle-escape-mode",
-      trigger: { key: "Escape" },
+      name: "Toggle Command Console",
+      event: "toggle-command-console",
+      trigger: { key: "/" },
       execute: () => {
         searchFilter = ""
-        if (escapeMode) {
-          escapeMode = isOpen = false
-        } else {
-          escapeMode = isOpen = true
-        }
+        isOpen = !isOpen
         return true
       },
-      showInToolbar: true,
     })
 
-    addCommand({
+    commander.primaryContext.action({
       name: "search-commands",
       title: "Search for a command",
       trigger: {
-        preamble: "F",
         key: "F",
+        isCtrl: true,
+        isShift: true,
       },
       execute: () => {
         isOpen = true
-        escapeMode = false
         tick().then(() => {
           searchInput?.focus()
           searchInput?.select()
@@ -80,7 +74,7 @@
   })
 
   onDestroy(() => {
-    removeCommand("toggle-escape-mode")
+    removeCommand("toggle-command-console")
     removeCommand("toggle-command-menu")
     removeCommand("search-commands")
   })
@@ -92,61 +86,69 @@
 
 <aside class="commands">
   <details bind:open={isOpen}>
-    <summary class:escape-mode={escapeMode}>☰</summary>
-    <slot />
-    <input
-      type="text"
-      placeholder="search..."
-      bind:this={searchInput}
-      bind:value={searchFilter}
-      on:keydown={(e) => {
-        if (e.key !== "Enter") return
-        // execute the first command that matches the search filter
-        const command = commander
-          .getCommands()
-          .find((c) => isFilterMatch(searchFilter, c))
+    <summary>☰</summary>
+    {#if isOpen}
+      <slot />
+      <input
+        type="text"
+        placeholder="search..."
+        bind:this={searchInput}
+        bind:value={searchFilter}
+        on:keydown={(e) => {
+          if (e.key !== "Enter") return
+          // execute the first command that matches the search filter
+          const command = commander
+            .getCommands()
+            .find((c) => isFilterMatch(searchFilter, c))
 
-        if (command) {
-          if (executeCommand(command)) {
-            isOpen = false
-            command.showInToolbar = true
+          if (command) {
+            if (executeCommand(command)) {
+              isOpen = false
+              command.showInToolbar = true
+              commander.update()
+            }
           }
-        }
-      }}
-    />
-    <div class="two-columns">
-      {#each commander.getContexts() as ctx}
-        <div class="title col1-2">{ctx.command.trigger.key}</div>
-        {#each ctx
-          .getCommands()
-          .filter((c) => isFilterMatch(searchFilter, c)) as command}
-          <div
-            class={`title ${
-              !searchFilter
-                ? ""
-                : isFilterMatch(searchFilter, command)
-                ? "filter-hit"
-                : "filter-miss"
-            }`}
-            title={command.name}
-          >
-            {command.title}
+        }}
+      />
+      <div class="two-columns">
+        {#each commander.getContexts() as ctx}
+          <div class="title col1-2 hilite">
+            {asKeyboardShortcut(ctx.command.trigger)}
           </div>
-          <button
-            on:click={() => {
-              if (executeCommand(command)) {
-                command.showInToolbar = true
-              }
-            }}
-            disabled={command.disabled && command.disabled()}
-            class:editmode={command.trigger.editmode}
-            class:escapemode={!command.trigger.editmode}
-          >
-            {asKeyboardShortcut(command.trigger)}
-          </button>
+          {#each ctx
+            .getCommands()
+            .filter((c) => !searchFilter || isFilterMatch(searchFilter, c)) as command}
+            <div
+              class={`title ${
+                !searchFilter
+                  ? ""
+                  : isFilterMatch(searchFilter, command)
+                  ? "filter-hit"
+                  : "filter-miss"
+              }`}
+              title={command.name}
+            >
+              {command.title}
+            </div>
+            <button
+              on:click={() => {
+                if (executeCommand(command)) {
+                  if (!command.showInToolbar) {
+                    command.showInToolbar = true
+                    commander.update()
+                  }
+                }
+              }}
+              disabled={command.disabled && command.disabled()}
+              class:editmode={command.trigger.editmode}
+              class:escapemode={!command.trigger.editmode}
+            >
+              {asKeyboardShortcut(command.trigger)}
+            </button>
+          {/each}
         {/each}
-      {/each}
-    </div>
+      </div>
+    {/if}
   </details>
 </aside>
 
@@ -187,10 +189,6 @@
     text-align: right;
   }
 
-  details > summary.escape-mode {
-    color: var(--color-highlight);
-  }
-
   .two-columns {
     display: grid;
     grid-template-columns: 3fr 1fr;
@@ -212,6 +210,10 @@
 
   .filter-hit {
     color: var(--color-highlight);
+    background-color: var(--color-background-highlight);
+  }
+
+  .hilite {
     background-color: var(--color-background-highlight);
   }
 

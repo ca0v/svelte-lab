@@ -1,3 +1,4 @@
+import { writable } from "svelte/store"
 import { log } from "@/lib/globals"
 import { toast } from "./toasts"
 
@@ -16,13 +17,10 @@ export type Command = {
     title?: string;
     icon?: string;
     trigger?: CommandTrigger;
-    execute?: (command: Command) => boolean | void;
+    execute?: (command: Command) => boolean | void | Promise<any>;
     disabled?: () => boolean;
     showInToolbar?: boolean;
 }
-
-type CallbackContext = { action: ActionContext, context: CommandContext };
-type Callback = (ctx?: CallbackContext) => void
 
 class ActionContext {
     constructor(public readonly command: Command) { }
@@ -33,13 +31,29 @@ class ActionContext {
 
 class CommandContext {
 
-    constructor(public readonly command: { trigger: CommandTrigger }) { }
+    private version = writable(1);
+
+    subscribe(fn: (v: number) => void) {
+        return this.version.subscribe(fn)
+    }
+
+    constructor(public readonly command: { name: string, trigger: CommandTrigger }) {
+    }
+
     public readonly actions: { [key: string]: ActionContext } = {};
 
     action(command: Command) {
         let result = this.getAction(command.trigger)
         if (result) log(`Action already exists: ${command.name} ${asKeyboardShortcut(command.trigger)}`)
-        return this.setActions(command.trigger, new ActionContext(command));
+        this.setActions(command.trigger, new ActionContext(command));
+        return this;
+    }
+
+    addCommand(command: Command) {
+        command.event = command.event || command.name
+        command.name = command.name || command.event
+        command.title = command.title || command.name
+        this.action(command)
     }
 
     getCommands() {
@@ -52,6 +66,7 @@ class CommandContext {
 
     private setActions(trigger: CommandTrigger, action: ActionContext) {
         this.actions[asKeyboardShortcut(trigger)] = action;
+        this.version.update(v => v + 1)
     }
 
     private getAction(trigger: CommandTrigger) {
@@ -73,6 +88,25 @@ export function isFilterMatch(searchFilter: string, command: Command) {
 }
 
 class Commander {
+    public readonly primaryContext: CommandContext;
+
+    constructor() {
+        this.primaryContext = new CommandContext({ name: "primary", trigger: null })
+        // get out of all other contexts
+        this.primaryContext.action(
+            { name: "Escape", trigger: { key: "Escape" } }
+        )
+    }
+
+    update() {
+        log("commander.update")
+        this.version.update(v => v + 1)
+    }
+    private version = writable(1);
+    subscribe(fn: (v: number) => void) {
+        return this.version.subscribe(fn)
+    }
+
     findCommand(eventName: string) {
         let result: Command;
         Object.entries(this.contexts).find(([key, context]) => {
@@ -102,10 +136,12 @@ class Commander {
 
     private contexts: { [key: string]: CommandContext } = {};
 
-    context(command: { trigger: CommandTrigger }) {
+    context(command: { name: string, trigger: CommandTrigger }) {
         let result = this.getContext(command.trigger);
         if (!result) {
-            result = this.setContext(command.trigger, new CommandContext(command));
+            const context = new CommandContext(command);
+            result = this.setContext(command.trigger, context);
+            context.subscribe(() => this.version.update(v => v + 1))
         }
         return result;
     }
@@ -118,38 +154,62 @@ class Commander {
         return this.contexts[asKeyboardShortcut(trigger)]
     }
 
+    private activeContext: CommandContext;
+    private un: Array<Function> = [];
+
     listen() {
-        let activeContext: CommandContext;
-        window.addEventListener('keydown', (e) => {
-            const shortcut = asKeyboardShortcut(e);
+        const listener = (e) => {
+
+            const shortcut = asKeyboardShortcut({
+                key: e.key,
+                isShift: e.shiftKey,
+                isAlt: e.altKey,
+                isCtrl: e.ctrlKey,
+            });
             let command: Command;
-            if (activeContext) {
-                command = activeContext.findCommand(shortcut);
+
+            if (this.activeContext) {
+                command = this.activeContext.findCommand(shortcut);
                 if (!command) {
-                    log(`You pressed ${shortcut}, try one of these: ${Object.keys(activeContext.actions).join(" ")}`)
+                    log(`You pressed ${shortcut}, try one of these: ${Object.keys(this.activeContext.actions).join(" ")}`)
                 }
             }
+
             if (!command) {
                 const ctx = this.findContext(shortcut);
                 if (ctx) {
                     log({ shortcut, ctx })
-                    activeContext = ctx;
+                    this.activeContext = ctx;
                     e.preventDefault();
                     e.stopPropagation();
+                    toast(ctx.command.name)
                     return
                 }
-                this.findContext(shortcut)
                 log(`You pressed ${shortcut}, try one of these: ${Object.keys(commander.contexts).join(" ")}`)
+
+                // search primary context
+                command = this.primaryContext.findCommand(shortcut);
+                if (command) {
+                    log(`Command found in primary context: ${command.name}`)
+                    this.activeContext = this.primaryContext;
+                }
+                else log(`Command not found in primary context, try one of these: ${Object.keys(this.primaryContext.actions).join(" ")}`)
             }
-            log({ shortcut, command })
+
             if (command) {
-                log({ shortcut, activeContext, command })
+                log({ shortcut, command })
                 e.preventDefault();
                 e.stopPropagation();
                 executeCommand(command)
                 return;
             }
-        })
+        }
+        window.addEventListener('keydown', listener);
+        this.un.push(() => window.removeEventListener('keydown', listener));
+    }
+
+    unlisten() {
+        this.un.forEach(u => u());
     }
 
     findContext(shortcut: string) {
@@ -181,7 +241,7 @@ export function addCommand(command: Command) {
     command.event = command.event || command.name
     command.name = command.name || command.event
     command.title = command.title || command.name
-    const context = commander.context({ trigger: { key: command.trigger.preamble || ":" } })
+    const context = commander.context({ name: "Preamble", trigger: { key: command.trigger.preamble || "/" } })
     context.action(command)
 }
 
