@@ -101,14 +101,14 @@ function initializeGoogleAccount() {
 }
 
 async function signin() {
-    if (signedIn) throw "already signed in";
+    if (signedIn) return;
     await useGapi();
     await useGooglePhotos();
     signedIn = true;
 }
 
 async function signout() {
-    if (!signedIn) throw "not signed in";
+    if (!signedIn) return;
     signedIn = false;
 }
 

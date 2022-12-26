@@ -70,11 +70,11 @@
   async function handleAuthClick() {
     // get the google auth2 object
     await loadAllStories()
-    photos = await getPhotosFor2022()
-    photos.sort((a, b) => a.created.localeCompare(b.created))
-    states.datefilter.from =
-      states.datefilter.from || photos[0]?.created.split("T")[0] || ""
+    states.datefilter.from = states.datefilter.from || asZulu(new Date())
     states.isSignedIn = true
+
+    photos = await getPhotosForOneDay(states.datefilter.from)
+    photos.sort((a, b) => a.created.localeCompare(b.created))
 
     collageId.subscribe(async (v) => {
       if (!v) return
@@ -110,10 +110,14 @@
     activeCollage = activeCollage
   }
 
-  function asZulu(yyyymmdd: string) {
-    const [year, month, day] = yyyymmdd.split("-").map((v) => parseInt(v))
-    const result = new Date(year, month - 1, day).toISOString()
-    return result
+  function asZulu(yyyymmdd: string | Date) {
+    if (typeof yyyymmdd === "string") {
+      const [year, month, day] = yyyymmdd.split("-").map((v) => parseInt(v))
+      const result = new Date(year, month - 1, day).toISOString()
+      return result
+    } else {
+      return yyyymmdd.toISOString().split("T")[0]
+    }
   }
 
   function applyTransform(activeTransformId: string) {
@@ -156,9 +160,12 @@
     if (states.isSignedIn && states.datefilter.from && states.datefilter.to) {
       const from = asZulu(states.datefilter.from)
       const to = asZulu(states.datefilter.to)
-      const toShow = photos.filter((p) => from <= p.created && p.created < to)
-
-      refreshBaseurl(toShow).then(() => {
+      getPhotosForOneDay(from).then((photos) => {
+        log({ photos })
+        log({ photos })
+        const toShow = photos.filter((p) => from <= p.created && p.created < to)
+        log({ toShow })
+        toShow.sort((a, b) => a.created.localeCompare(b.created))
         photosToShow = toShow
       })
     }
@@ -371,19 +378,13 @@
       })
   })
 
-  async function getPhotosFor2022() {
-    const startDate = await getLocalStorage(
-      "fetchPhotoList:end-date",
-      "2022-10-01"
-    )
-    const endDate = "2022-12-31"
-
-    const cachedPhotos: Record<string, Photo> =
-      (await getLocalStorage("fetchPhotoList:photos")) || {}
-
+  async function getPhotosForOneDay(yyyy_mm_dd: string) {
+    const startDate = addDays(yyyy_mm_dd, -1)
+    const endDate = addDays(yyyy_mm_dd, 1)
     console.log(`fetching photos from ${startDate} to ${endDate}`)
     const responseIterator = fetchPhotoList(startDate, endDate)
 
+    const result: Array<Photo> = []
     while (true) {
       const response = await responseIterator.next()
       if (response.done) break
@@ -391,25 +392,10 @@
       const photos = response.value
       if (!Array.isArray(photos)) break
       if (!photos.length) break
-
-      photos.forEach((photo) => {
-        cachedPhotos[photo.id] = photo
-      })
-      setLocalStorage("fetchPhotoList:photos", cachedPhotos)
-
-      photos.sort((a, b) => a.created.localeCompare(b.created))
-
-      setLocalStorage(
-        "fetchPhotoList:end-date",
-        photos[photos.length - 1].created.split("T")[0]
-      )
+      result.push(...photos)
     }
 
-    const result = Object.values(cachedPhotos).sort((a, b) =>
-      a.created.localeCompare(b.created)
-    )
-
-    return result
+    return result.sort((a, b) => a.created.localeCompare(b.created))
   }
 </script>
 
