@@ -112,8 +112,9 @@
       />
       <div class="two-columns">
         {#each commander.getContexts() as ctx}
-          <div class="title col1-2 hilite">
-            {asKeyboardShortcut(ctx.command.trigger)}
+          <div class="title hilite col1-2">
+            {ctx.command.name}
+            &lt;<i>{asKeyboardShortcut(ctx.command.trigger)}</i>&gt;
           </div>
           {#each ctx
             .getCommands()

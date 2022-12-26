@@ -7,6 +7,7 @@ export type CommandTrigger = {
     isShift?: boolean
     isAlt?: boolean
     isCtrl?: boolean
+    isArrowUp?: boolean
     preamble?: string
     editmode?: boolean
 }
@@ -53,7 +54,7 @@ class CommandContext {
         command.event = command.event || command.name
         command.name = command.name || command.event
         command.title = command.title || command.name
-        this.action(command)
+        return this.action(command)
     }
 
     getCommands() {

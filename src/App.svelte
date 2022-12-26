@@ -166,7 +166,7 @@
   onMount(async () => {
     commander
       .context({ name: "File", trigger: { key: "F", isShift: true } })
-      .action({
+      .addCommand({
         event: "auto_assign_photos",
         name: "Auto Assign Photos",
         trigger: {
@@ -174,7 +174,7 @@
         },
         execute: async () => autoAssignImages(photosToShow),
       })
-      .action({
+      .addCommand({
         event: "clear_all_photos",
         name: "Clear All Photos",
         trigger: {
@@ -182,7 +182,7 @@
         },
         execute: () => clearAllImages(),
       })
-      .action({
+      .addCommand({
         event: "save_story",
         name: "Save",
         title: "Save story",
@@ -203,10 +203,9 @@
           }
         },
       })
-      .action({
+      .addCommand({
         event: "start_new_story",
-        name: "Create",
-        title: "Create a new story",
+        name: "Create Story",
         trigger: {
           key: "n",
         },
@@ -225,10 +224,9 @@
           toast("New Story Created")
         },
       })
-      .action({
+      .addCommand({
         name: "Toggle Edit Mode",
         event: "toggle_edit_mode",
-        title: "Toggle Edit Mode",
         trigger: {
           key: "e",
         },
@@ -262,45 +260,42 @@
       },
     })
 
-    addCommand({
-      event: "zoom-in-workarea",
-      name: "Zoom Workarea In",
-      trigger: {
-        preamble: "w",
-        key: "ArrowUp",
-      },
-      execute: () => {
-        states.editor.width = Math.min(states.editor.width + 1, 200)
-        return true
-      },
-    })
+    commander
+      .context({ name: "Work Area", trigger: { key: "W", isShift: true } })
+      .addCommand({
+        event: "zoom-in-workarea",
+        name: "Zoom Workarea In",
+        trigger: {
+          key: "ArrowUp",
+        },
+        execute: () => {
+          states.editor.width = Math.min(states.editor.width + 1, 200)
+          return true
+        },
+      })
+      .addCommand({
+        event: "zoom-out-workarea",
+        name: "Zoom Workarea Out",
+        trigger: {
+          key: "ArrowDown",
+        },
+        execute: () => {
+          states.editor.width = Math.max(states.editor.width - 1, 25)
+          return true
+        },
+      })
+      .addCommand({
+        name: "goto-photowheel",
+        title: "Focus the PhotoWheel",
+        trigger: {
+          key: "p",
+        },
+        execute: () => {
+          collageView.focusPhotoWheel()
+        },
+      })
 
-    addCommand({
-      event: "zoom-out-workarea",
-      name: "Zoom Workarea Out",
-      trigger: {
-        preamble: "w",
-        key: "ArrowDown",
-      },
-      execute: () => {
-        states.editor.width = Math.max(states.editor.width - 1, 25)
-        return true
-      },
-    })
-
-    addCommand({
-      name: "goto-photowheel",
-      title: "Focus the PhotoWheel",
-      trigger: {
-        key: "p",
-        isAlt: true,
-      },
-      execute: () => {
-        collageView.focusPhotoWheel()
-      },
-    })
-
-    addCommand({
+    commander.primaryContext.addCommand({
       name: "Preview",
       event: "preview",
       title: "Preview collage",
@@ -311,23 +306,29 @@
       execute: () => (states.preview.visible = !states.preview.visible),
     })
 
+    const LAYOUTSHORTCUTKEYS = "abcdefghijklmnopqrstuvwxyz".split("")
     Object.keys($transforms).forEach((name, i) => {
-      addCommand({
-        name,
-        event: name,
-        title: `Use the "${name}" layout`,
-        trigger: {
-          key: (i >= 40 ? "" : (i % 10) + 1) + "",
-          preamble: "x",
-          isCtrl: i >= 10 && i < 20,
-          isAlt: i >= 20 && i < 30,
-          isShift: i >= 30 && i < 40,
-        },
-        execute: () => {
-          applyTransform(name)
-          toast(`Transform applied: ${name}`)
-        },
-      })
+      commander
+        .context({
+          name: "Use Layout",
+          trigger: { key: "X", isShift: true },
+        })
+        .addCommand({
+          name,
+          event: name,
+          title: `Use the "${name}" layout`,
+          trigger: {
+            key: LAYOUTSHORTCUTKEYS[i % LAYOUTSHORTCUTKEYS.length],
+            isCtrl:
+              i > LAYOUTSHORTCUTKEYS.length &&
+              i < 3 * LAYOUTSHORTCUTKEYS.length,
+            isAlt: i > 2 * LAYOUTSHORTCUTKEYS.length,
+          },
+          execute: () => {
+            applyTransform(name)
+            toast(`Transform applied: ${name}`)
+          },
+        })
     })
   })
 

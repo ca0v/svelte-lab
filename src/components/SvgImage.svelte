@@ -65,6 +65,7 @@
       log({ dx, dy, x, y })
       cloneElement.style.top = y + dy + "px"
       cloneElement.style.left = x + dx + "px"
+      cloneElement.innerText = e.shiftKey ? "copy" : "swap"
 
       hoverElements.forEach((el) => {
         el.classList.remove("dropping")

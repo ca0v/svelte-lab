@@ -145,28 +145,32 @@
     const keys = ID_MAP_KEYS.reverse()
 
     keys.forEach((key, index) => {
-      addCommand({
-        event: `swap-with-cell-${key}`,
-        name: `Swap with ${key}`,
-        trigger: {
-          preamble: "s",
-          key: key.toLocaleLowerCase(),
-        },
-        disabled: () => isDisabled(index),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const targetImage = transforms.data[index]
-          if (!targetImage) return
-          swap(targetImage, sourceTransform)
-          focusTarget(targetImage.target)
-          getFocusCellIdentifier()
-          return true
-        },
-      })
+      commander
+        .context({
+          name: "Swap Into",
+          trigger: { key: "S", isShift: true },
+        })
+        .addCommand({
+          event: `swap-with-cell-${key}`,
+          name: `Swap with ${key}`,
+          trigger: {
+            key: key.toLocaleLowerCase(),
+          },
+          disabled: () => isDisabled(index),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const targetImage = transforms.data[index]
+            if (!targetImage) return
+            swap(targetImage, sourceTransform)
+            focusTarget(targetImage.target)
+            getFocusCellIdentifier()
+            return true
+          },
+        })
 
       commander
-        .context({ name: "Copy Into", trigger: { key: "c" } })
+        .context({ name: "Copy Into", trigger: { key: "C", isShift: true } })
         .addCommand({
           event: `copy-into-cell-${key}`,
           name: `Copy to ${key}`,
@@ -187,10 +191,10 @@
         })
 
       commander
-        .context({ name: "Focus Cell", trigger: { key: "g" } })
+        .context({ name: "Goto Cell", trigger: { key: "G", isShift: true } })
         .addCommand({
           event: `focus-cell-${key}`,
-          name: `Focus ${key}`,
+          name: `Goto ${key}`,
           trigger: {
             key: key.toLocaleUpperCase(),
           },
@@ -204,69 +208,66 @@
         })
     })
 
-    addCommand({
-      event: "focus-work-area",
-      name: "Focus Work Area",
-      trigger: {
-        key: "w",
-        isAlt: true,
-      },
-      execute: () => {
-        if (lastActiveCell) {
-          lastActiveCell.focus()
-        } else {
-          focusTarget("i1")
-        }
-        return true
-      },
-    })
-    addCommand({
-      event: "delete-cell",
-      name: "Delete Cell",
-      trigger: {
-        key: "Delete",
-        isShift: true,
-      },
-      disabled: () => !getSourceTransform(),
-      execute: () => {
-        const sourceTransform = getSourceTransform()
-        if (!sourceTransform) return
-        sourceTransform.id = ""
-        sourceTransform.baseurl = ""
-        transforms = transforms
-        return true
-      },
-    })
+    commander
+      .context({ name: "Work Area", trigger: { key: "W", isShift: true } })
+      .addCommand({
+        event: "focus-work-area",
+        name: "Focus Work Area",
+        trigger: {
+          key: "w",
+        },
+        execute: () => {
+          if (lastActiveCell) {
+            lastActiveCell.focus()
+          } else {
+            focusTarget("i1")
+          }
+          return true
+        },
+      })
+      .addCommand({
+        event: "delete-cell",
+        name: "Delete Cell",
+        trigger: {
+          key: "Delete",
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          sourceTransform.id = ""
+          sourceTransform.baseurl = ""
+          transforms = transforms
+          return true
+        },
+      })
+      .addCommand({
+        event: "swap-cell-up",
+        name: "Bring Toward Top",
+        trigger: {
+          key: "Enter",
+        },
+        disabled: () => !getSourceTransform(),
+        execute: () => {
+          // need to swap the identity, as that is what determines the order on reload
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
 
-    addCommand({
-      event: "swap-cell-up",
-      name: "Bring Toward Top",
-      trigger: {
-        key: "Enter",
-        isCtrl: true,
-        editmode: true,
-      },
-      disabled: () => !getSourceTransform(),
-      execute: () => {
-        // need to swap the identity, as that is what determines the order on reload
-        const sourceTransform = getSourceTransform()
-        if (!sourceTransform) return
+          const index = transforms.data.findIndex(
+            (d) => d.target === sourceTransform.target
+          )
+          const targetTransform = transforms.data[index + 1]
+          if (!targetTransform) return
 
-        const index = transforms.data.findIndex(
-          (d) => d.target === sourceTransform.target
-        )
-        const targetTransform = transforms.data[index + 1]
-        if (!targetTransform) return
+          const id = targetTransform.id
+          targetTransform.id = sourceTransform.id
+          sourceTransform.id = id
 
-        const id = targetTransform.id
-        targetTransform.id = sourceTransform.id
-        sourceTransform.id = id
-
-        // redraw
-        transforms = transforms
-        return true
-      },
-    })
+          // redraw
+          transforms = transforms
+          return true
+        },
+      })
 
     // clone the current cell
     commander
@@ -372,420 +373,380 @@
         }
       }
 
-      addCommand({
-        event: "move-top-edge-up",
-        name: "Move Top Edge Up",
-        trigger: {
-          preamble: "t",
-          key: "ArrowUp",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ y: -1, height: 2 }),
-      })
+      commander
+        .context({
+          name: "Top Edge",
+          trigger: { key: "t" },
+        })
+        .addCommand({
+          event: "move-top-edge-up",
+          name: "Move Top Edge Up",
+          trigger: {
+            key: "ArrowUp",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: createMoveHandler({ y: -1, height: 2 }),
+        })
+        .addCommand({
+          event: "move-top-edge-down",
+          name: "Move Top Edge Down",
+          trigger: {
+            key: "ArrowDown",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: createMoveHandler({ y: 1, height: -2 }),
+        })
 
-      addCommand({
-        event: "move-top-edge-down",
-        name: "Move Top Edge Down",
-        trigger: {
-          preamble: "t",
-          key: "ArrowDown",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ y: 1, height: -2 }),
-      })
+      commander
+        .context({
+          name: "Bottom Edge",
+          trigger: { key: "b" },
+        })
+        .addCommand({
+          event: "move-bottom-edge-up",
+          name: "Move Bottom Edge Up",
+          trigger: {
+            key: "ArrowUp",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: createMoveHandler({ y: -1, height: -2 }),
+        })
+        .addCommand({
+          event: "move-bottom-edge-down",
+          name: "Move Bottom Edge Down",
+          trigger: {
+            key: "ArrowDown",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: createMoveHandler({ y: 1, height: 2 }),
+        })
 
-      addCommand({
-        event: "move-bottom-edge-up",
-        name: "Move Bottom Edge Up",
-        trigger: {
-          preamble: "b",
-          key: "ArrowUp",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ y: -1, height: -2 }),
-      })
+      commander
+        .context({
+          name: "Left Edge",
+          trigger: { key: "l" },
+        })
+        .addCommand({
+          event: "move-left-edge-left",
+          name: "Move Left Edge Left",
+          trigger: {
+            preamble: "l",
+            key: "ArrowLeft",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: createMoveHandler({ x: -1, width: 2 }),
+        })
+        .addCommand({
+          event: "move-left-edge-right",
+          name: "Move Left Edge Right",
+          trigger: {
+            preamble: "l",
+            key: "ArrowRight",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: createMoveHandler({ x: 1, width: -2 }),
+        })
 
-      addCommand({
-        event: "move-bottom-edge-down",
-        name: "Move Bottom Edge Down",
-        trigger: {
-          preamble: "b",
-          key: "ArrowDown",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ y: 1, height: 2 }),
-      })
+      commander
+        .context({
+          name: "Right Edge",
+          trigger: { key: "r" },
+        })
+        .addCommand({
+          event: "move-right-edge-left",
+          name: "Move Right Edge Left",
+          trigger: {
+            preamble: "r",
+            key: "ArrowLeft",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: createMoveHandler({ x: -1, width: -2 }),
+        })
+        .addCommand({
+          event: "move-right-edge-right",
+          name: "Move Right Edge Right",
+          trigger: {
+            preamble: "r",
+            key: "ArrowRight",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: createMoveHandler({ x: 1, width: 2 }),
+        })
 
-      addCommand({
-        event: "move-left-edge-left",
-        name: "Move Left Edge Left",
-        trigger: {
-          preamble: "l",
-          key: "ArrowLeft",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: -1, width: 2 }),
-      })
+      commander
+        .context({
+          name: "Zoom Image",
+          trigger: { key: "z" },
+        })
+        .addCommand({
+          event: "zoom-image-in",
+          name: "Zoom Image In",
+          trigger: {
+            key: "ArrowUp",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const dx = -1
+            const dy = -1
+            zoom(sourceTransform, { dx, dy })
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          event: "zoom-image-out",
+          name: "Zoom Image Out",
+          trigger: {
+            key: "ArrowDown",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const dx = 1
+            const dy = 1
+            zoom(sourceTransform, { dx, dy })
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          event: "zoom-in",
+          name: "Zoom In",
+          trigger: {
+            key: "ArrowUp",
+            isShift: true,
+          },
+          disabled: () => !getSourceTransform(),
+          execute: createMoveHandler({ width: 1, height: 1 }),
+        })
+        .addCommand({
+          event: "zoom-out",
+          name: "Zoom Out",
+          trigger: {
+            key: "ArrowDown",
+            isShift: true,
+          },
+          disabled: () => !getSourceTransform(),
+          execute: createMoveHandler({ width: -1, height: -1 }),
+        })
 
-      addCommand({
-        event: "move-left-edge-right",
-        name: "Move Left Edge Right",
-        trigger: {
-          preamble: "l",
-          key: "ArrowRight",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: 1, width: -2 }),
-      })
+      commander
+        .context({
+          name: "Move Image",
+          trigger: { key: "m" },
+        })
+        .addCommand({
+          event: "move-up",
+          name: "Move Up",
+          trigger: {
+            key: "ArrowUp",
+            isShift: true,
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const y = -1
+            translate(sourceTransform, 0, y)
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          event: "move-down",
+          name: "Move Down",
+          trigger: {
+            key: "ArrowDown",
+            isShift: true,
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const y = 1
+            translate(sourceTransform, 0, y)
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          event: "move-left",
+          name: "Move Left",
+          trigger: {
+            key: "ArrowLeft",
+            isShift: true,
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const x = -1
+            translate(sourceTransform, x, 0)
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          event: "move-right",
+          name: "Move Right",
+          trigger: {
+            key: "ArrowRight",
+            isShift: true,
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const x = 1
+            translate(sourceTransform, x, 0)
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          event: "move-image-up",
+          name: "Move Image Up",
+          trigger: {
+            key: "ArrowUp",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const y = -1
+            move(sourceTransform, { y })
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          event: "move-image-down",
+          name: "Move Image Down",
+          trigger: {
+            key: "ArrowDown",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const y = 1
+            move(sourceTransform, { y })
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          event: "move-image-left",
+          name: "Move Image Left",
+          trigger: {
+            key: "ArrowLeft",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const x = -1
+            move(sourceTransform, { x })
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          event: "move-image-right",
+          name: "Move Image Right",
+          trigger: {
+            preamble: "m",
+            key: "ArrowRight",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const x = 1
+            move(sourceTransform, { x })
+            transforms = transforms
+            return true
+          },
+        })
 
-      addCommand({
-        event: "move-right-edge-left",
-        name: "Move Right Edge Left",
-        trigger: {
-          preamble: "r",
-          key: "ArrowLeft",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: -1, width: -2 }),
-      })
-
-      addCommand({
-        event: "move-right-edge-right",
-        name: "Move Right Edge Right",
-        trigger: {
-          preamble: "r",
-          key: "ArrowRight",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ x: 1, width: 2 }),
-      })
-
-      addCommand({
-        event: "zoom-image-in",
-        name: "Zoom Image In",
-        trigger: {
-          preamble: "z",
-          key: "ArrowUp",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const dx = -1
-          const dy = -1
-          zoom(sourceTransform, { dx, dy })
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        event: "zoom-image-out",
-        name: "Zoom Image Out",
-        trigger: {
-          preamble: "z",
-          key: "ArrowDown",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const dx = 1
-          const dy = 1
-          zoom(sourceTransform, { dx, dy })
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        event: "zoom-in",
-        name: "Zoom In",
-        trigger: {
-          preamble: "z",
-          key: "ArrowUp",
-          isShift: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ width: 1, height: 1 }),
-      })
-
-      addCommand({
-        event: "zoom-out",
-        name: "Zoom Out",
-        trigger: {
-          preamble: "z",
-          key: "ArrowDown",
-          isShift: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: createMoveHandler({ width: -1, height: -1 }),
-      })
-
-      addCommand({
-        event: "move-up",
-        name: "Move Up",
-        trigger: {
-          preamble: "m",
-          key: "ArrowUp",
-          isShift: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const y = -1
-          translate(sourceTransform, 0, y)
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        event: "move-down",
-        name: "Move Down",
-        trigger: {
-          preamble: "m",
-          key: "ArrowDown",
-          isShift: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const y = 1
-          translate(sourceTransform, 0, y)
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        event: "move-left",
-        name: "Move Left",
-        trigger: {
-          preamble: "m",
-          key: "ArrowLeft",
-          isShift: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const x = -1
-          translate(sourceTransform, x, 0)
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        event: "move-right",
-        name: "Move Right",
-        trigger: {
-          preamble: "m",
-          key: "ArrowRight",
-          isShift: true,
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const x = 1
-          translate(sourceTransform, x, 0)
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        event: "move-image-up",
-        name: "Move Image Up",
-        trigger: {
-          preamble: "m",
-          key: "ArrowUp",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const y = -1
-          move(sourceTransform, { y })
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        event: "move-image-down",
-        name: "Move Image Down",
-        trigger: {
-          preamble: "m",
-          key: "ArrowDown",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const y = 1
-          move(sourceTransform, { y })
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        event: "move-image-left",
-        name: "Move Image Left",
-        trigger: {
-          preamble: "m",
-          key: "ArrowLeft",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const x = -1
-          move(sourceTransform, { x })
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        event: "move-image-right",
-        name: "Move Image Right",
-        trigger: {
-          preamble: "m",
-          key: "ArrowRight",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const x = 1
-          move(sourceTransform, { x })
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        name: "Rotate Clockwise",
-        event: "rotate-clockwise",
-        trigger: {
-          preamble: "z",
-          key: "ArrowRight",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const rotation = 6
-          rotate(sourceTransform, rotation)
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        name: "Rotate Counter-Clockwise",
-        event: "rotate-counter-clockwise",
-        trigger: {
-          preamble: "z",
-          key: "ArrowLeft",
-        },
-        disabled: () => !getSourceTransform(),
-        execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const rotation = -6
-          rotate(sourceTransform, rotation)
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        name: "Rotate Image Clockwise",
-        event: "rotate-image-clockwise",
-        trigger: {
-          preamble: "z",
-          key: "ArrowRight",
-          isShift: true,
-        },
-        disabled: () => !hasFocus(svgElement),
-        execute: () => {
-          const target = getActiveCell()
-          if (!target) return
-          const rotation = 6
-          rotateImage(target, rotation)
-          transforms = transforms
-          return true
-        },
-      })
-
-      addCommand({
-        name: "Rotate Image Counter-Clockwise",
-        event: "rotate-image-counter-clockwise",
-        trigger: {
-          preamble: "z",
-          key: "ArrowLeft",
-          isShift: true,
-        },
-        disabled: () => !hasFocus(svgElement),
-        execute: () => {
-          const target = getActiveCell()
-          if (!target) return
-          const rotation = -6
-          rotateImage(target, rotation)
-          transforms = transforms
-          return true
-        },
-      })
+      commander
+        .context({
+          name: "Rotate Image",
+          trigger: { key: "r", isShift: true },
+        })
+        .addCommand({
+          name: "Rotate Clockwise",
+          event: "rotate-clockwise",
+          trigger: {
+            key: "ArrowRight",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const rotation = 6
+            rotate(sourceTransform, rotation)
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          name: "Rotate Counter-Clockwise",
+          event: "rotate-counter-clockwise",
+          trigger: {
+            key: "ArrowLeft",
+          },
+          disabled: () => !getSourceTransform(),
+          execute: () => {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const rotation = -6
+            rotate(sourceTransform, rotation)
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          name: "Rotate Image Clockwise",
+          event: "rotate-image-clockwise",
+          trigger: {
+            key: "ArrowRight",
+            isShift: true,
+          },
+          disabled: () => !hasFocus(svgElement),
+          execute: () => {
+            const target = getActiveCell()
+            if (!target) return
+            const rotation = 6
+            rotateImage(target, rotation)
+            transforms = transforms
+            return true
+          },
+        })
+        .addCommand({
+          name: "Rotate Image Counter-Clockwise",
+          event: "rotate-image-counter-clockwise",
+          trigger: {
+            key: "ArrowLeft",
+            isShift: true,
+          },
+          disabled: () => !hasFocus(svgElement),
+          execute: () => {
+            const target = getActiveCell()
+            if (!target) return
+            const rotation = -6
+            rotateImage(target, rotation)
+            transforms = transforms
+            return true
+          },
+        })
     }
   })
 
-  onDestroy(() => {
-    removeCommand("move-bottom-edge-down")
-    removeCommand("move-bottom-edge-up")
-    removeCommand("move-left-edge-left")
-    removeCommand("move-left-edge-right")
-    removeCommand("move-right-edge-left")
-    removeCommand("move-right-edge-right")
-    removeCommand("move-top-edge-down")
-    removeCommand("move-top-edge-up")
-
-    removeCommand("clone-cell")
-    removeCommand("delete-cell")
-    removeCommand("move-down")
-    removeCommand("move-image-down")
-    removeCommand("move-image-left")
-    removeCommand("move-image-right")
-    removeCommand("move-image-up")
-    removeCommand("move-left")
-    removeCommand("move-right")
-    removeCommand("move-up")
-    removeCommand("rotate-clockwise")
-    removeCommand("rotate-counter-clockwise")
-    removeCommand("rotate-image-clockwise")
-    removeCommand("rotate-image-counter-clockwise")
-    removeCommand("shrink-image-down")
-    removeCommand("shrink-image-left")
-    removeCommand("shrink-image-right")
-    removeCommand("shrink-image-up")
-    removeCommand("zoom-image-in")
-    removeCommand("zoom-image-out")
-    removeCommand("zoom-in")
-    removeCommand("zoom-out")
-
-    const keys = ID_MAP_KEYS
-    keys.forEach((key, index) => {
-      removeCommand(`copy-into-cell-${key}`)
-      removeCommand(`focus-cell-${key}`)
-      removeCommand(`swap-with-cell-${key}`)
-    })
-  })
+  onDestroy(() => {})
 
   function getFocusCellIdentifier() {
     const image = getActiveCell()
