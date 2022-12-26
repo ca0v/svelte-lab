@@ -96,16 +96,15 @@ export function injectCss(id: string, generator: () => string) {
 
 
 function initialize() {
-    injectRect("grid-6x6", -15, -15, 30, 30)
-    injectRect("box", -25, -25, 50, 50)
-    injectRect("box_7x5", -35, -25, 70, 50)
+    injectPath("grid-6x6", polygonToPath(polygonPath(4, 30, 45)))
+    injectPath("box", polygonToPath(polygonPath(4, 50, 45)))
     injectPath("0", polygonToPath(polygonPath(6, 21, 0)))
     injectPath("poly5_0", polygonToPath(polygonPath(5, 51, 0)))
     injectPath("poly5_36", polygonToPath(polygonPath(5, 36, 52)))
     injectPath("poly5_36_1", polygonToPath(polygonPath(5, 36, 52 + 36 + 0)))
     injectPath("30", polygonToPath(polygonPath(6, 21, 30)))
     injectPath("2", polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64)))
-    injectRect("7x5", -35, -25, 70, 50)
+    injectRect("box_7x5", -35, -25, 70, 50)
     collageTemplates.update(t => ({ ...t, ...transforms }))
 
     injectCss(`hexagon_spiral_init`, () => createInitialCss(`hexagon_spiral`, 0.1, 36))

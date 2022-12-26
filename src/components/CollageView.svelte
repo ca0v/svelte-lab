@@ -23,6 +23,11 @@
     commander,
     removeCommand,
   } from "../store/commands"
+  import {
+    duplicateImageClipPath,
+    moveClipPath,
+    type Direction,
+  } from "@/lib/paths"
 
   export let sources: Array<{ id: string; url: string }> = []
   export let readonly = false
@@ -329,6 +334,18 @@
         move(cell, { x: dx, y: dy, width: dw, height: dh })
       }
 
+      function createEdgeMover(direction: Direction) {
+        return () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          // move the actual clippath points
+          const image = getActiveCell()
+          const clipPath = duplicateImageClipPath(image, sourceTransform.target)
+          moveClipPath(clipPath, direction)
+          sourceTransform.clipPath = clipPath.id.substring(5) // remove clip_
+        }
+      }
+
       function createMoveHandler(box: BBox) {
         return () => {
           const sourceTransform = getSourceTransform()
@@ -385,7 +402,7 @@
             key: "ArrowUp",
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ y: -1, height: 2 }),
+          execute: createEdgeMover({ top: -1 }),
         })
         .addCommand({
           event: "move-top-edge-down",
@@ -394,7 +411,7 @@
             key: "ArrowDown",
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ y: 1, height: -2 }),
+          execute: createEdgeMover({ top: 1 }),
         })
 
       commander
@@ -409,7 +426,7 @@
             key: "ArrowUp",
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ y: -1, height: -2 }),
+          execute: createEdgeMover({ bottom: -1 }),
         })
         .addCommand({
           event: "move-bottom-edge-down",
@@ -418,7 +435,7 @@
             key: "ArrowDown",
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ y: 1, height: 2 }),
+          execute: createEdgeMover({ bottom: 1 }),
         })
 
       commander
@@ -433,7 +450,7 @@
             key: "ArrowLeft",
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ x: -1, width: 2 }),
+          execute: createEdgeMover({ left: -1 }),
         })
         .addCommand({
           event: "move-left-edge-right",
@@ -442,7 +459,7 @@
             key: "ArrowRight",
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ x: 1, width: -2 }),
+          execute: createEdgeMover({ left: 1 }),
         })
 
       commander
@@ -457,7 +474,7 @@
             key: "ArrowLeft",
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ x: -1, width: -2 }),
+          execute: createEdgeMover({ right: -1 }),
         })
         .addCommand({
           event: "move-right-edge-right",
@@ -466,7 +483,7 @@
             key: "ArrowRight",
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ x: 1, width: 2 }),
+          execute: createEdgeMover({ right: 1 }),
         })
 
       commander
