@@ -143,7 +143,7 @@
         name: `Swap with ${key}`,
         trigger: {
           key: key.toLocaleLowerCase(),
-          editmode: true,
+          isCtrl: true,
         },
         disabled: () => isDisabled(index),
         execute: () => {
@@ -165,7 +165,6 @@
           isShift: ID_MAP.SHIFT.includes(key),
           isCtrl: true,
           isAlt: ID_MAP.ALT.includes(key),
-          editmode: true,
         },
         disabled: () => isDisabled(index),
         execute: () => {
@@ -186,7 +185,6 @@
           key: key.toLocaleUpperCase(),
           isShift: ID_MAP.SHIFT.includes(key),
           isAlt: ID_MAP.ALT.includes(key),
-          editmode: true,
         },
         disabled: () => isDisabled(index),
         execute: () => {
@@ -270,8 +268,7 @@
       title: "Clone Current Cell",
       trigger: {
         key: "d",
-        isCtrl: true,
-        editmode: true,
+        preamble: "f",
       },
       execute: () => {
         // get the image that is currently focused
@@ -723,9 +720,8 @@
         name: "Rotate Image Clockwise",
         event: "rotate-image-clockwise",
         trigger: {
+          preamble: "r",
           key: ".",
-          isShift: false,
-          editmode: true,
         },
         disabled: () => !hasFocus(svgElement),
         execute: () => {
@@ -742,9 +738,8 @@
         name: "Rotate Image Counter-Clockwise",
         event: "rotate-image-counter-clockwise",
         trigger: {
+          preamble: "r",
           key: ",",
-          isShift: false,
-          editmode: true,
         },
         disabled: () => !hasFocus(svgElement),
         execute: () => {

@@ -1,12 +1,12 @@
 <script type="ts">
-  import { asKeyboardShortcut, commands, command } from "../store/commands"
+  import { asKeyboardShortcut, command, commander } from "../store/commands"
 </script>
 
 <div class="toolbar">
-  {#each $commands.filter((command) => command.showInToolbar) as c, i}
+  {#each commander.getCommands().filter((c) => c.showInToolbar) as c, i}
     <div class="command-button">
       <p>{c.name}</p>
-      <button use:command={c.event}>{asKeyboardShortcut(c)}</button>
+      <button use:command={c.event}>{asKeyboardShortcut(c.trigger)}</button>
     </div>
   {/each}
 </div>

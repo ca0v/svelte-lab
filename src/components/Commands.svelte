@@ -1,10 +1,17 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount, onDestroy, tick } from "svelte"
+  import {
+    createEventDispatcher,
+    onMount,
+    onDestroy,
+    tick,
+    getAllContexts,
+  } from "svelte"
   import { log } from "../lib/globals"
   import {
     addCommand,
     asKeyboardShortcut,
-    commands,
+    commander,
+    isFilterMatch,
     removeCommand,
     type Command,
   } from "../store/commands"
@@ -13,122 +20,10 @@
   const dispatcher = createEventDispatcher()
 
   export let isOpen = false
-  export let watch: Document | Element
 
-  let lastKeyDownHandled = false
   let escapeMode = false
   let searchFilter = ""
   let searchInput: HTMLInputElement
-
-  let lastKeyUp = ""
-  function keyUpHandler(event: KeyboardEvent) {
-    // do not remain in escape mode if user doing other things
-    escapeMode = escapeMode && lastKeyDownHandled
-    // record the keypress if it was handled
-    lastKeyUp = lastKeyDownHandled ? event.key : ""
-  }
-
-  function keyDownHandler(event: KeyboardEvent) {
-    lastKeyDownHandled = false
-    const { key, shiftKey, ctrlKey, altKey } = event
-    log({ key, shiftKey, ctrlKey, altKey, lastKeyUp })
-
-    if (!escapeMode) {
-      // is it a normal key?
-      if (key.length == 1) {
-        // if in an input do not handle if ctrl or alt not pressed
-        if (
-          !ctrlKey &&
-          !altKey &&
-          (event.target instanceof HTMLInputElement ||
-            event.target instanceof HTMLTextAreaElement)
-        ) {
-          return log("not handling keydown in input")
-        }
-
-        if (
-          !ctrlKey &&
-          !altKey &&
-          !shiftKey &&
-          event.target instanceof HTMLSelectElement
-        ) {
-          return log("not handling keydown in select")
-        }
-      } else {
-        if (event.target instanceof HTMLSelectElement) {
-          switch (key) {
-            case "ArrowUp":
-            case "ArrowDown":
-            case "Tab":
-              return log("not handling up/down and tab in select")
-          }
-        }
-        if (event.target instanceof HTMLButtonElement) {
-          switch (key) {
-            case "Enter":
-            case " ":
-            case "Tab":
-              return log("not handling keydown in button")
-          }
-        }
-      }
-    }
-
-    const potentialActions = $commands.filter((action) => {
-      const { trigger } = action
-      if (!trigger) return false
-      trigger.isAlt = trigger.isAlt || false
-      trigger.isCtrl = trigger.isCtrl || false
-      trigger.isShift = trigger.isShift || false
-
-      let match =
-        (trigger.key == key || !trigger.key) &&
-        trigger.isShift == shiftKey &&
-        trigger.isCtrl == ctrlKey &&
-        trigger.isAlt == altKey &&
-        (trigger.editmode || escapeMode)
-
-      if (match && trigger.preamble) {
-        match = trigger.preamble == lastKeyUp
-      }
-
-      if (match && isCommandDisabled(action)) {
-        log(`found matching command ${action.name} but it is disabled.`)
-        match = false
-      }
-
-      return match
-    })
-
-    if (!potentialActions.length) {
-      log("no matching commands", { key, shiftKey, ctrlKey, altKey })
-      // do any commands have a matching preamble?
-      const matchingPreamble = $commands.filter((action) => {
-        const { trigger } = action
-        let match = trigger.preamble == key && (trigger.editmode || escapeMode)
-        return match
-      })
-      if (matchingPreamble.length) {
-        event.preventDefault()
-        event.stopPropagation()
-        lastKeyDownHandled = true
-      }
-      return
-    }
-
-    if (potentialActions.length) {
-      potentialActions.forEach((action) => {
-        log(`found matching command ${action.name}`)
-        if (executeCommand(action)) {
-          action.showInToolbar = false
-          $commands = $commands
-          event.preventDefault()
-          event.stopPropagation()
-          lastKeyDownHandled = true
-        }
-      })
-    }
-  }
 
   function executeCommand(command: Command) {
     if (isCommandDisabled(command)) return false
@@ -142,20 +37,17 @@
   }
 
   onMount(() => {
-    watch?.addEventListener("keydown", keyDownHandler)
-    watch?.addEventListener("keyup", keyUpHandler)
-
     document.addEventListener("execute_command", (event: CustomEvent) => {
       const { detail } = event
       const { eventName } = detail
-      const command = $commands.find((c) => c.event == eventName)
+      const command = commander.findCommand(eventName)
       command && executeCommand(command)
     })
 
     addCommand({
       name: "Toggle Escape Mode",
       event: "toggle-escape-mode",
-      trigger: { key: "Escape", editmode: true },
+      trigger: { key: "Escape" },
       execute: () => {
         searchFilter = ""
         if (escapeMode) {
@@ -171,7 +63,10 @@
     addCommand({
       name: "search-commands",
       title: "Search for a command",
-      trigger: { key: "F", isCtrl: true, isShift: true, editmode: true },
+      trigger: {
+        preamble: "F",
+        key: "F",
+      },
       execute: () => {
         isOpen = true
         escapeMode = false
@@ -185,30 +80,10 @@
   })
 
   onDestroy(() => {
-    watch?.removeEventListener("keydown", keyDownHandler)
-    watch?.removeEventListener("keyup", keyUpHandler)
-
     removeCommand("toggle-escape-mode")
     removeCommand("toggle-command-menu")
     removeCommand("search-commands")
   })
-
-  function isFilterMatch(searchFilter: string, command: Command) {
-    const tokens = searchFilter.toUpperCase().split(" ")
-    const match = (command.title + asKeyboardShortcut(command)).toUpperCase()
-    return (
-      tokens.reduce((b, t) => {
-        if (b < 0) return b // nothing to find, abort
-        const i = match.indexOf(t, b)
-        if (i < 0) return i // not found, abort
-        return i + t.length // found, continue after last token
-      }, 0) > -1
-    )
-  }
-
-  function getFilteredCommand(searchFilter: string) {
-    return $commands.find((c) => isFilterMatch(searchFilter, c))
-  }
 
   function isCommandDisabled(a: Command) {
     return a.disabled && a.disabled()
@@ -227,43 +102,49 @@
       on:keydown={(e) => {
         if (e.key !== "Enter") return
         // execute the first command that matches the search filter
-        const command = getFilteredCommand(searchFilter)
+        const command = commander
+          .getCommands()
+          .find((c) => isFilterMatch(searchFilter, c))
+
         if (command) {
           if (executeCommand(command)) {
             isOpen = false
             command.showInToolbar = true
-            $commands = $commands
           }
         }
       }}
     />
     <div class="two-columns">
-      {#each $commands.filter((c) => isFilterMatch(searchFilter, c)) as command}
-        <div
-          class={`title ${
-            !searchFilter
-              ? ""
-              : isFilterMatch(searchFilter, command)
-              ? "filter-hit"
-              : "filter-miss"
-          }`}
-          title={command.name}
-        >
-          {command.title}
-        </div>
-        <button
-          on:click={() => {
-            if (executeCommand(command)) {
-              command.showInToolbar = true
-            }
-          }}
-          disabled={command.disabled && command.disabled()}
-          class:editmode={command.trigger.editmode}
-          class:escapemode={!command.trigger.editmode}
-        >
-          {(command.trigger.editmode ? "" : !escapeMode ? "Esc " : "") +
-            asKeyboardShortcut(command)}
-        </button>
+      {#each commander.getContexts() as ctx}
+        <div class="title col1-2">{ctx.command.trigger.key}</div>
+        {#each ctx
+          .getCommands()
+          .filter((c) => isFilterMatch(searchFilter, c)) as command}
+          <div
+            class={`title ${
+              !searchFilter
+                ? ""
+                : isFilterMatch(searchFilter, command)
+                ? "filter-hit"
+                : "filter-miss"
+            }`}
+            title={command.name}
+          >
+            {command.title}
+          </div>
+          <button
+            on:click={() => {
+              if (executeCommand(command)) {
+                command.showInToolbar = true
+              }
+            }}
+            disabled={command.disabled && command.disabled()}
+            class:editmode={command.trigger.editmode}
+            class:escapemode={!command.trigger.editmode}
+          >
+            {asKeyboardShortcut(command.trigger)}
+          </button>
+        {/each}
       {/each}
     </div>
   </details>
@@ -315,6 +196,10 @@
     grid-template-columns: 3fr 1fr;
     gap: 0.25rem;
     transition-delay: 300ms width;
+  }
+
+  .col1-2 {
+    grid-column: 1 / 3;
   }
 
   input {

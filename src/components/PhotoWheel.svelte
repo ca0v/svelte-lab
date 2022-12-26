@@ -28,7 +28,6 @@
       name: "Next photo",
       trigger: {
         key: ".",
-        editmode: true,
       },
       disabled: () => !hasFocus(container),
       execute: () => {
@@ -44,7 +43,6 @@
       name: "Previous photo",
       trigger: {
         key: ",",
-        editmode: true,
       },
       disabled: () => !hasFocus(container),
       execute: () => {

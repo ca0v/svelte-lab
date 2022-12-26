@@ -7,6 +7,7 @@
   import Toolbar from "./components/Toolbar.svelte"
   import { loadAllStories, stories } from "./store/stories"
   import { collageTemplates as transforms } from "./store/transforms"
+  import { commander } from "./store/commands"
 
   import Commands from "./components/Commands.svelte"
   import Notes from "./components/Notes.svelte"
@@ -21,6 +22,7 @@
     command,
     removeCommand,
     shortcut,
+    type Command,
   } from "./store/commands"
   import { refreshBaseurl } from "./store/photos"
   import GoogleSignin from "./components/GoogleSignin.svelte"
@@ -162,6 +164,72 @@
   }
 
   onMount(async () => {
+    const initialCommands: Array<Command> = [
+      {
+        event: "start_new_story",
+        name: "Create",
+        title: "Create a new story",
+        trigger: {
+          key: "n",
+        },
+        execute: () => {
+          const newStory = {
+            id: createUniqueId(),
+            title: states.datefilter.from,
+            data: [],
+          }
+          stories.update((s) => [newStory, ...s])
+          $collageId = newStory.id
+          states.titleEditor.edit = true
+          states.editor.editmode = true
+          // "toggle-command-menu"
+          states.menu.isOpen = true
+          toast("New Story Created")
+        },
+      },
+      {
+        event: "save_story",
+        name: "Save",
+        title: "Save story",
+        trigger: {
+          key: "s",
+        },
+        execute: async () => {
+          states.saving = true
+          try {
+            setLocalStorage(`${activeCollage.id}`, activeCollage)
+            await saveCollage({ ...activeCollage })
+            toast("Saved")
+          } catch (ex) {
+            reportError(ex)
+            toast(`Error: ${ex}`)
+          } finally {
+            states.saving = false
+          }
+        },
+      },
+      {
+        event: "auto_assign_photos",
+        name: "Auto Assign",
+        title: "Auto assign photos",
+        trigger: {
+          key: "a",
+        },
+        execute: async () => autoAssignImages(photosToShow),
+      },
+      {
+        event: "clear_all_photos",
+        name: "Clear All Photos",
+        title: "Clear all photos",
+        trigger: {
+          key: "c",
+        },
+        execute: () => clearAllImages(),
+      },
+    ]
+    initialCommands.forEach(addCommand)
+    commander.listen()
+
     states.datefilter.from = localStorage.getItem("date_filter") || ""
 
     $colorWheelAngle = await getLocalStorage("colorwheel_angle", 0)
@@ -220,7 +288,6 @@
       trigger: {
         key: "p",
         isAlt: true,
-        editmode: true,
       },
       execute: () => {
         collageView.focusPhotoWheel()
@@ -233,7 +300,7 @@
       title: "Preview collage",
       trigger: {
         key: "p",
-        isCtrl: true,
+        isAlt: true,
       },
       execute: () => (states.preview.visible = !states.preview.visible),
     })
@@ -329,39 +396,7 @@
   }
 </script>
 
-<Commands
-  watch={document}
-  bind:isOpen={states.menu.isOpen}
-  on:start_new_story={() => {
-    const newStory = {
-      id: createUniqueId(),
-      title: states.datefilter.from,
-      data: [],
-    }
-    stories.update((s) => [newStory, ...s])
-    $collageId = newStory.id
-    states.titleEditor.edit = true
-    states.editor.editmode = true
-    // "toggle-command-menu"
-    states.menu.isOpen = true
-    toast("New Story Created")
-  }}
-  on:save_story={async () => {
-    states.saving = true
-    try {
-      setLocalStorage(`${activeCollage.id}`, activeCollage)
-      await saveCollage({ ...activeCollage })
-      toast("Saved")
-    } catch (ex) {
-      reportError(ex)
-      toast(`Error: ${ex}`)
-    } finally {
-      states.saving = false
-    }
-  }}
-  on:auto_assign_photos={() => autoAssignImages(photosToShow)}
-  on:clear_all_photos={() => clearAllImages()}
->
+<Commands bind:isOpen={states.menu.isOpen}>
   <GoogleSignin autoSignIn={false} />
 </Commands>
 
