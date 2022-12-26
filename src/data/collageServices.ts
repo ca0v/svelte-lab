@@ -73,5 +73,5 @@ export async function getAllCollages() {
 }
 
 export async function saveCollage(collage: CollageData) {
-    return (await api.collage.create(collage)).data;
+    return (await api.collage.create(collage));
 }

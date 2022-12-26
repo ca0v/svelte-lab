@@ -1,7 +1,7 @@
-import { getLocalStorage } from "@/lib/globals";
+import { getLocalStorage, setLocalStorage } from "@/lib/globals";
 import type { CollageData } from "@/d.ts";
 
-const collages: Array<CollageData> = [{
+const TEST_COLLAGES: Array<CollageData> = [{
     id: "1",
     title: "Collage 1",
     note: "Notes Go Here",
@@ -29,16 +29,20 @@ class Collage {
     get(): Promise<Array<string>>;
     get(id: string): Promise<CollageData>;
     async get(id?: string) {
+        let collages = await getLocalStorage<Record<string, CollageData>>("collages", {});
         if (!id) {
-            return ["1", "2", "3"]
+            let keys = Object.keys(collages);
+            return ["1", "2", "3", ...keys]
         } else {
-            const result = collages.find(c => c.id === id)
+            const result = collages[id] || TEST_COLLAGES.find(c => c.id === id)
             return result;
         }
     }
 
     async create(collage: CollageData) {
-        return;
+        const collages = await getLocalStorage<Record<string, CollageData>>("collages", {});
+        collages[collage.id] = collage;
+        setLocalStorage("collages", collages);
     }
 
     async getClientId() {
