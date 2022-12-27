@@ -166,7 +166,9 @@
       const from = asZulu(states.datefilter.from)
       const to = asZulu(states.datefilter.to)
       getPhotosForOneDay(from).then((photos) => {
-        photos = photos.filter((p) => from <= p.created! && p.created! < to)
+        photos = photos.filter((p) => {
+          return from <= p.created! && p.created! < to
+        })
         photos.sort((a, b) => a.created!.localeCompare(b.created!))
         photosToShow = photos
       })
@@ -388,7 +390,7 @@
   async function getPhotosForOneDay(yyyy_mm_dd: string) {
     const startDate = addDays(yyyy_mm_dd, -1)
     const endDate = addDays(yyyy_mm_dd, 1)
-    console.log(`fetching photos from ${startDate} to ${endDate}`)
+    log(`fetching photos from ${startDate} to ${endDate}`)
     const responseIterator = fetchPhotoList(startDate, endDate)
 
     const result: Array<Photo> = []
