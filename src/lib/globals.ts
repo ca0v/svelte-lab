@@ -1,9 +1,18 @@
-import { PhotoDB } from "@googlePhoto/indexdb"
-
 let dummy: HTMLElement;
 
-const photoDB = new PhotoDB();
-await photoDB.initialize();
+class PhotoDB {
+    getGlobal<T>(key: string) {
+        const result = localStorage.getItem(`global.${key}`)
+        if (!result) return null;
+        return <T>JSON.parse(result)
+    }
+
+    putGlobal(key: string, value: any) {
+        localStorage.setItem(`global.${key}`, JSON.stringify(value))
+    }
+}
+
+const photoDB = new PhotoDB()
 
 export function range(size: number) {
     return new Array(size).fill(0).map((_, i) => i);

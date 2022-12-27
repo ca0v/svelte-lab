@@ -88,7 +88,7 @@
       activeCollage = storyToLoad
     })
 
-    $collageId = localStorage.getItem("collage_name") || ""
+    $collageId = (await getLocalStorage("collage_name")) || ""
   }
 
   // assign images to each image element
