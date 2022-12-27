@@ -12,11 +12,11 @@
 
   import { getEffectiveTransform, hasFocus, log } from "../lib/globals"
 
-  import PhotoWheel from "./PhotoWheel.svelte"
+  import PhotoWheel, { type Source } from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
   import type { BBox, CollageCellState, CollageData } from "../d.ts/index"
   import { toast } from "../store/toasts"
-  import { onDestroy, onMount } from "svelte"
+  import { hasContext, onDestroy, onMount } from "svelte"
   import { command, commander, contexts } from "../store/commands"
   import {
     duplicateImageClipPath,
@@ -44,6 +44,10 @@
     photoWheel?.focus()
   }
 
+  function getPhotoWheelActiveSource() {
+    return photoWheel.activeSource as Source
+  }
+
   function copy(from: CollageCellState, into: CollageCellState) {
     into.id = from.id
     into.baseurl = from.baseurl
@@ -51,7 +55,6 @@
     into.y = from.y
     into.width = from.width
     into.height = from.height
-    transforms = transforms
   }
 
   function swap(i1: CollageCellState, i2: CollageCellState) {
@@ -92,9 +95,11 @@
     switch (mode) {
       case "copy":
         copy(t2, t1)
+        transforms = transforms
         break
       default:
         swap(t1, t2)
+        transforms = transforms
     }
   }
 
@@ -135,13 +140,20 @@
 
     function isDisabled(index: number): boolean {
       if (!hasFocus(svgElement)) return true
-      return (
-        !transforms?.data?.[index] ||
-        transforms.data[index] == getSourceTransform()
-      )
+      return !isTransform(index) || getTransform(index) == getSourceTransform()
     }
 
-    const keys = ID_MAP_KEYS.reverse()
+    function isTransform(index: number): boolean {
+      return !!transforms?.data?.[index]
+    }
+
+    function getTransform(index: number) {
+      const result = transforms.data![index]
+      if (!result) throw "no transform"
+      return result
+    }
+
+    const keys = ID_MAP_KEYS
 
     keys.forEach((key, index) => {
       contexts.swap.addCommand({
@@ -160,6 +172,7 @@
           swap(targetImage, sourceTransform)
           focusTarget(targetImage.target!)
           getFocusCellIdentifier()
+          transforms = transforms
           return true
         },
       })
@@ -172,14 +185,27 @@
         },
         disabled: () => isDisabled(index),
         execute: () => {
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-          const targetImage = transforms.data![index]
-          if (!targetImage) return
-          copy(sourceTransform, targetImage)
-          focusTarget(targetImage.target!)
-          getFocusCellIdentifier()
-          return true
+          if (
+            getSourceTransform() &&
+            (hasFocus(svgElement) || !getPhotoWheelActiveSource())
+          ) {
+            const sourceTransform = getSourceTransform()
+            if (!sourceTransform) return
+            const targetImage = getTransform(index)
+            copy(sourceTransform, targetImage)
+            focusTarget(targetImage.target!)
+            getFocusCellIdentifier()
+            transforms = transforms
+            return true
+          } else {
+            const source = getPhotoWheelActiveSource()
+            if (!source) throw "no active source"
+            const targetImage = getTransform(index)
+            targetImage.id = source.id
+            targetImage.baseurl = source.url
+            transforms = transforms
+            return true
+          }
         },
       })
 
@@ -189,10 +215,9 @@
         trigger: {
           key: key.toLocaleUpperCase(),
         },
-        disabled: () => isDisabled(index),
+        disabled: () => !isTransform(index),
         execute: () => {
-          const targetImage = transforms.data![index]
-          if (!targetImage) return
+          const targetImage = getTransform(index)
           focusTarget(targetImage.target!)
           return true
         },

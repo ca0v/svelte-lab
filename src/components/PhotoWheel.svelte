@@ -1,9 +1,17 @@
-<script lang="ts">
-  type Source = {
+<svelte:options accessors={true} />
+
+<script context="module" lang="ts">
+  export type Source = {
     id: string
     url: string
   }
 
+  export function whatisit() {
+    console.log("whatisit")
+  }
+</script>
+
+<script lang="ts">
   import { createEventDispatcher, onDestroy, onMount } from "svelte"
   import { hasFocus } from "../lib/globals"
   import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
@@ -22,6 +30,8 @@
     }
   }
 
+  export let activeSource: Source | null = null
+
   onMount(() => {
     contexts.workarea
       .addCommand({
@@ -38,7 +48,6 @@
           return true
         },
       })
-
       .addCommand({
         event: "goto-previous-photo",
         name: "Previous photo",
@@ -87,6 +96,7 @@
       on:focus={(event) => {
         // keep track of the last focused element
         lastFocusedElement = event.target
+        activeSource = source
       }}
       on:click={() => {
         // emit a click event so the parent can handle it
