@@ -317,7 +317,7 @@
         event: "zoom-in-workarea",
         name: "Zoom Workarea In",
         trigger: {
-          key: "ArrowUp",
+          key: "PageUp",
         },
         execute: () => {
           states.editor.width = Math.min(states.editor.width + 1, 200)
@@ -328,7 +328,7 @@
         event: "zoom-out-workarea",
         name: "Zoom Workarea Out",
         trigger: {
-          key: "ArrowDown",
+          key: "PageDown",
         },
         execute: () => {
           states.editor.width = Math.max(states.editor.width - 1, 25)
