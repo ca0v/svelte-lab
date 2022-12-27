@@ -16,7 +16,9 @@
     "start": "npm run dev & npm run start-image-server",
     "digital-ocean": "chmod u+x ./server/start.sh",
     "test": "vitest",
-    "db-migrate": "cd ./tools/ && python3 -c 'from migrate import addClippathColumn; addClippathColumn()'"
+    "pretest": "tsc",
+    "db-migrate": "cd ./tools/ && python3 -c 'from migrate import addClippathColumn; addClippathColumn()'",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.1.0",
@@ -33,6 +35,7 @@
     "@types/gapi": "^0.0.43",
     "@types/gapi.client.photoslibrary": "^1.0.0",
     "gh-pages": "^4.0.0",
+    "husky": "^8.0.2",
     "swagger-typescript-api": "^12.0.2",
     "vite-tsconfig-paths": "^4.0.3"
   }

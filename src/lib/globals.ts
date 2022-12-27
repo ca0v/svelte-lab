@@ -1,4 +1,6 @@
-import { PhotoDB } from "./indexdb"
+import { PhotoDB } from "@googlePhoto/indexdb"
+
+let dummy: HTMLElement;
 
 const photoDB = new PhotoDB();
 await photoDB.initialize();
@@ -8,7 +10,7 @@ export function range(size: number) {
 }
 
 // read data from localstorage
-async function getLocalStorage<T>(key: string, defaultValue?: T) {
+export async function getLocalStorage<T>(key: string, defaultValue?: T) {
     key = `svelte_lab.${key}`
     let data = await photoDB.getGlobal<any>(key);
     if (data) {
@@ -23,7 +25,7 @@ async function getLocalStorage<T>(key: string, defaultValue?: T) {
 }
 
 // write data to localstorage
-const setLocalStorage = (key: string, data: any) => {
+export function setLocalStorage(key: string, data: any) {
     key = `svelte_lab.${key}`
     //localStorage.setItem(key, JSON.stringify(data));
     photoDB.putGlobal(key, data)
@@ -57,10 +59,11 @@ export async function getPhotoUrl() {
     }
 }
 
-const dummy = document.createElement("div")
-document.body.appendChild(dummy)
-
 export function getEffectiveTransform(transform: string) {
+    if (!dummy) {
+        dummy = document.createElement("div")
+        document.body.appendChild(dummy)
+    }
     dummy.style.transform = transform
     const result = getComputedStyle(dummy).transform
     return result === "none" ? "" : result
@@ -92,4 +95,3 @@ export function log(...args: any[]) {
     console.log(...args)
 }
 
-export { setLocalStorage, getLocalStorage }

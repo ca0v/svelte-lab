@@ -50,7 +50,7 @@ class Collage {
     }
 
     async login(photoUrl: any, credential: any) {
-        return {};
+        return { apiKey: "123" };
     }
 
 }

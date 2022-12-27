@@ -4,7 +4,7 @@ import { commander } from "../src/store/commands"
 // Edit an assertion and save to see HMR in action
 
 test('Commands', () => {
-    const ctx1 = commander.context({ trigger: { key: 'c' } })
+    const ctx1 = commander.context({ name: "test", trigger: { key: 'c' } })
     let success = false
     ctx1.action({
         event: "start_new_story",
