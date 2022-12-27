@@ -8,9 +8,9 @@
   } from "svelte"
   import { log } from "../lib/globals"
   import {
-    addCommand,
     asKeyboardShortcut,
     commander,
+    contexts,
     isFilterMatch,
     removeCommand,
     type Command,
@@ -45,7 +45,7 @@
       command && executeCommand(command)
     })
 
-    addCommand({
+    contexts.primary.addCommand({
       name: "Toggle Command Console",
       event: "toggle-command-console",
       trigger: { key: "/" },

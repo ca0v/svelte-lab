@@ -98,8 +98,8 @@ class Commander {
     constructor() {
         this.primaryContext = new CommandContext({ name: "primary", trigger: {} })
         // get out of all other contexts
-        this.primaryContext.action(
-            { name: "Escape", trigger: { key: "Escape" } }
+        this.primaryContext.addCommand(
+            { name: "Escape Context", title: "Exit the current context", trigger: { key: "Escape" } }
         )
     }
 
@@ -126,7 +126,7 @@ class Commander {
     }
 
     getContexts() {
-        return Object.values(this.contexts);
+        return [this.primaryContext, ...Object.values(this.contexts)];
     }
 
     getCommands() {
@@ -244,31 +244,35 @@ class Commander {
 export const commander = new Commander();
 
 // prefer defining here instead of locally in the component
-export const contexts = {
-    copy: commander.context({
-        name: "Copy Into",
-        trigger: { key: "C", isShift: true },
-    }),
-    file: commander.context({
-        name: "File",
-        trigger: { key: "F", isShift: true },
-    }),
-    goto: commander.context({
-        name: "Goto Cell",
-        trigger: { key: "G", isShift: true },
-    }),
-    swap: commander.context({
-        name: "Swap Into",
-        trigger: { key: "S", isShift: true },
-    }),
-    workarea: commander.context({
-        name: "Work Area",
-        trigger: { key: "W", isShift: true },
-    }),
-}
+export const contexts = (() => {
+    const trigger: CommandTrigger = { isShift: true, isCtrl: true }
+    return {
+        primary: commander.primaryContext,
+        copy: commander.context({
+            name: "Copy Into",
+            trigger: { key: "C", ...trigger },
+        }),
+        file: commander.context({
+            name: "File",
+            trigger: { key: "F", ...trigger },
+        }),
+        goto: commander.context({
+            name: "Goto Cell",
+            trigger: { key: "G", ...trigger },
+        }),
+        swap: commander.context({
+            name: "Swap Into",
+            trigger: { key: "S", ...trigger },
+        }),
+        workarea: commander.context({
+            name: "Work Area",
+            trigger: { key: "W", ...trigger },
+        }),
+    }
+})();
 
 
-export function addCommand(command: Command) {
+function addCommand(command: Command) {
     command.event = command.event || command.name
     command.name = command.name || command.event
     command.title = command.title || command.name

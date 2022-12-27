@@ -7,7 +7,7 @@
   import Toolbar from "./components/Toolbar.svelte"
   import { loadAllStories, stories } from "./store/stories"
   import { collageTemplates as transforms } from "./store/transforms"
-  import { commander } from "./store/commands"
+  import { commander, contexts } from "./store/commands"
 
   import Commands from "./components/Commands.svelte"
   import Notes from "./components/Notes.svelte"
@@ -18,7 +18,6 @@
   import Toaster from "./components/Toaster.svelte"
   import { toast } from "./store/toasts"
   import {
-    addCommand,
     command,
     removeCommand,
     shortcut,
@@ -176,8 +175,7 @@
   }
 
   onMount(async () => {
-    commander
-      .context({ name: "File", trigger: { key: "F", isShift: true } })
+    contexts.file
       .addCommand({
         event: "auto_assign_photos",
         name: "Auto Assign Photos",
@@ -280,23 +278,21 @@
       document.documentElement.style.setProperty("--theme-hue", `${v}`)
     })
 
-    addCommand({
-      event: "toggle-color-wheel",
-      name: "Toggle Color Wheel",
-      trigger: {
-        key: " ",
-        isShift: true,
-        isAlt: true,
-        isCtrl: true,
-      },
-      execute: () => {
-        states.app.showColorWheel = !states.app.showColorWheel
-        return true
-      },
-    })
-
-    commander
-      .context({ name: "Work Area", trigger: { key: "W", isShift: true } })
+    contexts.workarea
+      .addCommand({
+        event: "toggle-color-wheel",
+        name: "Toggle Color Wheel",
+        trigger: {
+          key: " ",
+          isShift: true,
+          isAlt: true,
+          isCtrl: true,
+        },
+        execute: () => {
+          states.app.showColorWheel = !states.app.showColorWheel
+          return true
+        },
+      })
       .addCommand({
         event: "zoom-in-workarea",
         name: "Zoom Workarea In",

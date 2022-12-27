@@ -7,7 +7,7 @@
   import { createEventDispatcher, onDestroy, onMount } from "svelte"
   import { hasFocus } from "../lib/globals"
   import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
-  import { addCommand, removeCommand } from "../store/commands"
+  import { contexts, removeCommand } from "../store/commands"
   const dispatch = createEventDispatcher()
 
   export let sources: Array<Source> = []
@@ -23,35 +23,37 @@
   }
 
   onMount(() => {
-    addCommand({
-      event: "goto-next-photo",
-      name: "Next photo",
-      trigger: {
-        key: ".",
-      },
-      disabled: () => !hasFocus(container),
-      execute: () => {
-        const target = lastFocusedElement.nextElementSibling as HTMLElement
-        if (!target) return
-        target.focus()
-        return true
-      },
-    })
+    contexts.workarea
+      .addCommand({
+        event: "goto-next-photo",
+        name: "Next photo",
+        trigger: {
+          key: ".",
+        },
+        disabled: () => !hasFocus(container),
+        execute: () => {
+          const target = lastFocusedElement.nextElementSibling as HTMLElement
+          if (!target) return
+          target.focus()
+          return true
+        },
+      })
 
-    addCommand({
-      event: "goto-previous-photo",
-      name: "Previous photo",
-      trigger: {
-        key: ",",
-      },
-      disabled: () => !hasFocus(container),
-      execute: () => {
-        const target = lastFocusedElement.previousElementSibling as HTMLElement
-        if (!target) return
-        target.focus()
-        return true
-      },
-    })
+      .addCommand({
+        event: "goto-previous-photo",
+        name: "Previous photo",
+        trigger: {
+          key: ",",
+        },
+        disabled: () => !hasFocus(container),
+        execute: () => {
+          const target =
+            lastFocusedElement.previousElementSibling as HTMLElement
+          if (!target) return
+          target.focus()
+          return true
+        },
+      })
   })
 
   onDestroy(() => {
@@ -78,6 +80,7 @@
     <button
       draggable="true"
       on:dragstart={(e) => {
+        if (!e.dataTransfer) throw "no dataTransfer"
         e.dataTransfer.dropEffect = "copy"
         e.dataTransfer.setData("application/json", JSON.stringify(source))
       }}
