@@ -61,14 +61,14 @@ function cloneClipPath(sourceId: string, cloneId: string) {
 }
 
 function duplicateImageClipPath(clipPathOwner: SVGImageElement, cloneId: string) {
-    if (!clipPathOwner) return;
+    if (!clipPathOwner) throw "no clip path owner";
 
     const clipPath = clipPathOwner?.getAttribute("clip-path")
     const clipPathId = clipPath?.slice(5, -1)
-    if (!clipPathId) return;
+    if (!clipPathId) throw "no clip path"
 
     const clone = cloneClipPath(clipPathId, `clip_${cloneId}`)
-    if (!clone) return;
+    if (!clone) throw "no clone"
 
     clipPathOwner.setAttribute("clip-path", `url(#${clone.id})`)
     return clone;

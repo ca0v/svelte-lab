@@ -72,12 +72,14 @@ class Collage(db.Model):
 
     id: str
     data: str
+    clipPaths: str
     note: str
     title: str
 
     userid = db.Column(db.Text)
     id = db.Column(db.Text, primary_key=True)
     data = db.Column(db.Text)
+    clipPaths = db.Column(db.Text)
     note = db.Column(db.Text)
     title = db.Column(db.Text)
 
@@ -106,6 +108,9 @@ def getCollage(id):
 
     result = Collage.query.filter_by(userid=userid, id=id).first()
 
+    if result is None:
+        return jsonify({"error": "collage not found"}), 404
+
     data = result.data
     if data is not None:
         # parse the json data
@@ -113,8 +118,12 @@ def getCollage(id):
         # return the data
         result.data = data
 
-    if result is None:
-        return jsonify({"error": "collage not found"}), 404
+    clipPaths = result.clipPaths
+    if clipPaths is not None:
+        # parse the json data
+        clipPaths = json.loads(clipPaths)
+        # return the data
+        result.clipPaths = clipPaths
 
     return jsonify(result)
 
@@ -129,9 +138,18 @@ def create_collage():
     id = requestData['id']
     note = requestData['note']
     title = requestData['title']
-    data = json.dumps(requestData['data'])
+    data = requestData['data']
 
-    collage = Collage(userid=userid, id=id, data=data, note=note, title=title)
+    if data is not None:
+        data = json.dumps(data)
+
+    clipPaths = requestData['clipPaths']
+
+    if clipPaths is not None:
+        clipPaths = json.dumps(clipPaths)
+
+    collage = Collage(userid=userid, id=id, data=data,
+                      clipPaths=clipPaths, note=note, title=title)
 
     match = Collage.query.filter_by(userid=userid, id=id).first()
 
@@ -140,6 +158,7 @@ def create_collage():
         db.session.commit()
         return jsonify({"message": "collage created"}), 201
     else:
+        match.clipPaths = clipPaths
         match.data = data
         match.note = note
         match.title = title

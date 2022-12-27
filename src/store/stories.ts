@@ -16,6 +16,8 @@ export async function loadAllStories() {
                 log(`injecting clip-path ${key}`)
                 injectPath(key, value);
             });
+        } else {
+            log(`no clip-paths found for ${collage.id}: ${collage.title}`)
         }
         stories.update(v => [...v, collage]);
     });

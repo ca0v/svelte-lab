@@ -15,7 +15,8 @@
     "pip": "pip3 install -r ./server/requirements.txt",
     "start": "npm run dev & npm run start-image-server",
     "digital-ocean": "chmod u+x ./server/start.sh",
-    "test": "vitest"
+    "test": "vitest",
+    "db-migrate": "cd ./tools/ && python3 -c 'from migrate import addClippathColumn; addClippathColumn()'"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.1.0",

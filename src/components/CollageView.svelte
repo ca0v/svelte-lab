@@ -17,12 +17,7 @@
   import type { BBox, CollageCellState, CollageData } from "../d.ts/index"
   import { toast } from "../store/toasts"
   import { onDestroy, onMount } from "svelte"
-  import {
-    addCommand,
-    command,
-    commander,
-    removeCommand,
-  } from "../store/commands"
+  import { command, commander } from "../store/commands"
   import {
     duplicateImageClipPath,
     moveClipPath,
@@ -340,7 +335,10 @@
           if (!sourceTransform) return
           // move the actual clippath points
           const image = getActiveCell()
-          const clipPath = duplicateImageClipPath(image, sourceTransform.target)
+          const clipPath = duplicateImageClipPath(
+            image,
+            `${transforms.id}-${sourceTransform.target}`
+          )
           moveClipPath(clipPath, direction)
           sourceTransform.clipPath = clipPath.id.substring(5) // remove clip_
         }

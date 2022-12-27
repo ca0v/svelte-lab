@@ -210,14 +210,14 @@
 
             log({ clipPathIds })
 
-            const clipPaths = clipPathIds.reduce((result, id) => {
-              result[id] = getClipPathPoints(`clip_${id}`)
-              return result
-            }, <ClipPaths>{})
+            {
+              const clipPaths = clipPathIds.reduce((result, id) => {
+                result[id] = getClipPathPoints(`clip_${id}`)
+                return result
+              }, <ClipPaths>{})
 
-            log({ clipPaths })
-
-            activeCollage.clipPaths = clipPaths
+              activeCollage.clipPaths = clipPaths
+            }
 
             log({ activeCollage })
 
