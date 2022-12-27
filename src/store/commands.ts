@@ -8,7 +8,6 @@ export type CommandTrigger = {
     isAlt?: boolean
     isCtrl?: boolean
     isArrowUp?: boolean
-    preamble?: string
     editmode?: boolean
 }
 
@@ -44,7 +43,7 @@ class CommandContext {
 
     public readonly actions: { [key: string]: ActionContext } = {};
 
-    action(command: Command) {
+    private action(command: Command) {
         if (!command.trigger) throw new Error(`Command ${command.name} has no trigger`)
         let result = this.getAction(command.trigger)
         if (result) log(`Action already exists: ${command.name} ${asKeyboardShortcut(command.trigger)}`)
@@ -93,13 +92,13 @@ export function isFilterMatch(searchFilter: string, command: Command) {
 }
 
 class Commander {
-    public readonly primaryContext: CommandContext;
+    readonly primaryContext: CommandContext;
 
     constructor() {
         this.primaryContext = new CommandContext({ name: "primary", trigger: {} })
         // get out of all other contexts
         this.primaryContext.addCommand(
-            { name: "Escape Context", title: "Exit the current context", trigger: { key: "Escape" } }
+            { name: "Escape Context", title: "Exit the current context", event: "escape", trigger: { key: "Escape", } }
         )
     }
 
@@ -163,6 +162,12 @@ class Commander {
     private un: Array<Function> = [];
 
     listen() {
+        function preventDefault(e: Event) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+        }
         const listener = (e: KeyboardEvent) => {
 
             const shortcut = asKeyboardShortcut({
@@ -185,10 +190,8 @@ class Commander {
                 if (ctx) {
                     log({ shortcut, ctx })
                     this.activeContext = ctx;
-                    e.preventDefault();
-                    e.stopPropagation();
                     toast(ctx.command.name)
-                    return
+                    return preventDefault(e);
                 }
                 log(`You pressed ${shortcut}, try one of these: ${Object.keys(commander.contexts).join(" ")}`)
 
@@ -203,10 +206,8 @@ class Commander {
 
             if (command) {
                 log({ shortcut, command })
-                e.preventDefault();
-                e.stopPropagation();
                 executeCommand(command)
-                return;
+                return preventDefault(e);
             }
         }
         window.addEventListener('keydown', listener);
@@ -223,19 +224,22 @@ class Commander {
 
     play(contextHotkeys: string, ...invocations: string[]) {
         if (!invocations.length) {
-            return;
-        }
-        const context = this.contexts[contextHotkeys];
-        if (!context) throw "Context not found"
+            const context = contexts.primary;
+            const action = context.actions[contextHotkeys];
+            if (!action) throw `Action not found: ${contextHotkeys}`
+            executeCommand(action.command);
+        } else {
+            const context = this.contexts[contextHotkeys];
+            if (!context) throw "Context not found"
 
-        while (invocations.length) {
-            const actionHotKeys = invocations.shift();
-            if (!actionHotKeys) throw "Action hotkey not defined"
+            while (invocations.length) {
+                const actionHotKeys = invocations.shift();
+                if (!actionHotKeys) throw "Action hotkey not defined"
 
-            const action = context.actions[actionHotKeys];
-            if (!action) throw "Action not found"
-
-            action.execute(context);
+                const action = context.actions[actionHotKeys];
+                if (!action) throw `Action not found: ${actionHotKeys}`
+                executeCommand(action.command);
+            }
         }
     }
 }
@@ -266,19 +270,42 @@ export const contexts = (() => {
         }),
         workarea: commander.context({
             name: "Work Area",
-            trigger: { key: "W", ...trigger },
+            trigger: { key: "Z", ...trigger },
         }),
+        navigation: {
+            leftActions: commander.context({
+                name: "Left",
+                trigger: { key: "ArrowLeft", ...trigger },
+            }),
+            upActions: commander.context({
+                name: "Up",
+                trigger: { key: "ArrowUp", ...trigger },
+            }),
+            rightActions: commander.context({
+                name: "Right",
+                trigger: { key: "ArrowRight", ...trigger },
+            }),
+            downActions: commander.context({
+                name: "Down",
+                trigger: { key: "ArrowDown", ...trigger },
+            }),
+            zoomActions: commander.context({
+                name: "Zoom Image",
+                trigger: { key: "Z", ...trigger },
+            }),
+            moveActions: commander.context({
+                name: "Move Image",
+                trigger: { key: "M", ...trigger },
+            })
+        },
+        rotationActions: commander.context({
+            name: "Rotate Image",
+            trigger: { key: "A", ...trigger },
+        })
+
     }
 })();
 
-
-function addCommand(command: Command) {
-    command.event = command.event || command.name
-    command.name = command.name || command.event
-    command.title = command.title || command.name
-    const context = commander.context({ name: "Preamble", trigger: { key: command.trigger?.preamble || "/" } })
-    context.action(command)
-}
 
 export function removeCommand(commandName: string) {
     // TODO
@@ -307,7 +334,7 @@ export function shortcut(node: HTMLElement, shortcut: string | CommandTrigger) {
             return true
         },
     }
-    addCommand(command)
+    contexts.primary.addCommand(command)
     return {
         destroy() {
             removeCommand(command.name)
@@ -318,17 +345,15 @@ export function shortcut(node: HTMLElement, shortcut: string | CommandTrigger) {
 export function command(node: HTMLButtonElement, eventName: string) {
 
     const doit = () => {
-        const event = new Event("execute_command")
-        // @ts-ignore
-        event["detail"] = { eventName }
-        document.dispatchEvent(event)
+        const cmd = commander.findCommand(eventName);
+        if (!cmd) throw `Command not found: ${eventName}`
+        executeCommand(cmd);
     };
 
     node.addEventListener("click", doit)
     if (!node.innerText) {
         const cmd = commander.findCommand(eventName);
-        if (!cmd) throw "Command not found"
-
+        if (!cmd) throw `Command not found: ${eventName}`
         node.innerText = cmd.name
         node.title = cmd.title || cmd.name
     }
@@ -342,7 +367,7 @@ export function command(node: HTMLButtonElement, eventName: string) {
 
 export function asKeyboardShortcut(trigger: CommandTrigger) {
     if (!trigger) return "<none>"
-    const { key, preamble, isShift, isCtrl, isAlt } = trigger
+    const { key, isShift, isCtrl, isAlt } = trigger
     const keyNameMap = {
         ArrowUp: "↑",
         ArrowDown: "↓",
@@ -367,10 +392,17 @@ export function asKeyboardShortcut(trigger: CommandTrigger) {
     return modifiers
 }
 
-function executeCommand(command: Command) {
+async function executeCommand(command: Command) {
     if (command.execute) {
-        command.execute(command)
-        toast(command.title || command.name)
+        if (await command.execute(command)) {
+            toast(command.title || command.name)
+        }
+    } else {
+        // trigger execute-command
+        const event = new Event("execute_command")
+        // @ts-ignore
+        event["detail"] = { command }
+        document.dispatchEvent(event)
     }
 }
 

@@ -1,11 +1,5 @@
 <script lang="ts">
-  import {
-    createEventDispatcher,
-    onMount,
-    onDestroy,
-    tick,
-    getAllContexts,
-  } from "svelte"
+  import { createEventDispatcher, onMount, onDestroy, tick } from "svelte"
   import { log } from "../lib/globals"
   import {
     asKeyboardShortcut,
@@ -32,6 +26,7 @@
     }
 
     if (!command.event) throw "cannot dispatch command with no event"
+    log(`dispatching ${command.event}`)
     dispatcher(command.event, { action: command })
     return true
   }
@@ -40,12 +35,11 @@
     // @ts-ignore
     document.addEventListener("execute_command", (event: CustomEvent) => {
       const { detail } = event
-      const { eventName } = detail
-      const command = commander.findCommand(eventName)
+      const command = detail.command as Command
       command && executeCommand(command)
     })
 
-    contexts.primary.addCommand({
+    contexts.file.addCommand({
       name: "Toggle Command Console",
       event: "toggle-command-console",
       trigger: { key: "/" },
@@ -56,30 +50,26 @@
       },
     })
 
-    commander.primaryContext.action({
+    contexts.primary.addCommand({
       name: "search-commands",
       title: "Search for a command",
       trigger: {
-        key: "F",
+        key: " ",
         isCtrl: true,
-        isShift: true,
       },
       execute: () => {
         isOpen = true
         tick().then(() => {
           searchInput?.focus()
           searchInput?.select()
+          commander.play("Esc")
         })
         return true
       },
     })
   })
 
-  onDestroy(() => {
-    removeCommand("toggle-command-console")
-    removeCommand("toggle-command-menu")
-    removeCommand("search-commands")
-  })
+  onDestroy(() => {})
 
   function isCommandDisabled(a: Command) {
     return a.disabled && a.disabled()
@@ -92,6 +82,7 @@
     {#if isOpen}
       <slot />
       <input
+        class="command-search-input"
         type="text"
         placeholder="search..."
         bind:this={searchInput}
@@ -120,7 +111,8 @@
           </div>
           {#each ctx
             .getCommands()
-            .filter((c) => !searchFilter || isFilterMatch(searchFilter, c)) as command}
+            .filter((c) => !searchFilter || isFilterMatch(searchFilter, c))
+            .sort((a, b) => a.name.localeCompare(b.name)) as command}
             <div
               class={`title ${
                 !searchFilter

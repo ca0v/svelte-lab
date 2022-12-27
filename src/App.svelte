@@ -27,6 +27,7 @@
   import GoogleSignin from "./components/GoogleSignin.svelte"
   import { getClipPathPoints } from "./lib/paths"
 
+  let activeElement: Element | null = null
   let photos: Array<Photo> = []
   let photosToShow: Array<Photo> = []
 
@@ -64,6 +65,7 @@
     datefilter: {
       from: "",
       to: "",
+      priorFrom: "",
     },
   }
 
@@ -73,8 +75,7 @@
     states.datefilter.from = states.datefilter.from || asZulu(new Date())
     states.isSignedIn = true
 
-    photos = await getPhotosForOneDay(states.datefilter.from)
-    photos.sort((a, b) => a.created!.localeCompare(b.created!))
+    refreshPhotoWheel()
 
     collageId.subscribe(async (v) => {
       if (!v) return
@@ -155,27 +156,44 @@
     }
   }
 
-  $: states.datefilter.from &&
-    localStorage.setItem("date_filter", states.datefilter.from)
-  $: states.datefilter.to =
-    states.datefilter.to || addDays(states.datefilter.from, 1)
-
-  $: {
-    if (states.isSignedIn && states.datefilter.from && states.datefilter.to) {
+  async function refreshPhotoWheel() {
+    if (states.isSignedIn && states.datefilter.from) {
       const from = asZulu(states.datefilter.from)
+      states.datefilter.to = addDays(states.datefilter.from, 1)
       const to = asZulu(states.datefilter.to)
-      getPhotosForOneDay(from).then((photos) => {
-        photos = photos.filter((p) => {
-          return from <= p.created! && p.created! < to
+      photos = await getPhotosForOneDay(from)
+      photosToShow = photos
+        .filter((p) => {
+          const result = from <= p.created! && p.created! < to
+          log({ result, from, created: p.created, to, baseurl: p.baseurl })
+          return result
         })
-        photos.sort((a, b) => a.created!.localeCompare(b.created!))
-        photosToShow = photos
-      })
+        .sort((a, b) => a.created!.localeCompare(b.created!))
     }
   }
 
+  $: {
+    if (
+      activeElement instanceof HTMLInputElement ||
+      activeElement instanceof HTMLTextAreaElement ||
+      activeElement instanceof HTMLSelectElement ||
+      activeElement instanceof HTMLButtonElement
+    ) {
+      log("going into escape mode")
+      commander.play("Esc")
+    }
+
+    if (states.datefilter.from !== states.datefilter.priorFrom) {
+      states.datefilter.priorFrom = states.datefilter.from
+      refreshPhotoWheel()
+    }
+  }
+
+  $: states.datefilter.from &&
+    localStorage.setItem("date_filter", states.datefilter.from)
+
   onMount(async () => {
-    contexts.file
+    contexts.workarea
       .addCommand({
         event: "auto_assign_photos",
         name: "Auto Assign Photos",
@@ -192,6 +210,8 @@
         },
         execute: () => clearAllImages(),
       })
+
+    contexts.file
       .addCommand({
         event: "save_story",
         name: "Save",
@@ -404,7 +424,12 @@
   }
 </script>
 
-<Commands bind:isOpen={states.menu.isOpen}>
+<svelte:body
+  on:keyup={() => log((activeElement = document.activeElement))}
+  on:click={() => log((activeElement = document.activeElement))}
+/>
+
+<Commands bind:isOpen={states.menu.isOpen} on:escape={() => log("escape mode")}>
   <GoogleSignin autoSignIn={false} />
 </Commands>
 

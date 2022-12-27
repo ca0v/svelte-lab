@@ -259,7 +259,7 @@
         },
       })
 
-    contexts.file.action({
+    contexts.workarea.addCommand({
       name: "clone",
       event: "clone-cell",
       title: "Clone Current Cell",
@@ -382,11 +382,7 @@
         }
       }
 
-      commander
-        .context({
-          name: "Top Edge",
-          trigger: { key: "t", isShift: true },
-        })
+      contexts.navigation.upActions
         .addCommand({
           event: "move-top-edge-up",
           name: "Move Top Edge Up",
@@ -406,11 +402,7 @@
           execute: createEdgeMover({ top: 1 }),
         })
 
-      commander
-        .context({
-          name: "Bottom Edge",
-          trigger: { key: "B", isShift: true },
-        })
+      contexts.navigation.downActions
         .addCommand({
           event: "move-bottom-edge-up",
           name: "Move Bottom Edge Up",
@@ -430,11 +422,7 @@
           execute: createEdgeMover({ bottom: 1 }),
         })
 
-      commander
-        .context({
-          name: "Left Edge",
-          trigger: { key: "L", isShift: true },
-        })
+      contexts.navigation.leftActions
         .addCommand({
           event: "move-left-edge-left",
           name: "Move Left Edge Left",
@@ -454,11 +442,7 @@
           execute: createEdgeMover({ left: 1 }),
         })
 
-      commander
-        .context({
-          name: "Right Edge",
-          trigger: { key: "R", isShift: true },
-        })
+      contexts.navigation.rightActions
         .addCommand({
           event: "move-right-edge-left",
           name: "Move Right Edge Left",
@@ -478,11 +462,7 @@
           execute: createEdgeMover({ right: 1 }),
         })
 
-      commander
-        .context({
-          name: "Zoom Image",
-          trigger: { key: "Z", isShift: true },
-        })
+      contexts.navigation.zoomActions
         .addCommand({
           event: "zoom-image-in",
           name: "Zoom Image In",
@@ -538,11 +518,7 @@
           execute: createMoveHandler({ width: -1, height: -1 }),
         })
 
-      commander
-        .context({
-          name: "Move Image",
-          trigger: { key: "M", isShift: true },
-        })
+      contexts.navigation.moveActions
         .addCommand({
           event: "move-up",
           name: "Move Up",
@@ -663,7 +639,6 @@
           event: "move-image-right",
           name: "Move Image Right",
           trigger: {
-            preamble: "m",
             key: "ArrowRight",
           },
           disabled: () => !getSourceTransform(),
@@ -677,11 +652,7 @@
           },
         })
 
-      commander
-        .context({
-          name: "Rotate Image",
-          trigger: { key: "A", isShift: true },
-        })
+      contexts.rotationActions
         .addCommand({
           name: "Rotate Clockwise",
           event: "rotate-clockwise",
