@@ -6,14 +6,13 @@
   let commands = commander.getCommands().filter((c) => c.showInToolbar)
   commander.subscribe(() => {
     commands = commander.getCommands().filter((c) => c.showInToolbar)
-    log({ commands })
   })
 </script>
 
 <div class="toolbar">
-  {#each commands as c, i}
-    <button title={c.title} use:command={c.event}
-      >{asKeyboardShortcut(c.trigger)}</button
+  {#each commands.filter((c) => !!c.event && !!c.trigger) as c, i}
+    <button title={c.title} use:command={c.event || ""}
+      >{asKeyboardShortcut(c.trigger || {})}</button
     >
   {/each}
 </div>

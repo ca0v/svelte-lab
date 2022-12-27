@@ -1,7 +1,7 @@
 <script lang="ts">
   const ID_MAP = {
-    SHIFT: "QWERTASDFGYUIOPHJKLZXCVBNM".split(""),
-    ALT: "1234568790".split(""),
+    SHIFT: "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split(""),
+    ALT: "".split(""),
   }
   const ID_MAP_KEYS = [...ID_MAP.SHIFT, ...ID_MAP.ALT]
 
@@ -17,7 +17,7 @@
   import type { BBox, CollageCellState, CollageData } from "../d.ts/index"
   import { toast } from "../store/toasts"
   import { onDestroy, onMount } from "svelte"
-  import { command, commander } from "../store/commands"
+  import { command, commander, contexts } from "../store/commands"
   import {
     duplicateImageClipPath,
     moveClipPath,
@@ -77,13 +77,13 @@
 
   function swapHandler(e: CustomEvent) {
     const { mode, target1, target2 } = e.detail
-    const t1 = transforms.data.find((i) => i.target === target1)
+    const t1 = transforms.data?.find((i) => i.target === target1)
     if (!t1) {
       toast("no target image")
       return
     }
 
-    const t2 = transforms.data.find((i) => i.target === target2)
+    const t2 = transforms.data?.find((i) => i.target === target2)
     if (!t2) {
       toast("no active image")
       return
@@ -112,7 +112,6 @@
   document.addEventListener(
     "focus",
     () => {
-      log(document.activeElement.tagName)
       getActiveCell()
     },
     true
@@ -145,71 +144,62 @@
     const keys = ID_MAP_KEYS.reverse()
 
     keys.forEach((key, index) => {
-      commander
-        .context({
-          name: "Swap Into",
-          trigger: { key: "S", isShift: true },
-        })
-        .addCommand({
-          event: `swap-with-cell-${key}`,
-          name: `Swap with ${key}`,
-          trigger: {
-            key: key.toLocaleLowerCase(),
-          },
-          disabled: () => isDisabled(index),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const targetImage = transforms.data[index]
-            if (!targetImage) return
-            swap(targetImage, sourceTransform)
-            focusTarget(targetImage.target)
-            getFocusCellIdentifier()
-            return true
-          },
-        })
+      contexts.swap.addCommand({
+        event: `swap-with-cell-${key}`,
+        name: `Swap with ${key}`,
+        trigger: {
+          key: key.toLocaleLowerCase(),
+        },
+        disabled: () => isDisabled(index),
+        execute: () => {
+          if (!transforms.data) throw "no transforms data"
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const targetImage = transforms.data[index]
+          if (!targetImage) return
+          swap(targetImage, sourceTransform)
+          focusTarget(targetImage.target!)
+          getFocusCellIdentifier()
+          return true
+        },
+      })
 
-      commander
-        .context({ name: "Copy Into", trigger: { key: "C", isShift: true } })
-        .addCommand({
-          event: `copy-into-cell-${key}`,
-          name: `Copy to ${key}`,
-          trigger: {
-            key: key.toLocaleUpperCase(),
-          },
-          disabled: () => isDisabled(index),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const targetImage = transforms.data[index]
-            if (!targetImage) return
-            copy(sourceTransform, targetImage)
-            focusTarget(targetImage.target)
-            getFocusCellIdentifier()
-            return true
-          },
-        })
+      contexts.copy.addCommand({
+        event: `copy-into-cell-${key}`,
+        name: `Copy to ${key}`,
+        trigger: {
+          key: key.toLocaleUpperCase(),
+        },
+        disabled: () => isDisabled(index),
+        execute: () => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const targetImage = transforms.data![index]
+          if (!targetImage) return
+          copy(sourceTransform, targetImage)
+          focusTarget(targetImage.target!)
+          getFocusCellIdentifier()
+          return true
+        },
+      })
 
-      commander
-        .context({ name: "Goto Cell", trigger: { key: "G", isShift: true } })
-        .addCommand({
-          event: `focus-cell-${key}`,
-          name: `Goto ${key}`,
-          trigger: {
-            key: key.toLocaleUpperCase(),
-          },
-          disabled: () => isDisabled(index),
-          execute: () => {
-            const targetImage = transforms.data[index]
-            if (!targetImage) return
-            focusTarget(targetImage.target)
-            return true
-          },
-        })
+      contexts.goto.addCommand({
+        event: `focus-cell-${key}`,
+        name: `Goto ${key}`,
+        trigger: {
+          key: key.toLocaleUpperCase(),
+        },
+        disabled: () => isDisabled(index),
+        execute: () => {
+          const targetImage = transforms.data![index]
+          if (!targetImage) return
+          focusTarget(targetImage.target!)
+          return true
+        },
+      })
     })
 
-    commander
-      .context({ name: "Work Area", trigger: { key: "W", isShift: true } })
+    contexts.workarea
       .addCommand({
         event: "focus-work-area",
         name: "Focus Work Area",
@@ -243,25 +233,25 @@
       })
       .addCommand({
         event: "swap-cell-up",
-        name: "Bring Toward Top",
+        name: "Bring To Top",
         trigger: {
           key: "Enter",
         },
         disabled: () => !getSourceTransform(),
         execute: () => {
           // need to swap the identity, as that is what determines the order on reload
+          if (!transforms.data) throw "no transforms data"
           const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
-
+          if (!sourceTransform) throw "no source transform"
           const index = transforms.data.findIndex(
             (d) => d.target === sourceTransform.target
           )
-          const targetTransform = transforms.data[index + 1]
-          if (!targetTransform) return
+          const targetTransform = transforms.data[transforms.data.length - 1]
+          if (targetTransform === sourceTransform) throw "already on top"
 
-          const id = targetTransform.id
-          targetTransform.id = sourceTransform.id
-          sourceTransform.id = id
+          // place the source transform at the end of the list
+          transforms.data.splice(index, 1)
+          transforms.data.push(sourceTransform)
 
           // redraw
           transforms = transforms
@@ -269,43 +259,45 @@
         },
       })
 
-    // clone the current cell
-    commander
-      .context({ name: "File", trigger: { key: "F", isShift: true } })
-      .action({
-        name: "clone",
-        event: "clone-cell",
-        title: "Clone Current Cell",
-        trigger: {
-          key: "d",
-        },
-        execute: () => {
-          // get the image that is currently focused
-          const target = getFocusCellIdentifier()
-          if (!target) return
+    contexts.file.action({
+      name: "clone",
+      event: "clone-cell",
+      title: "Clone Current Cell",
+      trigger: {
+        key: "d",
+      },
+      execute: () => {
+        // get the image that is currently focused
+        if (!transforms.data) throw "no transforms data"
+        const target = getFocusCellIdentifier()
+        if (!target) return
 
-          const sourceTransformIndex = transforms?.data?.findIndex(
-            (d) => d.target === target
-          )
+        const sourceTransformIndex = transforms.data.findIndex(
+          (d) => d.target === target
+        )
 
-          if (sourceTransformIndex < 0) return
+        if (sourceTransformIndex < 0) return
 
-          const clone = deepClone(transforms.data[sourceTransformIndex])
-          clone.target = "i" + (transforms.data.length + 1)
-          transforms.data.splice(sourceTransformIndex + 1, 0, clone)
-          transforms = transforms
-          return true
-        },
-      })
+        const clone = deepClone(transforms.data[sourceTransformIndex])
+        clone.target = "i" + (transforms.data.length + 1)
+        transforms.data.splice(sourceTransformIndex + 1, 0, clone)
+        transforms = transforms
+        return true
+      },
+    })
 
     {
       function rotate(cell: CollageCellState, rotation: number) {
-        const currentStyle = getEffectiveTransform(cell.transform)
+        const currentStyle = cell.transform
+          ? getEffectiveTransform(cell.transform)
+          : ""
         cell.transform = `${currentStyle} rotate(${rotation}deg)`
       }
 
       function translate(cell: CollageCellState, x: number, y: number) {
-        const currentStyle = getEffectiveTransform(cell.transform)
+        const currentStyle = cell.transform
+          ? getEffectiveTransform(cell.transform)
+          : ""
         cell.transform = `${currentStyle} translate(${x}px, ${y}px)`
       }
 
@@ -315,14 +307,15 @@
       }
 
       function move(cell: CollageCellState, box: BBox) {
-        cell.x += box.x || 0
-        cell.y += box.y || 0
-        cell.width += box.width || 0
-        cell.height += box.height || 0
+        cell.x = (cell.x || 0) + (box.x || 0)
+        cell.y = (cell.y || 0) + (box.y || 0)
+        cell.width = (cell.width || 0) + (box.width || 0)
+        cell.height = (cell.height || 0) + (box.height || 0)
+        return cell as { x: number; y: number; width: number; height: number }
       }
 
       function zoom(cell: CollageCellState, scale: { dx: number; dy: number }) {
-        const { x: x0, y: y0, width: w0, height: h0 } = cell
+        const { x: x0, y: y0, width: w0, height: h0 } = move(cell, {})
         const { dx, dy } = scale
         const dw = w0 * (dx / x0)
         const dh = h0 * (dy / y0)
@@ -332,9 +325,10 @@
       function createEdgeMover(direction: Direction) {
         return () => {
           const sourceTransform = getSourceTransform()
-          if (!sourceTransform) return
+          if (!sourceTransform) throw "no source transform"
           // move the actual clippath points
           const image = getActiveCell()
+          if (!image) throw "no active cell"
           const clipPath = duplicateImageClipPath(
             image,
             `${transforms.id}-${sourceTransform.target}`
@@ -359,11 +353,11 @@
             width = width || 0
             height = height || 0
 
-            const w0 = sourceTransform.width
-            const h0 = sourceTransform.height
+            const w0 = sourceTransform.width || 0
+            const h0 = sourceTransform.height || 0
 
             const currentStyle = getEffectiveTransform(
-              sourceTransform.transform
+              sourceTransform.transform || ""
             )
 
             const translateTransform = `translate(${x}px, ${y}px)`
@@ -762,7 +756,7 @@
   function getFocusCellIdentifier() {
     const image = getActiveCell()
     if (!image) return
-    const target = image.parentElement.dataset.target
+    const target = image.parentElement?.dataset.target
     return target
   }
 
@@ -793,11 +787,11 @@
             {readonly}
             fast={editmode}
             href={transform.baseurl}
-            clipPath={transform.clipPath}
-            x={transform.x}
-            y={transform.y}
-            width={transform.width}
-            height={transform.height}
+            clipPath={transform.clipPath || ""}
+            x={transform.x || 0}
+            y={transform.y || 0}
+            width={transform.width || 0}
+            height={transform.height || 0}
             on:swap={swapHandler}
             on:drop={(e) => {
               const { id, url } = e.detail
@@ -807,7 +801,7 @@
             }}
             target={`${transform.target}`}
             hotkey={getHotkey(i)}
-            style={transform.transform}
+            style={transform.transform || ""}
             background={{
               stroke: transform.background?.stroke || "none",
               fill: transform.background?.fill || "none",

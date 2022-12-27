@@ -47,15 +47,15 @@
     // what is the svelte way of accessing the clone element?
     const cloneElement = document.querySelector(".clone") as HTMLDivElement
 
-    cloneElement.style.width = thisImage.getAttribute("width")
-    cloneElement.style.height = thisImage.getAttribute("height")
+    cloneElement.style.width = thisImage.getAttribute("width") || ""
+    cloneElement.style.height = thisImage.getAttribute("height") || ""
     cloneElement.style.backgroundImage = `url(${href})`
 
     const width = cloneElement.offsetWidth
     const height = cloneElement.offsetHeight
     let [x, y] = [e.pageX - width / 2, e.pageY - height / 2]
 
-    const hoverElements = []
+    const hoverElements: Array<SVGImageElement> = []
 
     const onMouseMove = (e: MouseEvent) => {
       cloneElement.classList.add("dragging")
@@ -92,7 +92,7 @@
         element.classList.remove("dropping")
         element.focus()
         dispatch("swap", {
-          target1: element.parentElement.dataset.target,
+          target1: element.parentElement?.dataset.target,
           target2: target,
           mode: e.shiftKey ? "copy" : "swap",
         })
@@ -162,10 +162,12 @@
       on:blur={() => (active = false)}
       on:mousedown={mouseDownHandler}
       on:dragover={(e) => {
+        if (!e.dataTransfer) throw new Error("no dataTransfer")
         e.dataTransfer.dropEffect = "copy"
         e.preventDefault()
       }}
       on:drop={(e) => {
+        if (!e.dataTransfer) throw new Error("no dataTransfer")
         const data = JSON.parse(e.dataTransfer.getData("application/json"))
         dispatch("drop", data)
         active = true
@@ -189,7 +191,7 @@
   g:has(image.fast),
   image:focus,
   image.fast {
-    transition-duration: 150ms;
+    transition-duration: 0ms;
     transition-timing-function: linear;
   }
 

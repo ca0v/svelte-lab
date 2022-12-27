@@ -41,7 +41,7 @@ class Collage {
 
     async create(collage: CollageData) {
         const collages = await getLocalStorage<Record<string, CollageData>>("collages", {});
-        collages[collage.id] = collage;
+        collages[collage.id!] = collage;
         setLocalStorage("collages", collages);
     }
 

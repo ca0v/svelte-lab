@@ -11,11 +11,11 @@ export function toast(message: string, duration = 1, level: ToastLevel = "info")
     setTimeout(() => toasts.update((t) => t.filter((t) => t.showUntil > Date.now())), 1000 * duration + 200)
 }
 
-export function reportExceptions<T>(f: (a: T) => void | Promise<void>) {
+export function reportExceptions<T>(f: (a?: T) => void | Promise<void>) {
     return async (a?: T) => {
         try {
             await f(a)
-        } catch (e) {
+        } catch (e: any) {
             console.error(e)
             toast(e?.message || JSON.stringify(e), 5, "err")
         }
