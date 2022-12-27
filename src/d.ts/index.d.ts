@@ -47,7 +47,7 @@ export interface CollageCellState {
     height?: number;
     transform?: string | null;
     clipPath?: string | null;
-    background?: CollageCellBackground;
+    background?: CollageCellBackground | null;
 }
 
 export type ClipPaths = Record<string, string>

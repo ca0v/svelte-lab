@@ -26,6 +26,7 @@ export type Command = {
 class ActionContext {
     constructor(public readonly command: Command) { }
     execute(context: CommandContext) {
+        if (!this.command.execute) throw new Error(`Command ${this.command.name} has no execute function`)
         this.command.execute(this.command)
     }
 }
@@ -44,6 +45,7 @@ class CommandContext {
     public readonly actions: { [key: string]: ActionContext } = {};
 
     action(command: Command) {
+        if (!command.trigger) throw new Error(`Command ${command.name} has no trigger`)
         let result = this.getAction(command.trigger)
         if (result) log(`Action already exists: ${command.name} ${asKeyboardShortcut(command.trigger)}`)
         this.setActions(command.trigger, new ActionContext(command));
@@ -76,6 +78,8 @@ class CommandContext {
 }
 
 export function isFilterMatch(searchFilter: string, command: Command) {
+    if (!searchFilter) return true
+    if (!command.trigger) throw new Error(`Command ${command.name} has no trigger`)
     const tokens = searchFilter.toUpperCase().split(" ")
     const match = (command.title + asKeyboardShortcut(command.trigger)).toUpperCase()
     return (
@@ -92,7 +96,7 @@ class Commander {
     public readonly primaryContext: CommandContext;
 
     constructor() {
-        this.primaryContext = new CommandContext({ name: "primary", trigger: null })
+        this.primaryContext = new CommandContext({ name: "primary", trigger: {} })
         // get out of all other contexts
         this.primaryContext.action(
             { name: "Escape", trigger: { key: "Escape" } }
@@ -108,8 +112,8 @@ class Commander {
         return this.version.subscribe(fn)
     }
 
-    findCommand(eventName: string) {
-        let result: Command;
+    findCommand(eventName: string): Command | null {
+        let result: Command | null = null;
         Object.entries(this.contexts).find(([key, context]) => {
             return Object.entries(context.actions).find(([key, action]) => {
                 if (action.command.event === eventName) {
@@ -118,7 +122,7 @@ class Commander {
                 }
             })
         })
-        return result;
+        return result
     }
 
     getContexts() {
@@ -155,11 +159,11 @@ class Commander {
         return this.contexts[asKeyboardShortcut(trigger)]
     }
 
-    private activeContext: CommandContext;
+    private activeContext: CommandContext | null = null;
     private un: Array<Function> = [];
 
     listen() {
-        const listener = (e) => {
+        const listener = (e: KeyboardEvent) => {
 
             const shortcut = asKeyboardShortcut({
                 key: e.key,
@@ -167,7 +171,7 @@ class Commander {
                 isAlt: e.altKey,
                 isCtrl: e.ctrlKey,
             });
-            let command: Command;
+            let command: Command | null = null;
 
             if (this.activeContext) {
                 command = this.activeContext.findCommand(shortcut);
@@ -236,13 +240,39 @@ class Commander {
     }
 }
 
+// reluctant export
 export const commander = new Commander();
+
+// prefer defining here instead of locally in the component
+export const contexts = {
+    copy: commander.context({
+        name: "Copy Into",
+        trigger: { key: "C", isShift: true },
+    }),
+    file: commander.context({
+        name: "File",
+        trigger: { key: "F", isShift: true },
+    }),
+    goto: commander.context({
+        name: "Goto Cell",
+        trigger: { key: "G", isShift: true },
+    }),
+    swap: commander.context({
+        name: "Swap Into",
+        trigger: { key: "S", isShift: true },
+    }),
+    workarea: commander.context({
+        name: "Work Area",
+        trigger: { key: "W", isShift: true },
+    }),
+}
+
 
 export function addCommand(command: Command) {
     command.event = command.event || command.name
     command.name = command.name || command.event
     command.title = command.title || command.name
-    const context = commander.context({ name: "Preamble", trigger: { key: command.trigger.preamble || "/" } })
+    const context = commander.context({ name: "Preamble", trigger: { key: command.trigger?.preamble || "/" } })
     context.action(command)
 }
 
@@ -283,18 +313,20 @@ export function shortcut(node: HTMLElement, shortcut: string | CommandTrigger) {
 
 export function command(node: HTMLButtonElement, eventName: string) {
 
-    let cmd = commander.findCommand(eventName);
-
     const doit = () => {
         const event = new Event("execute_command")
+        // @ts-ignore
         event["detail"] = { eventName }
         document.dispatchEvent(event)
     };
 
     node.addEventListener("click", doit)
     if (!node.innerText) {
+        const cmd = commander.findCommand(eventName);
+        if (!cmd) throw "Command not found"
+
         node.innerText = cmd.name
-        node.title = cmd.title
+        node.title = cmd.title || cmd.name
     }
 
     return {
@@ -323,7 +355,7 @@ export function asKeyboardShortcut(trigger: CommandTrigger) {
         isCtrl && keyNameMap.Control,
         isAlt && keyNameMap.Alt,
         isShift && keyNameMap.Shift,
-        key ? keyNameMap[key] || key.toUpperCase() : "",
+        key ? keyNameMap[key as keyof typeof keyNameMap] || key.toUpperCase() : "",
     ]
         .filter(Boolean)
         .join("+")
@@ -334,7 +366,7 @@ export function asKeyboardShortcut(trigger: CommandTrigger) {
 function executeCommand(command: Command) {
     if (command.execute) {
         command.execute(command)
-        toast(command.title)
+        toast(command.title || command.name)
     }
 }
 

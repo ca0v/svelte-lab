@@ -40,7 +40,7 @@ class Collage {
 
     async getClientId() {
         if (this.client_id) return this.client_id;
-        this.client_id = await getLocalStorage('clientId');
+        this.client_id = await getLocalStorage('clientId', "");
         if (!this.client_id) {
             const photoUrl = await getPhotoUrl();
             const response = await fetch(`${photoUrl}/client_id`, { credentials: "include" });

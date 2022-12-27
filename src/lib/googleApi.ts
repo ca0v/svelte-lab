@@ -7,6 +7,7 @@ const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/photoslibrar
 let signedIn = false;
 
 const baseUrl = await getPhotoUrl();
+if (!baseUrl) throw new Error("no photo url");
 const api = new Api({ baseUrl })
 
 /**
@@ -53,7 +54,7 @@ async function useGapi() {
         google.accounts.id.initialize({
             client_id,
             auto_select: true,
-            callback: async (result) => {
+            callback: async (result: { credential: string }) => {
                 const { credential } = result;
                 // sign into the photo server
                 const responseData = await api.collage.login(photoUrl, credential);
@@ -73,7 +74,7 @@ async function useGapi() {
 }
 
 function initializeGoogleAccount() {
-    google.accounts.id.prompt((notification) => {
+    google.accounts.id.prompt((notification: any) => {
         if (notification.isNotDisplayed()) {
             switch (notification.getNotDisplayedReason()) {
                 case "invalid_client":

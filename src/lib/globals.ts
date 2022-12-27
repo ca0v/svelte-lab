@@ -4,11 +4,12 @@ class PhotoDB {
     getGlobal<T>(key: string) {
         const result = localStorage.getItem(`global.${key}`)
         if (!result) return null;
-        return <T>JSON.parse(result)
+        return { value: <T>JSON.parse(result) }
     }
 
-    putGlobal(key: string, value: any) {
+    putGlobal<T>(key: string, value: T) {
         localStorage.setItem(`global.${key}`, JSON.stringify(value))
+        return value;
     }
 }
 
@@ -19,18 +20,12 @@ export function range(size: number) {
 }
 
 // read data from localstorage
+export async function getLocalStorage<T>(key: string, defaultValue: T): Promise<T>
+export async function getLocalStorage<T>(key: string): Promise<T | null>
 export async function getLocalStorage<T>(key: string, defaultValue?: T) {
     key = `svelte_lab.${key}`
-    let data = await photoDB.getGlobal<any>(key);
-    if (data) {
-        return <T>data.value;
-    }
-    data = localStorage.getItem(key)
-    if (data) {
-        log("WARNING: still reading from localstorage", key)
-        return <T>JSON.parse(data)
-    }
-    return defaultValue
+    let data = await photoDB.getGlobal<T>(key);
+    return data?.value || defaultValue;
 }
 
 // write data to localstorage
@@ -56,15 +51,7 @@ export async function getPhotoUrl() {
         const newPhotoUrl = promptUser('This is an alpha version of Just Be Collage.  Please check back later.  If you must continue, the answer is "../..",  but we are not ready for you.')
         if (!newPhotoUrl) return;
         newPhotoUrl && setLocalStorage('photoServerUrl', newPhotoUrl)
-
-        // verify the url by getting the client id
-        try {
-            this.client_id = "";
-            this.client_id = await this.getClientId();
-            return newPhotoUrl
-        } catch (ex) {
-            reportError(ex);
-        }
+        return newPhotoUrl
     }
 }
 

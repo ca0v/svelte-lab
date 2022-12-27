@@ -3,7 +3,9 @@ import { loadAllPhotos, loadAllPhotosByIds, loadMediaItem } from "@googlePhoto/g
 
 import type { CollageCellState, CollageData, Photo } from "../d.ts/index"
 import { Api } from "@justBeCollage/Api";
+
 const baseUrl = await getPhotoUrl();
+if (!baseUrl) throw new Error("baseUrl is required");
 const api = new Api({ baseUrl });
 
 export async function* fetchPhotoList(startDate: string, endDate: string): AsyncGenerator<Array<Photo>, void, void> {
@@ -32,9 +34,9 @@ export async function* fetchPhotoList(startDate: string, endDate: string): Async
             return {
                 id: p.id,
                 filename: p.filename,
-                created: p.mediaMetadata.creationTime,
-                width: parseInt(p.mediaMetadata.width),
-                height: parseInt(p.mediaMetadata.height),
+                created: p.mediaMetadata?.creationTime,
+                width: parseInt(p.mediaMetadata?.width || "0"),
+                height: parseInt(p.mediaMetadata?.height || "0"),
                 baseurl: p.baseUrl,
             }
         });
@@ -47,19 +49,21 @@ export async function* fetchPhotoByIds(ids: Array<string>) {
         const next = await photos.next();
         if (next.done || !next.value) break;
         yield next.value.map(p => {
+            const data = p.mediaItem!;
             return {
-                id: p.mediaItem.id,
-                filename: p.mediaItem.filename,
-                created: p.mediaItem.mediaMetadata.creationTime,
-                width: parseInt(p.mediaItem.mediaMetadata.width),
-                height: parseInt(p.mediaItem.mediaMetadata.height),
-                baseurl: p.mediaItem.baseUrl,
+                id: data.id,
+                filename: data.filename,
+                created: data.mediaMetadata?.creationTime,
+                width: parseInt(data.mediaMetadata?.width || "0"),
+                height: parseInt(data.mediaMetadata?.height || "0"),
+                baseurl: data.baseUrl,
             }
         });
     }
 }
 
 export async function asPhotoServiceUrl(photo: CollageCellState) {
+    if (!photo.id) throw new Error("photo.id is required");
     const photoInfo = await loadMediaItem(photo.id);
     return photoInfo.baseUrl;
 }

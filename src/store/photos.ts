@@ -4,10 +4,10 @@ import { fetchPhotoByIds } from "../data/collageServices";
 const transformToUrlMap: Record<string, Photo> = {}
 
 export async function refreshBaseurl(
-    photos: Array<{ id?: string; baseurl?: string }>
+    photos: Array<{ id?: string | null; baseurl?: string | null }>
 ) {
     // transforms need to have the baseUrl refreshed
-    const ids = photos.map((d) => d.id).filter((v) => !!v)
+    const ids = photos.map((d) => d.id).filter((v) => !!v) as Array<string>
     if (!ids.length) return;
 
     const iterator = fetchPhotoByIds([...new Set(ids)])
@@ -15,12 +15,12 @@ export async function refreshBaseurl(
     while (true) {
         const updates = await iterator.next()
         if (updates.done || !updates.value) break;
-        updates.value.forEach((p) => (transformToUrlMap[p.id] = p))
+        updates.value.forEach((p) => (transformToUrlMap[p.id!] = p))
     }
 
     photos.forEach((p) => {
         const original = p.baseurl
-        const current = transformToUrlMap[p.id]?.baseurl
+        const current = transformToUrlMap[p.id!]?.baseurl
         if (!current) return;
         if (original != current) {
             p.baseurl = current;

@@ -27,15 +27,17 @@
   function executeCommand(command: Command) {
     if (isCommandDisabled(command)) return false
     if (command.execute && command.execute(command)) {
-      toast(command.title)
+      toast(command.title || command.name)
       return true
     }
 
+    if (!command.event) throw "cannot dispatch command with no event"
     dispatcher(command.event, { action: command })
     return true
   }
 
   onMount(() => {
+    // @ts-ignore
     document.addEventListener("execute_command", (event: CustomEvent) => {
       const { detail } = event
       const { eventName } = detail
@@ -141,10 +143,10 @@
                 }
               }}
               disabled={command.disabled && command.disabled()}
-              class:editmode={command.trigger.editmode}
-              class:escapemode={!command.trigger.editmode}
+              class:editmode={command.trigger?.editmode}
+              class:escapemode={!command.trigger?.editmode}
             >
-              {asKeyboardShortcut(command.trigger)}
+              {asKeyboardShortcut(command.trigger || {})}
             </button>
           {/each}
         {/each}

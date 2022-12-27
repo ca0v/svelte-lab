@@ -35,6 +35,7 @@
   let collageView: CollageView
 
   let activeCollage: CollageData | null = {}
+  let activeCollageNote = ""
 
   const colorWheelAngle = writable(0)
 
@@ -74,7 +75,7 @@
     states.isSignedIn = true
 
     photos = await getPhotosForOneDay(states.datefilter.from)
-    photos.sort((a, b) => a.created.localeCompare(b.created))
+    photos.sort((a, b) => a.created!.localeCompare(b.created!))
 
     collageId.subscribe(async (v) => {
       if (!v) return
@@ -83,9 +84,11 @@
 
       if (!states.isSignedIn) return
       const storyToLoad = $stories.find((h) => h.id === v)
+      if (!storyToLoad) throw new Error("Story not found")
       toast("Acquiring story data...")
       await refreshStory(storyToLoad)
       activeCollage = storyToLoad
+      activeCollageNote = storyToLoad.note || ""
     })
 
     $collageId = (await getLocalStorage("collage_name")) || ""
@@ -93,6 +96,7 @@
 
   // assign images to each image element
   async function autoAssignImages(photos: Photo[]) {
+    if (!activeCollage?.data) throw new Error("No active collage")
     let j = 0
     activeCollage.data.some((transform) => {
       if (j >= photos.length) return true
@@ -103,6 +107,7 @@
   }
 
   function clearAllImages() {
+    if (!activeCollage?.data) throw new Error("No active collage")
     activeCollage.data.forEach((t) => {
       t.id = ""
       t.baseurl = ""
@@ -121,22 +126,22 @@
   }
 
   function applyTransform(activeTransformId: string) {
+    if (!activeCollage?.data) throw new Error("No active collage")
     const transform = $transforms[activeTransformId]
-    if (transform && activeCollage) {
-      // capture existing images
-      const ids = activeCollage?.data.map((d) => d.id).filter((v) => !!v)
-      // replace transform
-      activeCollage.data = transform.map((t, i) => ({
-        id: ids[i] || "",
-        target: "i" + t.i,
-        transform: t.style,
-        clipPath: t.clipPath,
-        height: t.bbox?.height || 100,
-        width: t.bbox?.width || 100,
-        x: t.bbox?.x || -50,
-        y: t.bbox?.y || -50,
-      }))
-    }
+    if (!transform) throw new Error("No transform found")
+    // capture existing images
+    const ids = activeCollage?.data.map((d) => d.id).filter((v) => !!v)
+    // replace transform
+    activeCollage.data = transform.map((t, i) => ({
+      id: ids[i] || "",
+      target: "i" + t.i,
+      transform: t.style,
+      clipPath: t.clipPath,
+      height: t.bbox?.height || 100,
+      width: t.bbox?.width || 100,
+      x: t.bbox?.x || -50,
+      y: t.bbox?.y || -50,
+    }))
   }
 
   function createUniqueId(): string {
@@ -161,12 +166,11 @@
       const from = asZulu(states.datefilter.from)
       const to = asZulu(states.datefilter.to)
       getPhotosForOneDay(from).then((photos) => {
-        log({ photos })
-        log({ photos })
-        const toShow = photos.filter((p) => from <= p.created && p.created < to)
-        log({ toShow })
-        toShow.sort((a, b) => a.created.localeCompare(b.created))
-        photosToShow = toShow
+        photos = photos.filter((p) => {
+          return from <= p.created! && p.created! < to
+        })
+        photos.sort((a, b) => a.created!.localeCompare(b.created!))
+        photosToShow = photos
       })
     }
   }
@@ -198,21 +202,24 @@
           key: "s",
         },
         execute: async () => {
+          if (!activeCollage) throw new Error("No active collage")
           states.saving = true
           try {
             setLocalStorage(`${activeCollage.id}`, activeCollage)
+
             // every distinct clippath used by the collage must be saved
-            const clipPathIds = [
-              ...new Set(
-                activeCollage.data.map((t) => t.clipPath).filter((v) => !!v)
-              ),
-            ]
+            if (activeCollage.data) {
+              const clipPathIds = [
+                ...new Set(
+                  activeCollage.data.map((t) => t.clipPath).filter((v) => !!v)
+                ),
+              ] as Array<string>
 
-            log({ clipPathIds })
-
-            {
               const clipPaths = clipPathIds.reduce((result, id) => {
-                result[id] = getClipPathPoints(`clip_${id}`)
+                const d = getClipPathPoints(`clip_${id}`)
+                if (d) {
+                  result[id] = d
+                }
                 return result
               }, <ClipPaths>{})
 
@@ -371,17 +378,19 @@
 
     Object.keys($transforms).forEach(removeCommand)
 
-    document
-      .querySelectorAll("[data-shortcut]")
-      .forEach((element: HTMLElement) => {
+    document.querySelectorAll("[data-shortcut]").forEach((element) => {
+      if (element instanceof HTMLElement) {
         removeCommand(`goto-${element.title}`)
-      })
+      } else {
+        throw new Error("Unexpected element type")
+      }
+    })
   })
 
   async function getPhotosForOneDay(yyyy_mm_dd: string) {
     const startDate = addDays(yyyy_mm_dd, -1)
     const endDate = addDays(yyyy_mm_dd, 1)
-    console.log(`fetching photos from ${startDate} to ${endDate}`)
+    log(`fetching photos from ${startDate} to ${endDate}`)
     const responseIterator = fetchPhotoList(startDate, endDate)
 
     const result: Array<Photo> = []
@@ -395,7 +404,7 @@
       result.push(...photos)
     }
 
-    return result.sort((a, b) => a.created.localeCompare(b.created))
+    return result.sort((a, b) => a.created!.localeCompare(b.created!))
   }
 </script>
 
@@ -430,7 +439,7 @@
               use:shortcut={{ key: "t", isAlt: true, editmode: true }}
               title="Select an existing story"
             >
-              {#each $stories.sort( (a, b) => a.title.localeCompare(b.title) ) as collage}
+              {#each $stories.sort( (a, b) => (a.title || "").localeCompare(b.title || "") ) as collage}
                 <option value={collage.id}>{collage.title}</option>
               {/each}
             </select>
@@ -446,7 +455,7 @@
             <p><u>N</u>otes</p>
             <Notes
               shortcut={{ key: "n", isAlt: true, editmode: true }}
-              bind:note={activeCollage.note}
+              bind:note={activeCollageNote}
             />
           {/if}
         </div>
@@ -456,7 +465,10 @@
             bind:this={collageView}
             transforms={activeCollage}
             bind:editmode={states.editor.editmode}
-            sources={photosToShow.map((p) => ({ id: p.id, url: p.baseurl }))}
+            sources={photosToShow.map((p) => ({
+              id: p.id || "",
+              url: p.baseurl || "",
+            }))}
           >
             <div class="spacer" />
             <div class="toolbar">
@@ -494,7 +506,7 @@
             <h3 class="fit">
               <button
                 on:click={() => {
-                  $collageId = collage.id
+                  $collageId = collage.id || ""
                   states.preview.visible = false
                 }}
               >

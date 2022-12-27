@@ -4,9 +4,12 @@ const GOOGLE_PHOTO_PAGE_SIZE = 25;
 
 export async function listAllAlbums() {
     let { albums, nextPageToken } = await listAlbums();
+    albums = albums || [];
     while (nextPageToken) {
         const moreAlbums = await listAlbums(nextPageToken);
-        albums.splice(albums.length, 0, ...moreAlbums.albums);
+        if (moreAlbums.albums) {
+            albums.splice(albums.length, 0, ...moreAlbums.albums);
+        }
         nextPageToken = moreAlbums.nextPageToken;
     }
     return albums;
@@ -73,7 +76,9 @@ export async function* loadAllPhotos(startDate: gapi.client.photoslibrary.Date, 
     : AsyncGenerator<Array<gapi.client.photoslibrary.MediaItem>, void, void> {
     while (true) {
         const response = await loadPhotos(startDate, endDate, pageToken);
-        yield response.mediaItems;
+        if (response.mediaItems) {
+            yield response.mediaItems;
+        }
         pageToken = response.nextPageToken
         if (!pageToken) break;
     }
@@ -108,12 +113,15 @@ export async function loadAllPhotosByAlbum(albumId: string, pageToken?: string) 
         throw new Error("Error loading photos")
     }
     let { mediaItems, nextPageToken } = response.result;
+    mediaItems = mediaItems || [];
     while (nextPageToken) {
         const morePhotos = await loadPhotosByAlbum(albumId, nextPageToken);
         if (morePhotos.status !== 200) {
             throw new Error("Error loading photos")
         }
-        mediaItems.splice(mediaItems.length, 0, ...morePhotos.result.mediaItems);
+        if (morePhotos.result.mediaItems) {
+            mediaItems.splice(mediaItems.length, 0, ...morePhotos.result.mediaItems);
+        }
         nextPageToken = morePhotos.result.nextPageToken;
     }
     return mediaItems;
@@ -144,6 +152,7 @@ export async function loadAllPhotosByDate(dates: Array<{ year: number, month: nu
         throw new Error("Error loading photos")
     }
     let { mediaItems, nextPageToken } = response.result;
+    mediaItems = mediaItems || [];
     while (nextPageToken) {
         const morePhotos = await loadPhotosByDate(dates, nextPageToken);
         if (morePhotos.status !== 200) {

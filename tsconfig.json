@@ -12,6 +12,7 @@
      * of JS in `.svelte` files.
      */
     "noEmit": true,
+    "strict": true,
     "allowJs": true,
     "checkJs": true,
     "isolatedModules": true,
