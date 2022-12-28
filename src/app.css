@@ -3,7 +3,7 @@
     --color-error: red;
     --border-radius: 3px;
     --editor-font-size: clamp(8px, 2cqmin, 16px);
-    --font-size: clamp(8px, 2cqmin, 20px);
+    --font-size: clamp(8pt, 2cqmin, 12pt);
     --font-family: system-ui;
 
     font-family: var(--font-family);

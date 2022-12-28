@@ -3,12 +3,14 @@ import { loadAllPhotos, loadAllPhotosByIds, loadMediaItem } from "@googlePhoto/g
 
 import type { CollageCellState, CollageData, Photo } from "../d.ts/index"
 import { Api } from "@justBeCollage/Api";
+import { sleep } from "@/lib/paths";
 
 const baseUrl = await getPhotoUrl();
 if (!baseUrl) throw new Error("baseUrl is required");
 const api = new Api({ baseUrl });
 
 export async function* fetchPhotoList(startDate: string, endDate: string): AsyncGenerator<Array<Photo>, void, void> {
+    await sleep(1000);
     if (!startDate) throw new Error("startDate is required");
     if (!endDate) throw new Error("endDate is required");
     const startDateMap = startDate.split("-").map((v) => parseInt(v, 10))

@@ -166,7 +166,7 @@
     background-color: var(--color-background-2);
     border-bottom-left-radius: 1rem;
     outline: 1px solid var(--color-border-2);
-    width: clamp(25rem, 40vh, 35rem);
+    width: clamp(330px, 40vh, 620px);
     height: 80vh;
   }
 

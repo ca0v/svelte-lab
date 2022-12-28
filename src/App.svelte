@@ -35,7 +35,7 @@
   import type { ClipPaths, CollageData, Photo } from "./d.ts/index"
   import Toaster from "./components/Toaster.svelte"
   import { toast } from "./store/toasts"
-  import { removeCommand, shortcut, type Command } from "./store/commands"
+  import { shortcut } from "./store/commands"
   import { refreshBaseurl } from "./store/photos"
   import GoogleSignin from "./components/GoogleSignin.svelte"
   import { getClipPathPoints } from "./lib/paths"
@@ -55,11 +55,12 @@
     app: {
       showColorWheel: false,
       colorWheelAngle: 0,
+      isSaving: false,
+      isLoading: false,
     },
     menu: {
       isOpen: false,
     },
-    saving: false,
     isSignedIn: false,
     editor: {
       editmode: true,
@@ -165,7 +166,9 @@
       const from = asZulu(states.datefilter.from)
       states.datefilter.to = addDays(states.datefilter.from, 1)
       const to = asZulu(states.datefilter.to)
+      states.app.isLoading = true
       photos = await getPhotosForOneDay(from)
+      states.app.isLoading = false
       photosToShow = photos
         .filter((p) => {
           const result = from <= p.created! && p.created! < to
@@ -211,7 +214,7 @@
         execute: async () => {
           setLocalStorage("app.state", states)
           if (!activeCollage) throw new Error("No active collage")
-          states.saving = true
+          states.app.isSaving = true
           try {
             setLocalStorage(`${activeCollage.id}`, activeCollage)
 
@@ -243,7 +246,7 @@
             reportError(ex)
             toast(`Error: ${ex}`)
           } finally {
-            states.saving = false
+            states.app.isSaving = false
           }
         },
       })
@@ -423,10 +426,7 @@
 />
 
 <main>
-  <Commands
-    bind:isOpen={states.menu.isOpen}
-    on:escape={() => log("escape mode")}
-  >
+  <Commands bind:isOpen={states.menu.isOpen}>
     <GoogleSignin autoSignIn={false} />
   </Commands>
 
@@ -485,7 +485,14 @@
               url: p.baseurl || "",
             }))}
           >
-            <div class="spacer" />
+            <div
+              class="status"
+              class:loading={states.app.isLoading}
+              class:saving={states.app.isSaving}
+            >
+              {states.app.isLoading ? "loading..." : ""}
+              {states.app.isSaving ? "saving..." : ""}
+            </div>
             <div class="toolbar">
               <DateRange
                 bind:date_filter_from={states.datefilter.from}
@@ -595,11 +602,22 @@
     justify-content: center;
   }
 
-  .spacer {
-    height: 1rem;
-    width: 1rem;
+  .status {
+    height: 1.5rem;
+    width: 15rem;
+    margin: 0 auto;
+    opacity: 0;
+    transition-duration: 500ms;
+    text-align: center;
+    font-size: smaller;
   }
 
+  .status.loading {
+    opacity: 1;
+    color: var(--color-highlight);
+    background-color: var(--color-background-highlight);
+    border-radius: var(--border-radius);
+  }
   .preview-area {
     position: fixed;
     top: 0;
