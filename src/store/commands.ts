@@ -117,7 +117,6 @@ class Commander {
                 },
                 execute: (command) => {
                     log("Undo")
-                    debugger;
                     return this.undo()
                 }
             })
@@ -280,7 +279,9 @@ class Commander {
                 return preventDefault(e);
             }
 
-            this.setActiveContext(this.primaryContext);
+            // fallback to active context if we are just pressing ctrl, alt, shift, etc.
+            if (e.key.length === 1)
+                this.setActiveContext(this.primaryContext);
         }
         document.addEventListener('keydown', keyDownHandler);
         this.un.push(() => document.removeEventListener('keydown', keyDownHandler));
@@ -404,10 +405,6 @@ export const contexts = (() => {
             downActions: commander.context({
                 name: "Down",
                 trigger: { key: "ArrowDown", ...trigger },
-            }),
-            zoomActions: commander.context({
-                name: "Zoom Image",
-                trigger: { key: "Z", ...trigger },
             }),
             moveActions: commander.context({
                 name: "Move Image",

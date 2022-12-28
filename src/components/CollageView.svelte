@@ -28,6 +28,7 @@
     moveClipPath,
     type Direction,
   } from "@/lib/paths"
+  import Commands from "./Commands.svelte"
 
   export let sources: Array<{ id: string; url: string }> = []
   export let readonly = false
@@ -376,45 +377,47 @@
       }
 
       function createMoveHandler(box: BBox) {
-        return () => {
+        return (command: Command) => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
 
-          const moveImage = false
-          if (moveImage) {
-            move(sourceTransform, box)
-          } else {
-            let { x, y, width, height } = box
-            x = x || 0
-            y = y || 0
-            width = width || 0
-            height = height || 0
+          let { x, y, width, height } = box
+          x = x || 0
+          y = y || 0
+          width = width || 0
+          height = height || 0
 
-            const w0 = sourceTransform.width || 0
-            const h0 = sourceTransform.height || 0
+          const w0 = sourceTransform.width || 0
+          const h0 = sourceTransform.height || 0
 
-            const currentStyle = getEffectiveTransform(
-              sourceTransform.transform || ""
-            )
+          const currentStyle = getEffectiveTransform(
+            sourceTransform.transform || ""
+          )
 
-            const translateTransform = `translate(${x}px, ${y}px)`
-            let scaleTransform = "scale(1,1)"
+          const translateTransform = `translate(${x}px, ${y}px)`
+          let scaleTransform = "scale(1,1)"
 
-            if (width < 0) {
-              scaleTransform += ` scale(${w0 / (w0 - width)}, 1)`
-            } else if (width > 0) {
-              scaleTransform += ` scale(${(w0 + width) / w0}, 1)`
-            }
-
-            if (height < 0) {
-              scaleTransform += ` scale(1, ${h0 / (h0 - height)})`
-            } else if (height > 0) {
-              scaleTransform += ` scale(1, ${(h0 + height) / h0})`
-            }
-
-            sourceTransform.transform = `${currentStyle} ${scaleTransform} ${translateTransform}`
+          if (width < 0) {
+            scaleTransform += ` scale(${w0 / (w0 - width)}, 1)`
+          } else if (width > 0) {
+            scaleTransform += ` scale(${(w0 + width) / w0}, 1)`
           }
+
+          if (height < 0) {
+            scaleTransform += ` scale(1, ${h0 / (h0 - height)})`
+          } else if (height > 0) {
+            scaleTransform += ` scale(1, ${(h0 + height) / h0})`
+          }
+
+          sourceTransform.transform = `${currentStyle} ${scaleTransform} ${translateTransform}`
           transforms = transforms
+
+          command.undo = () => {
+            sourceTransform.transform = currentStyle
+            transforms = transforms
+            return true
+          }
+
           return true
         }
       }
@@ -499,7 +502,7 @@
           execute: createEdgeMover({ right: 1 }),
         })
 
-      contexts.navigation.zoomActions
+      contexts.workarea
         .addCommand({
           event: "zoom-image-in",
           name: "Zoom Image In",
