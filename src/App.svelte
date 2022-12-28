@@ -31,16 +31,10 @@
   import Notes from "./components/Notes.svelte"
   import SvgPaths from "./components/SvgPaths.svelte"
   import { fetchPhotoList, saveCollage } from "./data/collageServices"
-  import {
-    addDays,
-    deepClone,
-    getLocalStorage,
-    log,
-    setLocalStorage,
-  } from "./lib/globals"
+  import { addDays, getLocalStorage, log, setLocalStorage } from "./lib/globals"
   import type { ClipPaths, CollageData, Photo } from "./d.ts/index"
   import Toaster from "./components/Toaster.svelte"
-  import { toast } from "./store/toasts"
+  import { toast, toasts } from "./store/toasts"
   import { shortcut } from "./store/commands"
   import { refreshBaseurl } from "./store/photos"
   import GoogleSignin from "./components/GoogleSignin.svelte"
@@ -529,6 +523,7 @@
               class:loading={states.app.isLoading}
               class:saving={states.app.isSaving}
             >
+              {$toasts[0]?.message || ""}
               {states.app.isLoading ? "loading..." : ""}
               {states.app.isSaving ? "saving..." : ""}
             </div>
@@ -645,7 +640,7 @@
     height: 1.5rem;
     width: 15rem;
     margin: 0 auto;
-    opacity: 0;
+    opacity: 0.5;
     transition-duration: 500ms;
     text-align: center;
     font-size: smaller;
