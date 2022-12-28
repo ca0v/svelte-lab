@@ -615,7 +615,7 @@
     container-type: inline-size;
     padding: 1cqmin;
     overflow: auto;
-    height: calc(100cqh - 10rem);
+    height: calc(100cqh - 1rem);
     justify-content: center;
     width: max(320px, 80cqw);
   }
