@@ -3,12 +3,11 @@ import { writable } from "svelte/store"
 import type { CollageData } from "../d.ts/index";
 import { getAllCollages, getCollage } from "../data/collageServices"
 import { injectPath } from "./svg";
-export const stories = writable<Array<CollageData>>([]);
 
 export async function loadAllStories() {
     const additionalStories = await getAllCollages();
     // load each collage
-    additionalStories.forEach(async (s) => {
+    return Promise.all(additionalStories.map(async (s) => {
         const collage = await getCollage(s);
         // restore clip-paths
         if (collage.clipPaths) {
@@ -19,9 +18,8 @@ export async function loadAllStories() {
         } else {
             log(`no clip-paths found for ${collage.id}: ${collage.title}`)
         }
-        stories.update(v => [...v, collage]);
-    });
-    return stories;
+        return collage;
+    }));
 }
 
 
