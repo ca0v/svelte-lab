@@ -330,6 +330,14 @@
         cell.style.transform = `${currentStyle} rotate(${rotation}deg)`
       }
 
+      function place(cell: CollageCellState, box: BBox) {
+        cell.x = box.x || 0
+        cell.y = box.y || 0
+        cell.width = box.width || 0
+        cell.height = box.height || 0
+        return cell as { x: number; y: number; width: number; height: number }
+      }
+
       function move(cell: CollageCellState, box: BBox) {
         cell.x = (cell.x || 0) + (box.x || 0)
         cell.y = (cell.y || 0) + (box.y || 0)
@@ -369,7 +377,30 @@
         }
       }
 
+      function asBox(cell: CollageCellState) {
+        return {
+          x: cell.x || 0,
+          y: cell.y || 0,
+          width: cell.width || 0,
+          height: cell.height || 0,
+        } as { x: number; y: number; width: number; height: number }
+      }
+
       function createMoveHandler(box: BBox) {
+        return (command: Command) => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const undoBox = asBox(sourceTransform)
+          move(sourceTransform, box)
+          command.undo = () => {
+            place(sourceTransform, undoBox)
+            transforms = transforms
+          }
+          transforms = transforms
+          return true
+        }
+      }
+      function createTranslateHandler(box: BBox) {
         const { x, y } = box
         return (command: Command) => {
           const sourceTransform = getSourceTransform()
@@ -580,7 +611,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ y: -1 }),
+          execute: createTranslateHandler({ y: -1 }),
         })
         .addCommand({
           event: "move-down",
@@ -590,7 +621,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ y: 1 }),
+          execute: createTranslateHandler({ y: 1 }),
         })
         .addCommand({
           event: "move-left",
@@ -600,7 +631,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ x: -1 }),
+          execute: createTranslateHandler({ x: -1 }),
         })
         .addCommand({
           event: "move-right",
@@ -610,7 +641,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ x: 1 }),
+          execute: createTranslateHandler({ x: 1 }),
         })
         .addCommand({
           event: "move-image-up",
@@ -619,14 +650,7 @@
             key: "ArrowUp",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const y = -1
-            move(sourceTransform, { y })
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ y: -1 }),
         })
         .addCommand({
           event: "move-image-down",
@@ -635,14 +659,7 @@
             key: "ArrowDown",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const y = 1
-            move(sourceTransform, { y })
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ y: 1 }),
         })
         .addCommand({
           event: "move-image-left",
@@ -651,14 +668,7 @@
             key: "ArrowLeft",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const x = -1
-            move(sourceTransform, { x })
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ x: -1 }),
         })
         .addCommand({
           event: "move-image-right",
@@ -667,14 +677,7 @@
             key: "ArrowRight",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const x = 1
-            move(sourceTransform, { x })
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ x: 1 }),
         })
 
       contexts.rotationActions
