@@ -239,6 +239,7 @@
               activeCollage.clipPaths = clipPaths
             }
 
+            activeCollage.note = activeCollageNote || ""
             log({ activeCollage })
 
             await saveCollage({ ...activeCollage })
@@ -418,6 +419,14 @@
     return result.sort((a, b) => a.created!.localeCompare(b.created!))
   }
 </script>
+
+<svelte:window
+  on:beforeunload={(event) => {
+    log("beforeunload")
+    event.preventDefault()
+    return (event.returnValue = "Are you sure you want to exit?")
+  }}
+/>
 
 <svelte:body
   on:keyup={() => log((activeElement = document.activeElement))}

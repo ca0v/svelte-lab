@@ -106,13 +106,18 @@ class Commander {
                 { name: "Escape Context", title: "Exit the current context", event: "escape", trigger: { key: "Escape", } }
             )
             .addCommand({
-                name: "suppress-reload", trigger: { key: "r", isCtrl: true }, execute: (command) => {
-                    toast("Reload temporarily supressed.")
+                name: "suppress-reload-1", trigger: { key: "r", isCtrl: true }, execute: (command) => {
+                    toast("Reload temporarily suppressed.")
                     return true
                 }
             }).addCommand({
-                name: "suppress-reload", trigger: { key: "R", isCtrl: true, isShift: true }, execute: (command) => {
-                    toast("Reload temporarily supressed.")
+                name: "suppress-reload-2", trigger: { key: "R", isCtrl: true, isShift: true }, execute: (command) => {
+                    toast("Reload temporarily suppressed.")
+                    return true
+                }
+            }).addCommand({
+                name: "suppress-close-1", trigger: { key: "W", isCtrl: true, isShift: true }, execute: (command) => {
+                    toast("Close temporarily suppressed (impossible?).")
                     return true
                 }
             })

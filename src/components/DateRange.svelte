@@ -16,7 +16,8 @@
         name: "prior_day",
         title: "Show prior photos",
         trigger: {
-          key: "ArrowLeft",
+          key: "B",
+          isShift: true,
         },
         execute: () => {
           date_filter_from = addDays(date_filter_from, -1)
@@ -26,7 +27,8 @@
         name: "next_day",
         title: "Show later photos",
         trigger: {
-          key: "ArrowRight",
+          key: "N",
+          isShift: true,
         },
         execute: () => {
           date_filter_from = addDays(date_filter_from, 1)
