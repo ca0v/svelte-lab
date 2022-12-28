@@ -101,9 +101,21 @@ class Commander {
     constructor() {
         this.primaryContext = this.context({ name: "primary", trigger: {} })
         // get out of all other contexts
-        this.primaryContext.addCommand(
-            { name: "Escape Context", title: "Exit the current context", event: "escape", trigger: { key: "Escape", } }
-        )
+        this.primaryContext
+            .addCommand(
+                { name: "Escape Context", title: "Exit the current context", event: "escape", trigger: { key: "Escape", } }
+            )
+            .addCommand({
+                name: "suppress-reload", trigger: { key: "r", isCtrl: true }, execute: (command) => {
+                    toast("Reload temporarily supressed.")
+                    return true
+                }
+            }).addCommand({
+                name: "suppress-reload", trigger: { key: "R", isCtrl: true, isShift: true }, execute: (command) => {
+                    toast("Reload temporarily supressed.")
+                    return true
+                }
+            })
     }
 
     update() {

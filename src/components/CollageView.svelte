@@ -183,7 +183,7 @@
         trigger: {
           key: key.toLocaleUpperCase(),
         },
-        disabled: () => isDisabled(index),
+        disabled: () => isDisabled(index) && !getPhotoWheelActiveSource(),
         execute: () => {
           if (
             getSourceTransform() &&
