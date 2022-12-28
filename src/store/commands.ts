@@ -220,8 +220,8 @@ class Commander {
                 return preventDefault(e);
             }
         }
-        window.addEventListener('keydown', keyDownHandler);
-        this.un.push(() => window.removeEventListener('keydown', keyDownHandler));
+        document.addEventListener('keydown', keyDownHandler);
+        this.un.push(() => document.removeEventListener('keydown', keyDownHandler));
     }
 
     unlisten() {
