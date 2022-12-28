@@ -191,24 +191,6 @@
     $collageId = (await getLocalStorage("collage_name", "")) + ""
     log("collageId", { $collageId })
 
-    contexts.workarea
-      .addCommand({
-        event: "auto_assign_photos",
-        name: "Auto Assign Photos",
-        trigger: {
-          key: "a",
-        },
-        execute: async () => autoAssignImages(photosToShow),
-      })
-      .addCommand({
-        event: "clear_all_photos",
-        name: "Clear All Photos",
-        trigger: {
-          key: "c",
-        },
-        execute: () => clearAllImages(),
-      })
-
     contexts.file
       .addCommand({
         event: "save_story",
@@ -217,6 +199,7 @@
         trigger: {
           key: "s",
         },
+        disabled: () => !activeCollage?.data,
         execute: async () => {
           setLocalStorage("app.state", states)
           if (!activeCollage) throw new Error("No active collage")
@@ -287,7 +270,24 @@
           states.editor.editmode = !states.editor.editmode
         },
       })
+
     contexts.workarea
+      .addCommand({
+        event: "auto_assign_photos",
+        name: "Auto Assign Photos",
+        trigger: {
+          key: "a",
+        },
+        execute: async () => autoAssignImages(photosToShow),
+      })
+      .addCommand({
+        event: "clear_all_photos",
+        name: "Clear All Photos",
+        trigger: {
+          key: "c",
+        },
+        execute: () => clearAllImages(),
+      })
       .addCommand({
         event: "toggle-color-wheel",
         name: "Toggle Color Wheel",
@@ -313,7 +313,7 @@
         },
       })
 
-    commander.primaryContext
+    contexts.primary
       .addCommand({
         event: "zoom-in-workarea",
         name: "Zoom Workarea In",
