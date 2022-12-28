@@ -169,7 +169,7 @@
           key: key.toLocaleLowerCase(),
         },
         disabled: () => isDisabled(index),
-        execute: () => {
+        execute: (command: Command) => {
           if (!transforms.data) throw "no transforms data"
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
@@ -179,6 +179,12 @@
           focusTarget(targetImage.target!)
           getFocusCellIdentifier()
           transforms = transforms
+
+          command.undo = () => {
+            swap(sourceTransform, targetImage)
+            focusTarget(sourceTransform.target!)
+            transforms = transforms
+          }
           return true
         },
       })
