@@ -22,12 +22,13 @@
   import type { BBox, CollageCellState, CollageData } from "../d.ts/index"
   import { toast } from "../store/toasts"
   import { hasContext, onDestroy, onMount } from "svelte"
-  import { commander, contexts } from "../store/commands"
+  import { commander, contexts, type Command } from "../store/commands"
   import {
     duplicateImageClipPath,
     moveClipPath,
     type Direction,
   } from "@/lib/paths"
+  import Commands from "./Commands.svelte"
 
   export let sources: Array<{ id: string; url: string }> = []
   export let readonly = false
@@ -168,7 +169,7 @@
           key: key.toLocaleLowerCase(),
         },
         disabled: () => isDisabled(index),
-        execute: () => {
+        execute: (command: Command) => {
           if (!transforms.data) throw "no transforms data"
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
@@ -178,6 +179,12 @@
           focusTarget(targetImage.target!)
           getFocusCellIdentifier()
           transforms = transforms
+
+          command.undo = () => {
+            swap(sourceTransform, targetImage)
+            focusTarget(sourceTransform.target!)
+            transforms = transforms
+          }
           return true
         },
       })
@@ -189,7 +196,7 @@
           key: key.toLocaleUpperCase(),
         },
         disabled: () => isDisabled(index) && !getPhotoWheelActiveSource(),
-        execute: () => {
+        execute: (command: Command) => {
           if (
             getSourceTransform() &&
             (hasFocus(svgElement) || !getPhotoWheelActiveSource())
@@ -197,10 +204,17 @@
             const sourceTransform = getSourceTransform()
             if (!sourceTransform) return
             const targetImage = getTransform(index)
+            const undoClone = { ...targetImage }
             copy(sourceTransform, targetImage)
             focusTarget(targetImage.target!)
             getFocusCellIdentifier()
             transforms = transforms
+
+            command.undo = () => {
+              Object.assign(targetImage, undoClone)
+              focusTarget(sourceTransform.target!)
+              transforms = transforms
+            }
             return true
           } else {
             const source = getPhotoWheelActiveSource()
@@ -268,7 +282,7 @@
           key: "Enter",
         },
         disabled: () => !getSourceTransform(),
-        execute: () => {
+        execute: (command: Command) => {
           // need to swap the identity, as that is what determines the order on reload
           if (!transforms.data) throw "no transforms data"
           const sourceTransform = getSourceTransform()
@@ -285,6 +299,16 @@
 
           // redraw
           transforms = transforms
+
+          command.undo = () => {
+            // place the source transform back where it was
+            const tail = transforms.data!.pop()
+            if (tail !== sourceTransform) throw "tail is not source transform"
+            transforms.data!.splice(index, 0, sourceTransform)
+            transforms = transforms
+            return true
+          }
+
           return true
         },
       })
@@ -317,23 +341,12 @@
     })
 
     {
-      function rotate(cell: CollageCellState, rotation: number) {
-        const currentStyle = cell.transform
-          ? getEffectiveTransform(cell.transform)
-          : ""
-        cell.transform = `${currentStyle} rotate(${rotation}deg)`
-      }
-
-      function translate(cell: CollageCellState, x: number, y: number) {
-        const currentStyle = cell.transform
-          ? getEffectiveTransform(cell.transform)
-          : ""
-        cell.transform = `${currentStyle} translate(${x}px, ${y}px)`
-      }
-
-      function rotateImage(cell: SVGImageElement, rotation: number) {
-        const currentStyle = getEffectiveTransform(cell.style.transform)
-        cell.style.transform = `${currentStyle} rotate(${rotation}deg)`
+      function place(cell: CollageCellState, box: BBox) {
+        cell.x = box.x || 0
+        cell.y = box.y || 0
+        cell.width = box.width || 0
+        cell.height = box.height || 0
+        return cell as { x: number; y: number; width: number; height: number }
       }
 
       function move(cell: CollageCellState, box: BBox) {
@@ -353,7 +366,7 @@
       }
 
       function createEdgeMover(direction: Direction) {
-        return () => {
+        return (command: Command) => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) throw "no source transform"
           // move the actual clippath points
@@ -363,51 +376,155 @@
             image,
             `${transforms.id}-${sourceTransform.target}`
           )
+
+          const undoClipPath =
+            clipPath.querySelector("path")?.getAttribute("d") || ""
           moveClipPath(clipPath, direction)
           sourceTransform.clipPath = clipPath.id.substring(5) // remove clip_
+          command.undo = () => {
+            clipPath.querySelector("path")?.setAttribute("d", undoClipPath)
+          }
+          return true
+        }
+      }
+
+      function asBox(cell: CollageCellState) {
+        return {
+          x: cell.x || 0,
+          y: cell.y || 0,
+          width: cell.width || 0,
+          height: cell.height || 0,
+        } as { x: number; y: number; width: number; height: number }
+      }
+
+      function createImageRotationHandler({ rotation }: { rotation: number }) {
+        return (command: Command) => {
+          const target = getActiveCell()
+          if (!target) return
+          const rotation = 6
+          const currentStyle = getEffectiveTransform(target.style.transform)
+          target.style.transform = `${currentStyle} rotate(${rotation}deg)`
+          transforms = transforms
+
+          command.undo = () => {
+            target.style.transform = currentStyle
+            transforms = transforms
+          }
+          return true
+        }
+      }
+
+      function createRotationHandler({ rotation }: { rotation: number }) {
+        return (command: Command) => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const currentStyle = sourceTransform.transform
+            ? getEffectiveTransform(sourceTransform.transform)
+            : ""
+          sourceTransform.transform = `${currentStyle} rotate(${rotation}deg)`
+          transforms = transforms
+          command.undo = () => {
+            sourceTransform.transform = currentStyle
+            transforms = transforms
+          }
+          return true
         }
       }
 
       function createMoveHandler(box: BBox) {
-        return () => {
+        return (command: Command) => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const undoBox = asBox(sourceTransform)
+          move(sourceTransform, box)
+          command.undo = () => {
+            place(sourceTransform, undoBox)
+            transforms = transforms
+          }
+          transforms = transforms
+          return true
+        }
+      }
+      function createTranslateHandler(box: BBox) {
+        const { x, y } = box
+        return (command: Command) => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const currentStyle = sourceTransform.transform
+            ? getEffectiveTransform(sourceTransform.transform)
+            : ""
+          sourceTransform.transform = `${currentStyle} translate(${x || 0}px, ${
+            y || 0
+          }px)`
+          transforms = transforms
+
+          command.undo = () => {
+            sourceTransform.transform = currentStyle
+            transforms = transforms
+          }
+          return true
+        }
+      }
+
+      function createImageZoomHandler({ dx, dy }: { dx: number; dy: number }) {
+        return (command: Command) => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const undoBox = asBox(sourceTransform)
+          zoom(sourceTransform, { dx, dy })
+          transforms = transforms
+
+          command.undo = () => {
+            place(sourceTransform, undoBox)
+            transforms = transforms
+          }
+
+          return true
+        }
+      }
+
+      function createZoomHandler(box: BBox) {
+        return (command: Command) => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
 
-          const moveImage = false
-          if (moveImage) {
-            move(sourceTransform, box)
-          } else {
-            let { x, y, width, height } = box
-            x = x || 0
-            y = y || 0
-            width = width || 0
-            height = height || 0
+          let { x, y, width, height } = box
+          x = x || 0
+          y = y || 0
+          width = width || 0
+          height = height || 0
 
-            const w0 = sourceTransform.width || 0
-            const h0 = sourceTransform.height || 0
+          const w0 = sourceTransform.width || 0
+          const h0 = sourceTransform.height || 0
 
-            const currentStyle = getEffectiveTransform(
-              sourceTransform.transform || ""
-            )
+          const currentStyle = getEffectiveTransform(
+            sourceTransform.transform || ""
+          )
 
-            const translateTransform = `translate(${x}px, ${y}px)`
-            let scaleTransform = "scale(1,1)"
+          const translateTransform = `translate(${x}px, ${y}px)`
+          let scaleTransform = "scale(1,1)"
 
-            if (width < 0) {
-              scaleTransform += ` scale(${w0 / (w0 - width)}, 1)`
-            } else if (width > 0) {
-              scaleTransform += ` scale(${(w0 + width) / w0}, 1)`
-            }
-
-            if (height < 0) {
-              scaleTransform += ` scale(1, ${h0 / (h0 - height)})`
-            } else if (height > 0) {
-              scaleTransform += ` scale(1, ${(h0 + height) / h0})`
-            }
-
-            sourceTransform.transform = `${currentStyle} ${scaleTransform} ${translateTransform}`
+          if (width < 0) {
+            scaleTransform += ` scale(${w0 / (w0 - width)}, 1)`
+          } else if (width > 0) {
+            scaleTransform += ` scale(${(w0 + width) / w0}, 1)`
           }
+
+          if (height < 0) {
+            scaleTransform += ` scale(1, ${h0 / (h0 - height)})`
+          } else if (height > 0) {
+            scaleTransform += ` scale(1, ${(h0 + height) / h0})`
+          }
+
+          sourceTransform.transform = `${currentStyle} ${scaleTransform} ${translateTransform}`
           transforms = transforms
+
+          command.undo = () => {
+            sourceTransform.transform = currentStyle
+            transforms = transforms
+            return true
+          }
+
           return true
         }
       }
@@ -492,7 +609,7 @@
           execute: createEdgeMover({ right: 1 }),
         })
 
-      contexts.navigation.zoomActions
+      contexts.workarea
         .addCommand({
           event: "zoom-image-in",
           name: "Zoom Image In",
@@ -500,15 +617,7 @@
             key: "ArrowUp",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const dx = -1
-            const dy = -1
-            zoom(sourceTransform, { dx, dy })
-            transforms = transforms
-            return true
-          },
+          execute: createImageZoomHandler({ dx: -1, dy: -1 }),
         })
         .addCommand({
           event: "zoom-image-out",
@@ -517,15 +626,7 @@
             key: "ArrowDown",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const dx = 1
-            const dy = 1
-            zoom(sourceTransform, { dx, dy })
-            transforms = transforms
-            return true
-          },
+          execute: createImageZoomHandler({ dx: 1, dy: 1 }),
         })
         .addCommand({
           event: "zoom-in",
@@ -535,7 +636,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ width: 1, height: 1 }),
+          execute: createZoomHandler({ width: 1, height: 1 }),
         })
         .addCommand({
           event: "zoom-out",
@@ -545,7 +646,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ width: -1, height: -1 }),
+          execute: createZoomHandler({ width: -1, height: -1 }),
         })
 
       contexts.navigation.moveActions
@@ -557,14 +658,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const y = -1
-            translate(sourceTransform, 0, y)
-            transforms = transforms
-            return true
-          },
+          execute: createTranslateHandler({ y: -1 }),
         })
         .addCommand({
           event: "move-down",
@@ -574,14 +668,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const y = 1
-            translate(sourceTransform, 0, y)
-            transforms = transforms
-            return true
-          },
+          execute: createTranslateHandler({ y: 1 }),
         })
         .addCommand({
           event: "move-left",
@@ -591,14 +678,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const x = -1
-            translate(sourceTransform, x, 0)
-            transforms = transforms
-            return true
-          },
+          execute: createTranslateHandler({ x: -1 }),
         })
         .addCommand({
           event: "move-right",
@@ -608,14 +688,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const x = 1
-            translate(sourceTransform, x, 0)
-            transforms = transforms
-            return true
-          },
+          execute: createTranslateHandler({ x: 1 }),
         })
         .addCommand({
           event: "move-image-up",
@@ -624,14 +697,7 @@
             key: "ArrowUp",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const y = -1
-            move(sourceTransform, { y })
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ y: -1 }),
         })
         .addCommand({
           event: "move-image-down",
@@ -640,14 +706,7 @@
             key: "ArrowDown",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const y = 1
-            move(sourceTransform, { y })
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ y: 1 }),
         })
         .addCommand({
           event: "move-image-left",
@@ -656,14 +715,7 @@
             key: "ArrowLeft",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const x = -1
-            move(sourceTransform, { x })
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ x: -1 }),
         })
         .addCommand({
           event: "move-image-right",
@@ -672,14 +724,7 @@
             key: "ArrowRight",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const x = 1
-            move(sourceTransform, { x })
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ x: 1 }),
         })
 
       contexts.rotationActions
@@ -690,14 +735,7 @@
             key: "ArrowRight",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const rotation = 6
-            rotate(sourceTransform, rotation)
-            transforms = transforms
-            return true
-          },
+          execute: createRotationHandler({ rotation: 6 }),
         })
         .addCommand({
           name: "Rotate Counter-Clockwise",
@@ -706,14 +744,7 @@
             key: "ArrowLeft",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const rotation = -6
-            rotate(sourceTransform, rotation)
-            transforms = transforms
-            return true
-          },
+          execute: createRotationHandler({ rotation: -6 }),
         })
         .addCommand({
           name: "Rotate Image Clockwise",
@@ -723,14 +754,7 @@
             isShift: true,
           },
           disabled: () => !hasFocus(svgElement),
-          execute: () => {
-            const target = getActiveCell()
-            if (!target) return
-            const rotation = 6
-            rotateImage(target, rotation)
-            transforms = transforms
-            return true
-          },
+          execute: createImageRotationHandler({ rotation: 6 }),
         })
         .addCommand({
           name: "Rotate Image Counter-Clockwise",
@@ -740,14 +764,7 @@
             isShift: true,
           },
           disabled: () => !hasFocus(svgElement),
-          execute: () => {
-            const target = getActiveCell()
-            if (!target) return
-            const rotation = -6
-            rotateImage(target, rotation)
-            transforms = transforms
-            return true
-          },
+          execute: createImageRotationHandler({ rotation: -6 }),
         })
     }
   })

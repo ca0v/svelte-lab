@@ -18,6 +18,7 @@ export type Command = {
     title?: string;
     icon?: string;
     trigger?: CommandTrigger;
+    undo?: (command: Command) => boolean | void | Promise<any>;
     execute?: (command: Command) => boolean | void | Promise<any>;
     disabled?: () => boolean;
     showInToolbar?: boolean;
@@ -107,6 +108,30 @@ class Commander {
         this.primaryContext = this.context({ name: "primary", trigger: {} })
         // get out of all other contexts
         this.primaryContext
+            .addCommand({
+                event: "undo",
+                name: "Undo",
+                trigger: {
+                    key: "z",
+                    isCtrl: true,
+                },
+                execute: (command) => {
+                    log("Undo")
+                    return this.undo()
+                }
+            })
+            .addCommand({
+                event: "redo",
+                name: "Redo",
+                trigger: {
+                    key: "y",
+                    isCtrl: true,
+                },
+                execute: (command) => {
+                    log("Redo")
+                    return this.redo()
+                }
+            })
             .addCommand(
                 {
                     event: "escape",
@@ -248,13 +273,15 @@ class Commander {
 
             if (command && !isCommandDisabled(command)) {
                 log({ shortcut, command })
-                executeCommand(command)
+                this.executeCommand(command)
                 command.showInToolbar = false
                 commander.update();
                 return preventDefault(e);
             }
 
-            this.setActiveContext(this.primaryContext);
+            // fallback to active context if we are just pressing ctrl, alt, shift, etc.
+            if (e.key.length === 1)
+                this.setActiveContext(this.primaryContext);
         }
         document.addEventListener('keydown', keyDownHandler);
         this.un.push(() => document.removeEventListener('keydown', keyDownHandler));
@@ -282,14 +309,14 @@ class Commander {
             const context = contexts.primary;
             const action = context.actions[contextHotkeys];
             if (action) {
-                executeCommand(action.command);
+                this.executeCommand(action.command);
                 return;
             }
 
             // perhaps it is an event
             const command = this.findCommand(contextHotkeys);
             if (command) {
-                executeCommand(command);
+                this.executeCommand(command);
                 return
             }
 
@@ -304,8 +331,32 @@ class Commander {
 
                 const action = context.actions[actionHotKeys];
                 if (!action) throw `Action not found: ${actionHotKeys}`
-                executeCommand(action.command);
+                this.executeCommand(action.command);
             }
+        }
+    }
+
+    undoStack = [] as Array<{ command: Command, undo: Function }>;
+    redoStack = [] as Command[];
+
+    executeCommand(command: Command) {
+        executeCommand(command);
+        if (command.undo) {
+            this.undoStack.push({ command, undo: command.undo });
+        }
+    }
+
+    undo() {
+        const info = this.undoStack.pop();
+        if (!info) return false;
+        this.redoStack.push(info.command);
+        return info.undo.apply(info.command, info.command);
+    }
+
+    redo() {
+        const command = this.redoStack.pop();
+        if (command) {
+            return this.executeCommand(command);
         }
     }
 }
@@ -354,10 +405,6 @@ export const contexts = (() => {
             downActions: commander.context({
                 name: "Down",
                 trigger: { key: "ArrowDown", ...trigger },
-            }),
-            zoomActions: commander.context({
-                name: "Zoom Image",
-                trigger: { key: "Z", ...trigger },
             }),
             moveActions: commander.context({
                 name: "Move Image",
