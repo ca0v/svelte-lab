@@ -40,10 +40,10 @@
       command && executeCommand(command)
     })
 
-    contexts.file.addCommand({
+    contexts.primary.addCommand({
       name: "Toggle Command Console",
       event: "toggle-command-console",
-      trigger: { key: "/" },
+      trigger: { key: "/", isCtrl: true },
       execute: () => {
         searchFilter = ""
         isOpen = !isOpen
@@ -55,8 +55,8 @@
       name: "search-commands",
       title: "Search for a command",
       trigger: {
-        key: " ",
-        isCtrl: true,
+        key: "/",
+        isAlt: true,
       },
       execute: () => {
         isOpen = true

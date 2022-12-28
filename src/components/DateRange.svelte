@@ -11,25 +11,29 @@
   }
 
   onMount(() => {
-    contexts.workarea
+    contexts.primary
       .addCommand({
-        name: "prior_day",
-        title: "Show prior photos",
+        event: "prior_day",
+        name: "Prior Photos",
         trigger: {
-          key: "B",
-          isShift: true,
+          key: "p",
+          isCtrl: true,
+          isAlt: true,
         },
+        disabled: () => !date_filter_from,
         execute: () => {
           date_filter_from = addDays(date_filter_from, -1)
         },
       })
       .addCommand({
-        name: "next_day",
-        title: "Show later photos",
+        event: "next_day",
+        name: "Next Photos",
         trigger: {
-          key: "N",
-          isShift: true,
+          key: "n",
+          isCtrl: true,
+          isAlt: true,
         },
+        disabled: () => !date_filter_from,
         execute: () => {
           date_filter_from = addDays(date_filter_from, 1)
         },

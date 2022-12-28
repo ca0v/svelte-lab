@@ -283,17 +283,6 @@
           states.editor.editmode = !states.editor.editmode
         },
       })
-    commander.listen()
-
-    states.datefilter.from = localStorage.getItem("date_filter") || ""
-
-    $colorWheelAngle = await getLocalStorage("colorwheel_angle", 0)
-    colorWheelAngle.subscribe(async (v) => {
-      toast(`Color wheel angle: ${v}deg`)
-      setLocalStorage("colorwheel_angle", v)
-      document.documentElement.style.setProperty("--theme-hue", `${v}`)
-    })
-
     contexts.workarea
       .addCommand({
         event: "toggle-color-wheel",
@@ -310,28 +299,6 @@
         },
       })
       .addCommand({
-        event: "zoom-in-workarea",
-        name: "Zoom Workarea In",
-        trigger: {
-          key: "PageUp",
-        },
-        execute: () => {
-          states.editor.width = Math.min(states.editor.width + 1, 200)
-          return true
-        },
-      })
-      .addCommand({
-        event: "zoom-out-workarea",
-        name: "Zoom Workarea Out",
-        trigger: {
-          key: "PageDown",
-        },
-        execute: () => {
-          states.editor.width = Math.max(states.editor.width - 1, 25)
-          return true
-        },
-      })
-      .addCommand({
         name: "goto-photowheel",
         title: "Focus the PhotoWheel",
         trigger: {
@@ -342,15 +309,54 @@
         },
       })
 
-    commander.primaryContext.addCommand({
-      name: "Preview",
-      event: "preview",
-      title: "Preview collage",
-      trigger: {
-        key: "p",
-        isAlt: true,
-      },
-      execute: () => (states.preview.visible = !states.preview.visible),
+    commander.primaryContext
+      .addCommand({
+        event: "zoom-in-workarea",
+        name: "Zoom Workarea In",
+        trigger: {
+          key: "=",
+          isCtrl: true,
+          isAlt: true,
+        },
+        disabled: () => !activeCollage?.data,
+        execute: () => {
+          states.editor.width = Math.min(states.editor.width + 1, 200)
+          return true
+        },
+      })
+      .addCommand({
+        event: "zoom-out-workarea",
+        name: "Zoom Workarea Out",
+        trigger: {
+          key: "-",
+          isCtrl: true,
+          isAlt: true,
+        },
+        disabled: () => !activeCollage?.data,
+        execute: () => {
+          states.editor.width = Math.max(states.editor.width - 1, 25)
+          return true
+        },
+      })
+      .addCommand({
+        name: "Preview",
+        event: "preview",
+        title: "Preview collage",
+        trigger: {
+          key: "p",
+          isAlt: true,
+        },
+        execute: () => (states.preview.visible = !states.preview.visible),
+      })
+    commander.listen()
+
+    states.datefilter.from = localStorage.getItem("date_filter") || ""
+
+    $colorWheelAngle = await getLocalStorage("colorwheel_angle", 0)
+    colorWheelAngle.subscribe(async (v) => {
+      toast(`Color wheel angle: ${v}deg`)
+      setLocalStorage("colorwheel_angle", v)
+      document.documentElement.style.setProperty("--theme-hue", `${v}`)
     })
 
     const LAYOUTSHORTCUTKEYS = "abcdefghijklmnopqrstuvwxyz".split("")
@@ -381,22 +387,6 @@
 
   onDestroy(() => {
     commander.unlisten()
-    removeCommand("preview")
-    removeCommand("toggle_edit_mode")
-    removeCommand("toggle-color-wheel")
-    removeCommand("goto-photowheel")
-    removeCommand("zoom-in-workarea")
-    removeCommand("zoom-out-workarea")
-
-    Object.keys($transforms).forEach(removeCommand)
-
-    document.querySelectorAll("[data-shortcut]").forEach((element) => {
-      if (element instanceof HTMLElement) {
-        removeCommand(`goto-${element.title}`)
-      } else {
-        throw new Error("Unexpected element type")
-      }
-    })
   })
 
   async function getPhotosForOneDay(yyyy_mm_dd: string) {

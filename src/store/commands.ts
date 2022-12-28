@@ -229,12 +229,14 @@ class Commander {
                 command = this.primaryContext.findCommand(shortcut);
                 if (command) {
                     log(`Command found in primary context: ${command.name}`)
-                    this.setActiveContext(this.primaryContext);
+                    if (!isCommandDisabled(command)) {
+                        this.setActiveContext(this.primaryContext);
+                    }
                 }
                 else log(`Command not found in primary context, try one of these: ${Object.keys(this.primaryContext.actions).join(" ")}`)
             }
 
-            if (command) {
+            if (command && !isCommandDisabled(command)) {
                 log({ shortcut, command })
                 executeCommand(command)
                 command.showInToolbar = false
@@ -421,6 +423,7 @@ export function asKeyboardShortcut(trigger: CommandTrigger) {
 }
 
 async function executeCommand(command: Command) {
+    if (isCommandDisabled(command)) throw "Command is disabled"
     if (command.execute) {
         if (await command.execute(command)) {
             toast(command.title || command.name)
