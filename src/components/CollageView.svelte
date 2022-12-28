@@ -325,13 +325,6 @@
         cell.transform = `${currentStyle} rotate(${rotation}deg)`
       }
 
-      function translate(cell: CollageCellState, x: number, y: number) {
-        const currentStyle = cell.transform
-          ? getEffectiveTransform(cell.transform)
-          : ""
-        cell.transform = `${currentStyle} translate(${x}px, ${y}px)`
-      }
-
       function rotateImage(cell: SVGImageElement, rotation: number) {
         const currentStyle = getEffectiveTransform(cell.style.transform)
         cell.style.transform = `${currentStyle} rotate(${rotation}deg)`
@@ -377,6 +370,26 @@
       }
 
       function createMoveHandler(box: BBox) {
+        const { x, y } = box
+        return (command: Command) => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const currentStyle = sourceTransform.transform
+            ? getEffectiveTransform(sourceTransform.transform)
+            : ""
+          sourceTransform.transform = `${currentStyle} translate(${x || 0}px, ${
+            y || 0
+          }px)`
+          transforms = transforms
+
+          command.undo = () => {
+            sourceTransform.transform = currentStyle
+            transforms = transforms
+          }
+          return true
+        }
+      }
+      function createZoomHandler(box: BBox) {
         return (command: Command) => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
@@ -545,7 +558,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ width: 1, height: 1 }),
+          execute: createZoomHandler({ width: 1, height: 1 }),
         })
         .addCommand({
           event: "zoom-out",
@@ -555,7 +568,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: createMoveHandler({ width: -1, height: -1 }),
+          execute: createZoomHandler({ width: -1, height: -1 }),
         })
 
       contexts.navigation.moveActions
@@ -567,14 +580,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const y = -1
-            translate(sourceTransform, 0, y)
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ y: -1 }),
         })
         .addCommand({
           event: "move-down",
@@ -584,14 +590,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const y = 1
-            translate(sourceTransform, 0, y)
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ y: 1 }),
         })
         .addCommand({
           event: "move-left",
@@ -601,14 +600,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const x = -1
-            translate(sourceTransform, x, 0)
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ x: -1 }),
         })
         .addCommand({
           event: "move-right",
@@ -618,14 +610,7 @@
             isShift: true,
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const x = 1
-            translate(sourceTransform, x, 0)
-            transforms = transforms
-            return true
-          },
+          execute: createMoveHandler({ x: 1 }),
         })
         .addCommand({
           event: "move-image-up",
