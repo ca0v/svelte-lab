@@ -196,7 +196,7 @@
           key: key.toLocaleUpperCase(),
         },
         disabled: () => isDisabled(index) && !getPhotoWheelActiveSource(),
-        execute: () => {
+        execute: (command: Command) => {
           if (
             getSourceTransform() &&
             (hasFocus(svgElement) || !getPhotoWheelActiveSource())
@@ -204,10 +204,17 @@
             const sourceTransform = getSourceTransform()
             if (!sourceTransform) return
             const targetImage = getTransform(index)
+            const undoClone = { ...targetImage }
             copy(sourceTransform, targetImage)
             focusTarget(targetImage.target!)
             getFocusCellIdentifier()
             transforms = transforms
+
+            command.undo = () => {
+              Object.assign(targetImage, undoClone)
+              focusTarget(sourceTransform.target!)
+              transforms = transforms
+            }
             return true
           } else {
             const source = getPhotoWheelActiveSource()
