@@ -31,7 +31,13 @@
   import Notes from "./components/Notes.svelte"
   import SvgPaths from "./components/SvgPaths.svelte"
   import { fetchPhotoList, saveCollage } from "./data/collageServices"
-  import { addDays, getLocalStorage, log, setLocalStorage } from "./lib/globals"
+  import {
+    addDays,
+    deepClone,
+    getLocalStorage,
+    log,
+    setLocalStorage,
+  } from "./lib/globals"
   import type { ClipPaths, CollageData, Photo } from "./d.ts/index"
   import Toaster from "./components/Toaster.svelte"
   import { toast } from "./store/toasts"
@@ -87,9 +93,27 @@
       showColorWheel: false,
       colorWheelAngle: 0,
     },
+    editor: {
+      isTouched: false,
+      data: "",
+    },
     datefilter: {
       from: "",
     },
+  }
+
+  function isDirty() {
+    if (!hackState.editor.data) return false
+    if (!activeCollage?.data) return false
+    if (hackState.editor.isTouched) return true
+    const was = hackState.editor.data
+    buildDocument()
+    const is = JSON.stringify(activeCollage)
+    hackState.editor.isTouched = was !== is
+    if (hackState.editor.isTouched) {
+      log({ was, is })
+    }
+    return hackState.editor.isTouched
   }
 
   async function handleAuthClick() {
@@ -104,6 +128,9 @@
     collageId.subscribe(async (v) => {
       if (!v) return
       if (!states.isSignedIn) return
+      if (isDirty()) {
+        if (confirm("Save changes?")) await saveDocument()
+      }
       setLocalStorage("collage_name", v)
       const storyToLoad = stories.find((h) => h.id === v + "")
       log("stories", JSON.stringify(stories))
@@ -111,6 +138,8 @@
       toast("Acquiring story data...")
       await refreshStory(storyToLoad)
       activeCollage = storyToLoad
+      hackState.editor.isTouched = false
+      hackState.editor.data = JSON.stringify(storyToLoad)
       activeCollageNote = storyToLoad.note || ""
     })
   }
@@ -179,6 +208,43 @@
     }
   }
 
+  async function saveDocument() {
+    setLocalStorage("app.state", states)
+    if (!activeCollage) throw new Error("No active collage")
+    states.app.isSaving = true
+    try {
+      setLocalStorage(`${activeCollage.id}`, activeCollage)
+
+      // every distinct clippath used by the collage must be saved
+      if (activeCollage.data) {
+        const clipPathIds = [
+          ...new Set(
+            activeCollage.data.map((t) => t.clipPath).filter((v) => !!v)
+          ),
+        ] as Array<string>
+
+        const clipPaths = clipPathIds.reduce((result, id) => {
+          const d = getClipPathPoints(`clip_${id}`)
+          if (d) {
+            result[id] = d
+          }
+          return result
+        }, <ClipPaths>{})
+
+        activeCollage.clipPaths = clipPaths
+      }
+
+      buildDocument()
+      await saveCollage({ ...activeCollage })
+      toast("Saved")
+    } catch (ex) {
+      reportError(ex)
+      toast(`Error: ${ex}`)
+    } finally {
+      states.app.isSaving = false
+    }
+  }
+
   $: {
     // how to get this to run ony when the datefilter.from changes?
     if (states.datefilter.from !== hackState.datefilter.from) {
@@ -212,42 +278,7 @@
         },
         disabled: () => !activeCollage?.data,
         execute: async () => {
-          setLocalStorage("app.state", states)
-          if (!activeCollage) throw new Error("No active collage")
-          states.app.isSaving = true
-          try {
-            setLocalStorage(`${activeCollage.id}`, activeCollage)
-
-            // every distinct clippath used by the collage must be saved
-            if (activeCollage.data) {
-              const clipPathIds = [
-                ...new Set(
-                  activeCollage.data.map((t) => t.clipPath).filter((v) => !!v)
-                ),
-              ] as Array<string>
-
-              const clipPaths = clipPathIds.reduce((result, id) => {
-                const d = getClipPathPoints(`clip_${id}`)
-                if (d) {
-                  result[id] = d
-                }
-                return result
-              }, <ClipPaths>{})
-
-              activeCollage.clipPaths = clipPaths
-            }
-
-            activeCollage.note = activeCollageNote || ""
-            log({ activeCollage })
-
-            await saveCollage({ ...activeCollage })
-            toast("Saved")
-          } catch (ex) {
-            reportError(ex)
-            toast(`Error: ${ex}`)
-          } finally {
-            states.app.isSaving = false
-          }
+          await saveDocument()
         },
       })
       .addCommand({
@@ -396,6 +427,11 @@
     setLocalStorage("app.state", states)
   })
 
+  function buildDocument() {
+    if (!activeCollage) throw `No active collage`
+    activeCollage.note = activeCollageNote || ""
+  }
+
   async function getPhotosForOneDay(yyyy_mm_dd: string) {
     const startDate = addDays(yyyy_mm_dd, -1)
     const endDate = addDays(yyyy_mm_dd, 1)
@@ -420,8 +456,11 @@
 <svelte:window
   on:beforeunload={(event) => {
     log("beforeunload")
-    event.preventDefault()
-    return (event.returnValue = "Are you sure you want to exit?")
+    if (isDirty()) {
+      event.preventDefault()
+      return (event.returnValue =
+        "You have unsaved changes.  Are you sure you want to exit?")
+    }
   }}
 />
 
