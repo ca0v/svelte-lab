@@ -18,6 +18,7 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 
 ## What is next?
 
+* BUG: Clicking Ctrl+Shift+Arrow* contexts should not be invoked from an input control
 * BUG: errors are silent...e.g. run without services running...no warnings
 * BUG: Heavily zoomed images should increase the resolution using google photos API (presently using default 512?)
 * BUG: How to *not* commit "mock" configuration?

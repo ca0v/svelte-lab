@@ -5,6 +5,7 @@
     asKeyboardShortcut,
     commander,
     contexts,
+    isCommandDisabled,
     isFilterMatch,
     removeCommand,
     type Command,
@@ -70,10 +71,6 @@
   })
 
   onDestroy(() => {})
-
-  function isCommandDisabled(a: Command) {
-    return a.disabled && a.disabled()
-  }
 </script>
 
 <aside class="commands">

@@ -22,6 +22,10 @@ export type Command = {
     showInToolbar?: boolean;
 }
 
+export function isCommandDisabled(a: Command) {
+    return a.disabled && a.disabled()
+}
+
 class ActionContext {
     constructor(public readonly command: Command) { }
     execute(context: CommandContext) {
@@ -168,7 +172,7 @@ class Commander {
             e.stopImmediatePropagation();
             return false;
         }
-        const listener = (e: KeyboardEvent) => {
+        const keyDownHandler = (e: KeyboardEvent) => {
 
             const shortcut = asKeyboardShortcut({
                 key: e.key,
@@ -189,6 +193,10 @@ class Commander {
                 const ctx = this.findContext(shortcut);
                 if (ctx) {
                     log({ shortcut, ctx })
+                    if (Object.values(ctx.actions).every(a => isCommandDisabled(a.command))) {
+                        // ignore this context since we cannot execute any commands
+                        return;
+                    }
                     this.activeContext = ctx;
                     toast(ctx.command.name)
                     return preventDefault(e);
@@ -212,8 +220,8 @@ class Commander {
                 return preventDefault(e);
             }
         }
-        window.addEventListener('keydown', listener);
-        this.un.push(() => window.removeEventListener('keydown', listener));
+        window.addEventListener('keydown', keyDownHandler);
+        this.un.push(() => window.removeEventListener('keydown', keyDownHandler));
     }
 
     unlisten() {
