@@ -1,6 +1,4 @@
 import { log } from "@/lib/globals";
-import { writable } from "svelte/store"
-import type { CollageData } from "../d.ts/index";
 import { getAllCollages, getCollage } from "../data/collageServices"
 import { injectPath } from "./svg";
 

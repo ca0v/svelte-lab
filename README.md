@@ -89,6 +89,12 @@ This will scale better and be easier to remember.  Example of future expansion:
 | BW 3 | Sets the border width of the active cell to 3|
 | BS . | Sets the border style of the active cell to to dots|
 
+## Terms
+
+`Story` is a collection of collages
+`Collage` is a collection of cells
+`Cell` is an image container with transition and styling attributes
+
 ## References
 
 * [svelte cheet sheet](https://sveltesociety.dev/cheatsheet)

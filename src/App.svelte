@@ -23,7 +23,7 @@
   import DateRange from "./components/DateRange.svelte"
   import Logo from "./components/Logo.svelte"
   import Toolbar from "./components/Toolbar.svelte"
-  import { loadAllStories, stories } from "./store/stories"
+  import { loadAllStories } from "./store/stories"
   import { collageTemplates as transforms } from "./store/transforms"
   import { commander, contexts } from "./store/commands"
 
@@ -51,6 +51,8 @@
   let activeCollageNote = ""
 
   const colorWheelAngle = writable(0)
+
+  let stories: Array<CollageData> = []
 
   let states = {
     app: {
@@ -84,7 +86,8 @@
 
   async function handleAuthClick() {
     // get the google auth2 object
-    await loadAllStories()
+    stories = await loadAllStories()
+    log("stories loaded", JSON.stringify(stories))
     states.datefilter.from = states.datefilter.from || asZulu(new Date())
     states.isSignedIn = true
 
@@ -92,19 +95,16 @@
 
     collageId.subscribe(async (v) => {
       if (!v) return
-
-      localStorage.setItem("collage_name", v)
-
       if (!states.isSignedIn) return
-      const storyToLoad = $stories.find((h) => h.id === v)
-      if (!storyToLoad) throw new Error("Story not found")
+      setLocalStorage("collage_name", v)
+      const storyToLoad = stories.find((h) => h.id === v + "")
+      log("stories", JSON.stringify(stories))
+      if (!storyToLoad) throw `Story not found: ${v}`
       toast("Acquiring story data...")
       await refreshStory(storyToLoad)
       activeCollage = storyToLoad
       activeCollageNote = storyToLoad.note || ""
     })
-
-    $collageId = (await getLocalStorage("collage_name")) || ""
   }
 
   // assign images to each image element
@@ -186,10 +186,11 @@
     }
   }
 
-  $: states.datefilter.from &&
-    localStorage.setItem("date_filter", states.datefilter.from)
-
   onMount(async () => {
+    states = await getLocalStorage("app.state", states)
+    $collageId = (await getLocalStorage("collage_name", "")) + ""
+    log("collageId", { $collageId })
+
     contexts.workarea
       .addCommand({
         event: "auto_assign_photos",
@@ -217,6 +218,7 @@
           key: "s",
         },
         execute: async () => {
+          setLocalStorage("app.state", states)
           if (!activeCollage) throw new Error("No active collage")
           states.saving = true
           try {
@@ -266,7 +268,7 @@
             title: states.datefilter.from,
             data: [],
           }
-          stories.update((s) => [newStory, ...s])
+          stories.push(newStory)
           $collageId = newStory.id
           states.titleEditor.edit = true
           states.editor.editmode = true
@@ -352,8 +354,6 @@
       })
     commander.listen()
 
-    states.datefilter.from = localStorage.getItem("date_filter") || ""
-
     $colorWheelAngle = await getLocalStorage("colorwheel_angle", 0)
     colorWheelAngle.subscribe(async (v) => {
       toast(`Color wheel angle: ${v}deg`)
@@ -389,6 +389,7 @@
 
   onDestroy(() => {
     commander.unlisten()
+    setLocalStorage("app.state", states)
   })
 
   async function getPhotosForOneDay(yyyy_mm_dd: string) {
@@ -446,15 +447,15 @@
         </Toolbar>
         <div class="two-column">
           <p>S<u>t</u>ories</p>
-          {#if !$stories.length}
+          {#if !stories.length}
             <button on:click={() => commander.play("start_new_story")} />
           {:else}
             <select
               bind:value={$collageId}
-              use:shortcut={{ key: "t", isAlt: true, editmode: true }}
+              use:shortcut={{ key: "t", isAlt: true }}
               title="Select an existing story"
             >
-              {#each $stories.sort( (a, b) => (a.title || "").localeCompare(b.title || "") ) as collage}
+              {#each stories as collage}
                 <option value={collage.id}>{collage.title}</option>
               {/each}
             </select>
@@ -515,7 +516,7 @@
     <div class="preview-area">
       <h2>Preview</h2>
       <div class="frame three-by">
-        {#each $stories.filter((c) => c.data?.length).reverse() as collage}
+        {#each stories.filter((c) => c.data?.length).reverse() as collage}
           <div class="border">
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <h3 class="fit">
@@ -618,6 +619,6 @@
     overflow: auto;
     height: calc(100cqh - 1rem);
     justify-content: center;
-    width: max(320px, 80cqw);
+    width: calc(100cqw - 1rem);
   }
 </style>
