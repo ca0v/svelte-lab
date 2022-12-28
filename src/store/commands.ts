@@ -108,7 +108,17 @@ class Commander {
         // get out of all other contexts
         this.primaryContext
             .addCommand(
-                { name: "Escape Context", title: "Exit the current context", event: "escape", trigger: { key: "Escape", } }
+                {
+                    event: "escape",
+                    name: "Escape Context",
+                    title: "Exit the current context",
+                    trigger: { key: "Escape", },
+                    disabled: () => this.activeContext === this.primaryContext,
+                    execute: () => {
+                        this.setActiveContext(this.primaryContext);
+                        return true;
+                    }
+                }
             )
             .addCommand({
                 name: "suppress-reload-1", trigger: { key: "r", isCtrl: true }, execute: (command) => {
@@ -243,12 +253,15 @@ class Commander {
                 commander.update();
                 return preventDefault(e);
             }
+
+            this.setActiveContext(this.primaryContext);
         }
         document.addEventListener('keydown', keyDownHandler);
         this.un.push(() => document.removeEventListener('keydown', keyDownHandler));
     }
 
     private setActiveContext(ctx: CommandContext) {
+        if (this.activeContext === ctx) return;
         this.activeContext = ctx
         state.update(s => {
             s.activeContext = ctx.command.name

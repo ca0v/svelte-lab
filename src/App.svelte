@@ -40,7 +40,6 @@
   import GoogleSignin from "./components/GoogleSignin.svelte"
   import { getClipPathPoints } from "./lib/paths"
 
-  let activeElement: Element | null = null
   let photos: Array<Photo> = []
   let photosToShow: Array<Photo> = []
 
@@ -50,13 +49,12 @@
   let activeCollage: CollageData | null = {}
   let activeCollageNote = ""
 
-  const colorWheelAngle = writable(0)
-
   let stories: Array<CollageData> = []
 
   let states = {
     app: {
       showColorWheel: false,
+      colorWheelAngle: 0,
     },
     menu: {
       isOpen: false,
@@ -80,7 +78,16 @@
     datefilter: {
       from: "",
       to: "",
-      priorFrom: "",
+    },
+  }
+
+  const hackState = {
+    app: {
+      showColorWheel: false,
+      colorWheelAngle: 0,
+    },
+    datefilter: {
+      from: "",
     },
   }
 
@@ -170,19 +177,20 @@
   }
 
   $: {
-    if (
-      activeElement instanceof HTMLInputElement ||
-      activeElement instanceof HTMLTextAreaElement ||
-      activeElement instanceof HTMLSelectElement ||
-      activeElement instanceof HTMLButtonElement
-    ) {
-      log("going into escape mode")
-      commander.play("Esc")
+    // how to get this to run ony when the datefilter.from changes?
+    if (states.datefilter.from !== hackState.datefilter.from) {
+      hackState.datefilter.from = states.datefilter.from
+      toast(`Refreshing Photo Wheel`)
+      refreshPhotoWheel()
     }
 
-    if (states.datefilter.from !== states.datefilter.priorFrom) {
-      states.datefilter.priorFrom = states.datefilter.from
-      refreshPhotoWheel()
+    if (states.app.colorWheelAngle != hackState.app.colorWheelAngle) {
+      hackState.app.colorWheelAngle = states.app.colorWheelAngle
+      toast(`Color wheel angle: ${states.app.colorWheelAngle}deg`)
+      document.documentElement.style.setProperty(
+        "--theme-hue",
+        `${states.app.colorWheelAngle}`
+      )
     }
   }
 
@@ -354,13 +362,6 @@
       })
     commander.listen()
 
-    $colorWheelAngle = await getLocalStorage("colorwheel_angle", 0)
-    colorWheelAngle.subscribe(async (v) => {
-      toast(`Color wheel angle: ${v}deg`)
-      setLocalStorage("colorwheel_angle", v)
-      document.documentElement.style.setProperty("--theme-hue", `${v}`)
-    })
-
     const LAYOUTSHORTCUTKEYS = "abcdefghijklmnopqrstuvwxyz".split("")
     Object.keys($transforms).forEach((name, i) => {
       commander
@@ -421,16 +422,14 @@
   }}
 />
 
-<svelte:body
-  on:keyup={() => log((activeElement = document.activeElement))}
-  on:click={() => log((activeElement = document.activeElement))}
-/>
-
-<Commands bind:isOpen={states.menu.isOpen} on:escape={() => log("escape mode")}>
-  <GoogleSignin autoSignIn={false} />
-</Commands>
-
 <main>
+  <Commands
+    bind:isOpen={states.menu.isOpen}
+    on:escape={() => log("escape mode")}
+  >
+    <GoogleSignin autoSignIn={false} />
+  </Commands>
+
   {#if states.isSignedIn}
     <SvgPaths />
   {:else}
@@ -501,7 +500,7 @@
             <p>Color Wheel Angle</p>
             <input
               type="range"
-              bind:value={$colorWheelAngle}
+              bind:value={states.app.colorWheelAngle}
               min="0"
               max="360"
               step="1"
@@ -539,9 +538,8 @@
       </div>
     </div>
   {/if}
+  <Toaster />
 </main>
-
-<Toaster />
 
 <style>
   main {
