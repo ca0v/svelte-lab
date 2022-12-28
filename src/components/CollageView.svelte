@@ -420,6 +420,24 @@
           return true
         }
       }
+
+      function createImageZoomHandler({ dx, dy }: { dx: number; dy: number }) {
+        return (command: Command) => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const undoBox = asBox(sourceTransform)
+          zoom(sourceTransform, { dx, dy })
+          transforms = transforms
+
+          command.undo = () => {
+            place(sourceTransform, undoBox)
+            transforms = transforms
+          }
+
+          return true
+        }
+      }
+
       function createZoomHandler(box: BBox) {
         return (command: Command) => {
           const sourceTransform = getSourceTransform()
@@ -554,15 +572,7 @@
             key: "ArrowUp",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const dx = -1
-            const dy = -1
-            zoom(sourceTransform, { dx, dy })
-            transforms = transforms
-            return true
-          },
+          execute: createImageZoomHandler({ dx: -1, dy: -1 }),
         })
         .addCommand({
           event: "zoom-image-out",
@@ -571,15 +581,7 @@
             key: "ArrowDown",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const dx = 1
-            const dy = 1
-            zoom(sourceTransform, { dx, dy })
-            transforms = transforms
-            return true
-          },
+          execute: createImageZoomHandler({ dx: 1, dy: 1 }),
         })
         .addCommand({
           event: "zoom-in",
