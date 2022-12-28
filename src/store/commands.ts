@@ -18,6 +18,7 @@ export type Command = {
     title?: string;
     icon?: string;
     trigger?: CommandTrigger;
+    undo?: (command: Command) => boolean | void | Promise<any>;
     execute?: (command: Command) => boolean | void | Promise<any>;
     disabled?: () => boolean;
     showInToolbar?: boolean;
@@ -107,6 +108,31 @@ class Commander {
         this.primaryContext = this.context({ name: "primary", trigger: {} })
         // get out of all other contexts
         this.primaryContext
+            .addCommand({
+                event: "undo",
+                name: "Undo",
+                trigger: {
+                    key: "z",
+                    isCtrl: true,
+                },
+                execute: (command) => {
+                    log("Undo")
+                    debugger;
+                    return this.undo()
+                }
+            })
+            .addCommand({
+                event: "redo",
+                name: "Redo",
+                trigger: {
+                    key: "y",
+                    isCtrl: true,
+                },
+                execute: (command) => {
+                    log("Redo")
+                    return this.redo()
+                }
+            })
             .addCommand(
                 {
                     event: "escape",
@@ -248,7 +274,7 @@ class Commander {
 
             if (command && !isCommandDisabled(command)) {
                 log({ shortcut, command })
-                executeCommand(command)
+                this.executeCommand(command)
                 command.showInToolbar = false
                 commander.update();
                 return preventDefault(e);
@@ -282,14 +308,14 @@ class Commander {
             const context = contexts.primary;
             const action = context.actions[contextHotkeys];
             if (action) {
-                executeCommand(action.command);
+                this.executeCommand(action.command);
                 return;
             }
 
             // perhaps it is an event
             const command = this.findCommand(contextHotkeys);
             if (command) {
-                executeCommand(command);
+                this.executeCommand(command);
                 return
             }
 
@@ -304,8 +330,31 @@ class Commander {
 
                 const action = context.actions[actionHotKeys];
                 if (!action) throw `Action not found: ${actionHotKeys}`
-                executeCommand(action.command);
+                this.executeCommand(action.command);
             }
+        }
+    }
+
+    undoStack = [] as Array<{ command: Command, undo: Function }>;
+    redoStack = [] as Command[];
+
+    executeCommand(command: Command) {
+        executeCommand(command);
+        if (command.undo) {
+            this.undoStack.push({ command, undo: command.undo });
+        }
+    }
+
+    undo() {
+        const info = this.undoStack.pop();
+        if (!info) return false;
+        return info.undo.apply(info.command, info.command);
+    }
+
+    redo() {
+        const command = this.redoStack.pop();
+        if (command) {
+            return this.executeCommand(command);
         }
     }
 }

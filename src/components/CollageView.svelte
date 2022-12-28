@@ -22,7 +22,7 @@
   import type { BBox, CollageCellState, CollageData } from "../d.ts/index"
   import { toast } from "../store/toasts"
   import { hasContext, onDestroy, onMount } from "svelte"
-  import { commander, contexts } from "../store/commands"
+  import { commander, contexts, type Command } from "../store/commands"
   import {
     duplicateImageClipPath,
     moveClipPath,
@@ -353,7 +353,7 @@
       }
 
       function createEdgeMover(direction: Direction) {
-        return () => {
+        return (command: Command) => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) throw "no source transform"
           // move the actual clippath points
@@ -363,8 +363,15 @@
             image,
             `${transforms.id}-${sourceTransform.target}`
           )
+
+          const undoClipPath =
+            clipPath.querySelector("path")?.getAttribute("d") || ""
           moveClipPath(clipPath, direction)
           sourceTransform.clipPath = clipPath.id.substring(5) // remove clip_
+          command.undo = () => {
+            clipPath.querySelector("path")?.setAttribute("d", undoClipPath)
+          }
+          return true
         }
       }
 
