@@ -10,7 +10,12 @@
     return keys[index]
   }
 
-  import { getEffectiveTransform, hasFocus, log } from "../lib/globals"
+  import {
+    deepClone,
+    getEffectiveTransform,
+    hasFocus,
+    log,
+  } from "../lib/globals"
 
   import PhotoWheel, { type Source } from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
@@ -754,10 +759,6 @@
     if (!image) return
     const target = image.parentElement?.dataset.target
     return target
-  }
-
-  function deepClone<T>(data: T): T {
-    return JSON.parse(JSON.stringify(data))
   }
 </script>
 

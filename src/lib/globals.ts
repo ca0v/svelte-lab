@@ -91,3 +91,6 @@ export function log(...args: any[]) {
     console.log(...args)
 }
 
+export function deepClone<T>(o: T) {
+    return JSON.parse(JSON.stringify(o)) as T
+}

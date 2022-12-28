@@ -1,4 +1,4 @@
-<script type="ts">
+<script lang="ts">
   import { log } from "@/lib/globals"
   import { asKeyboardShortcut, commander } from "../store/commands"
 
