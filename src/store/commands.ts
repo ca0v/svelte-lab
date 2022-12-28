@@ -1,6 +1,7 @@
 import { writable } from "svelte/store"
 import { log } from "@/lib/globals"
 import { toast } from "./toasts"
+import { tick } from "svelte"
 
 export type CommandTrigger = {
     key?: string
@@ -21,6 +22,10 @@ export type Command = {
     disabled?: () => boolean;
     showInToolbar?: boolean;
 }
+
+export let state = writable({
+    activeContext: "primary",
+})
 
 export function isCommandDisabled(a: Command) {
     return a.disabled && a.disabled()
@@ -214,7 +219,7 @@ class Commander {
                         // ignore this context since we cannot execute any commands
                         return;
                     }
-                    this.activeContext = ctx;
+                    this.setActiveContext(ctx)
                     toast(ctx.command.name)
                     return preventDefault(e);
                 }
@@ -224,7 +229,7 @@ class Commander {
                 command = this.primaryContext.findCommand(shortcut);
                 if (command) {
                     log(`Command found in primary context: ${command.name}`)
-                    this.activeContext = this.primaryContext;
+                    this.setActiveContext(this.primaryContext);
                 }
                 else log(`Command not found in primary context, try one of these: ${Object.keys(this.primaryContext.actions).join(" ")}`)
             }
@@ -239,6 +244,14 @@ class Commander {
         }
         document.addEventListener('keydown', keyDownHandler);
         this.un.push(() => document.removeEventListener('keydown', keyDownHandler));
+    }
+
+    private setActiveContext(ctx: CommandContext) {
+        this.activeContext = ctx
+        state.update(s => {
+            s.activeContext = ctx.command.name
+            return s
+        })
     }
 
     unlisten() {

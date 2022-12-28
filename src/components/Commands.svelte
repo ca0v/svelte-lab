@@ -7,7 +7,7 @@
     contexts,
     isCommandDisabled,
     isFilterMatch,
-    removeCommand,
+    state as commandState,
     type Command,
   } from "../store/commands"
   import { toast } from "../store/toasts"
@@ -75,7 +75,7 @@
 
 <aside class="commands">
   <details bind:open={isOpen}>
-    <summary>☰</summary>
+    <summary>{$commandState.activeContext || ""} ☰</summary>
     {#if isOpen}
       <slot />
       <input
