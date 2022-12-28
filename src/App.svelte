@@ -1,3 +1,21 @@
+<script lang="ts" context="module">
+  function asZulu(yyyymmdd: string | Date) {
+    if (typeof yyyymmdd === "string") {
+      const [year, month, day] = yyyymmdd.split("-").map((v) => parseInt(v))
+      const result = new Date(year, month - 1, day).toISOString()
+      return result
+    } else {
+      return yyyymmdd.toISOString().split("T")[0]
+    }
+  }
+
+  function createUniqueId(): string {
+    return Math.random()
+      .toString(36)
+      .substring(2, 16 + 2)
+  }
+</script>
+
 <script lang="ts">
   import { onDestroy, onMount } from "svelte"
   import { writable } from "svelte/store"
@@ -110,16 +128,6 @@
     activeCollage = activeCollage
   }
 
-  function asZulu(yyyymmdd: string | Date) {
-    if (typeof yyyymmdd === "string") {
-      const [year, month, day] = yyyymmdd.split("-").map((v) => parseInt(v))
-      const result = new Date(year, month - 1, day).toISOString()
-      return result
-    } else {
-      return yyyymmdd.toISOString().split("T")[0]
-    }
-  }
-
   function applyTransform(activeTransformId: string) {
     if (!activeCollage?.data) throw new Error("No active collage")
     const transform = $transforms[activeTransformId]
@@ -137,12 +145,6 @@
       x: t.bbox?.x || -50,
       y: t.bbox?.y || -50,
     }))
-  }
-
-  function createUniqueId(): string {
-    return Math.random()
-      .toString(36)
-      .substring(2, 16 + 2)
   }
 
   async function refreshStory(story: CollageData) {
