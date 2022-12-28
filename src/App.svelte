@@ -17,12 +17,7 @@
   import type { ClipPaths, CollageData, Photo } from "./d.ts/index"
   import Toaster from "./components/Toaster.svelte"
   import { toast } from "./store/toasts"
-  import {
-    command,
-    removeCommand,
-    shortcut,
-    type Command,
-  } from "./store/commands"
+  import { removeCommand, shortcut, type Command } from "./store/commands"
   import { refreshBaseurl } from "./store/photos"
   import GoogleSignin from "./components/GoogleSignin.svelte"
   import { getClipPathPoints } from "./lib/paths"
@@ -435,10 +430,6 @@
 
 <main>
   {#if states.isSignedIn}
-    <div>
-      <h1>just.be.collage</h1>
-      <h2>Collage Builder</h2>
-    </div>
     <SvgPaths />
   {:else}
     <Logo>
@@ -449,11 +440,13 @@
   {#if states.isSignedIn}
     <div class="frame">
       <div class="work-area">
-        <Toolbar />
+        <Toolbar>
+          <h1>just.be.collage</h1>
+        </Toolbar>
         <div class="two-column">
           <p>S<u>t</u>ories</p>
           {#if !$stories.length}
-            <button use:command={"start_new_story"} />
+            <button on:click={() => commander.play("start_new_story")} />
           {:else}
             <select
               bind:value={$collageId}

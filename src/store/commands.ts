@@ -95,7 +95,7 @@ class Commander {
     readonly primaryContext: CommandContext;
 
     constructor() {
-        this.primaryContext = new CommandContext({ name: "primary", trigger: {} })
+        this.primaryContext = this.context({ name: "primary", trigger: {} })
         // get out of all other contexts
         this.primaryContext.addCommand(
             { name: "Escape Context", title: "Exit the current context", event: "escape", trigger: { key: "Escape", } }
@@ -125,7 +125,7 @@ class Commander {
     }
 
     getContexts() {
-        return [this.primaryContext, ...Object.values(this.contexts)];
+        return Object.values(this.contexts);
     }
 
     getCommands() {
@@ -207,6 +207,8 @@ class Commander {
             if (command) {
                 log({ shortcut, command })
                 executeCommand(command)
+                command.showInToolbar = false
+                commander.update();
                 return preventDefault(e);
             }
         }
@@ -226,8 +228,19 @@ class Commander {
         if (!invocations.length) {
             const context = contexts.primary;
             const action = context.actions[contextHotkeys];
-            if (!action) throw `Action not found: ${contextHotkeys}`
-            executeCommand(action.command);
+            if (action) {
+                executeCommand(action.command);
+                return;
+            }
+
+            // perhaps it is an event
+            const command = this.findCommand(contextHotkeys);
+            if (command) {
+                executeCommand(command);
+                return
+            }
+
+            throw `Action not found: ${contextHotkeys}`
         } else {
             const context = this.contexts[contextHotkeys];
             if (!context) throw "Context not found"
@@ -339,29 +352,6 @@ export function shortcut(node: HTMLElement, shortcut: string | CommandTrigger) {
         destroy() {
             removeCommand(command.name)
         },
-    }
-}
-
-export function command(node: HTMLButtonElement, eventName: string) {
-
-    const doit = () => {
-        const cmd = commander.findCommand(eventName);
-        if (!cmd) throw `Command not found: ${eventName}`
-        executeCommand(cmd);
-    };
-
-    node.addEventListener("click", doit)
-    if (!node.innerText) {
-        const cmd = commander.findCommand(eventName);
-        if (!cmd) throw `Command not found: ${eventName}`
-        node.innerText = cmd.name
-        node.title = cmd.title || cmd.name
-    }
-
-    return {
-        destroy() {
-            node.removeEventListener("click", doit)
-        }
     }
 }
 

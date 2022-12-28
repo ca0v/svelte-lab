@@ -92,6 +92,7 @@
           // execute the first command that matches the search filter
           const command = commander
             .getCommands()
+            .filter((c) => !isCommandDisabled(c))
             .find((c) => isFilterMatch(searchFilter, c))
 
           if (command) {

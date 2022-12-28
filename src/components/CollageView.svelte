@@ -17,7 +17,7 @@
   import type { BBox, CollageCellState, CollageData } from "../d.ts/index"
   import { toast } from "../store/toasts"
   import { hasContext, onDestroy, onMount } from "svelte"
-  import { command, commander, contexts } from "../store/commands"
+  import { commander, contexts } from "../store/commands"
   import {
     duplicateImageClipPath,
     moveClipPath,
@@ -765,7 +765,7 @@
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <section>
     {#if !transforms?.data}
-      <button use:command={"search-commands"}
+      <button on:click={() => commander.play("search-commands")}
         >No layout defined, select one</button
       >
     {:else}
