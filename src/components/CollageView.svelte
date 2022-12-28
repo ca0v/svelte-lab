@@ -269,7 +269,7 @@
           key: "Enter",
         },
         disabled: () => !getSourceTransform(),
-        execute: () => {
+        execute: (command: Command) => {
           // need to swap the identity, as that is what determines the order on reload
           if (!transforms.data) throw "no transforms data"
           const sourceTransform = getSourceTransform()
@@ -286,6 +286,16 @@
 
           // redraw
           transforms = transforms
+
+          command.undo = () => {
+            // place the source transform back where it was
+            const tail = transforms.data!.pop()
+            if (tail !== sourceTransform) throw "tail is not source transform"
+            transforms.data!.splice(index, 0, sourceTransform)
+            transforms = transforms
+            return true
+          }
+
           return true
         },
       })
@@ -318,18 +328,6 @@
     })
 
     {
-      function rotate(cell: CollageCellState, rotation: number) {
-        const currentStyle = cell.transform
-          ? getEffectiveTransform(cell.transform)
-          : ""
-        cell.transform = `${currentStyle} rotate(${rotation}deg)`
-      }
-
-      function rotateImage(cell: SVGImageElement, rotation: number) {
-        const currentStyle = getEffectiveTransform(cell.style.transform)
-        cell.style.transform = `${currentStyle} rotate(${rotation}deg)`
-      }
-
       function place(cell: CollageCellState, box: BBox) {
         cell.x = box.x || 0
         cell.y = box.y || 0
@@ -384,6 +382,40 @@
           width: cell.width || 0,
           height: cell.height || 0,
         } as { x: number; y: number; width: number; height: number }
+      }
+
+      function createImageRotationHandler({ rotation }: { rotation: number }) {
+        return (command: Command) => {
+          const target = getActiveCell()
+          if (!target) return
+          const rotation = 6
+          const currentStyle = getEffectiveTransform(target.style.transform)
+          target.style.transform = `${currentStyle} rotate(${rotation}deg)`
+          transforms = transforms
+
+          command.undo = () => {
+            target.style.transform = currentStyle
+            transforms = transforms
+          }
+          return true
+        }
+      }
+
+      function createRotationHandler({ rotation }: { rotation: number }) {
+        return (command: Command) => {
+          const sourceTransform = getSourceTransform()
+          if (!sourceTransform) return
+          const currentStyle = sourceTransform.transform
+            ? getEffectiveTransform(sourceTransform.transform)
+            : ""
+          sourceTransform.transform = `${currentStyle} rotate(${rotation}deg)`
+          transforms = transforms
+          command.undo = () => {
+            sourceTransform.transform = currentStyle
+            transforms = transforms
+          }
+          return true
+        }
       }
 
       function createMoveHandler(box: BBox) {
@@ -690,14 +722,7 @@
             key: "ArrowRight",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const rotation = 6
-            rotate(sourceTransform, rotation)
-            transforms = transforms
-            return true
-          },
+          execute: createRotationHandler({ rotation: 6 }),
         })
         .addCommand({
           name: "Rotate Counter-Clockwise",
@@ -706,14 +731,7 @@
             key: "ArrowLeft",
           },
           disabled: () => !getSourceTransform(),
-          execute: () => {
-            const sourceTransform = getSourceTransform()
-            if (!sourceTransform) return
-            const rotation = -6
-            rotate(sourceTransform, rotation)
-            transforms = transforms
-            return true
-          },
+          execute: createRotationHandler({ rotation: -6 }),
         })
         .addCommand({
           name: "Rotate Image Clockwise",
@@ -723,14 +741,7 @@
             isShift: true,
           },
           disabled: () => !hasFocus(svgElement),
-          execute: () => {
-            const target = getActiveCell()
-            if (!target) return
-            const rotation = 6
-            rotateImage(target, rotation)
-            transforms = transforms
-            return true
-          },
+          execute: createImageRotationHandler({ rotation: 6 }),
         })
         .addCommand({
           name: "Rotate Image Counter-Clockwise",
@@ -740,14 +751,7 @@
             isShift: true,
           },
           disabled: () => !hasFocus(svgElement),
-          execute: () => {
-            const target = getActiveCell()
-            if (!target) return
-            const rotation = -6
-            rotateImage(target, rotation)
-            transforms = transforms
-            return true
-          },
+          execute: createImageRotationHandler({ rotation: -6 }),
         })
     }
   })
