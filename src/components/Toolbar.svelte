@@ -31,9 +31,14 @@
     --command-width: min(20cqw, 10rem);
     display: grid;
     grid-template-columns: repeat(auto-fit, var(--command-width));
-    column-gap: 2px;
+    column-gap: 6px;
+    row-gap: 6px;
     justify-content: center;
     height: 3rem;
+    margin-right: 10rem;
+    margin-left: 5rem;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
   }
 
   .toolbar > button {

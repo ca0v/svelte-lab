@@ -461,11 +461,15 @@
   }}
 />
 
-<main>
-  <Commands bind:isOpen={states.menu.isOpen}>
-    <GoogleSignin autoSignIn={false} />
-  </Commands>
+<Commands bind:isOpen={states.menu.isOpen}>
+  <GoogleSignin autoSignIn={false} />
+</Commands>
 
+<Toolbar>
+  <h1>just.be.collage</h1>
+</Toolbar>
+
+<main>
   {#if states.isSignedIn}
     <SvgPaths />
   {:else}
@@ -477,9 +481,6 @@
   {#if states.isSignedIn}
     <div class="frame" hidden={states.preview.visible}>
       <div class="work-area">
-        <Toolbar>
-          <h1>just.be.collage</h1>
-        </Toolbar>
         <div class="two-column">
           <p>S<u>t</u>ories</p>
           {#if !stories.length}
@@ -593,9 +594,11 @@
     justify-content: center;
     background-color: var(--color-background);
     width: calc(100cqw - 2px);
-    height: calc(100cqh - 2px);
+    height: calc(100cqh - 6rem);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius);
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   p {
@@ -669,11 +672,8 @@
   .work-area {
     display: grid;
     gap: 1rem;
-    container-type: inline-size;
     padding: 1cqmin;
-    overflow: auto;
-    height: calc(100cqh - 1rem);
+    overflow: hidden;
     justify-content: center;
-    width: calc(100cqw - 1rem);
   }
 </style>

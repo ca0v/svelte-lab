@@ -832,11 +832,11 @@
       </svg>
     {/if}
   </section>
+  {#if !readonly && editmode && transforms}
+    <slot />
+    <PhotoWheel {sources} bind:this={photoWheel} />
+  {/if}
 </div>
-{#if !readonly && editmode && transforms}
-  <slot />
-  <PhotoWheel {sources} bind:this={photoWheel} />
-{/if}
 
 <style>
   svg {
