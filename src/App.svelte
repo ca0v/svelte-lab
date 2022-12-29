@@ -582,7 +582,9 @@
       </div>
     </div>
   {/if}
-  <Toaster />
+  {#if !states.isSignedIn}
+    <Toaster />
+  {/if}
 </main>
 
 <style>
@@ -641,7 +643,7 @@
 
   .status {
     height: 1.5rem;
-    width: 15rem;
+    width: min(30rem, var(--workarea-width));
     margin: 0 auto;
     opacity: 0.5;
     transition-duration: 500ms;
