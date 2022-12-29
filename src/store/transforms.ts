@@ -1,6 +1,6 @@
 import { writable } from "svelte/store"
 import type { CollageTemplate } from "../d.ts";
-import { range } from "../lib/globals";
+import { log, range } from "../lib/globals";
 import { polygonPath, polygonToPath, translatePath } from "../lib/paths";
 import { injectPath, injectRect } from "./svg";
 
@@ -33,7 +33,7 @@ const transforms: Record<string, CollageTemplate> = {
         { "i": 0, "style": "translate(0,0)", clipPath: "poly5_36" },
         ...[1, 2, 3, 4, 5].map((i) => ({
             "i": i,
-            "style": `rotate(${36 + i * 72}deg) translate(${55}px, ${-20}px) rotate(-${36 + i * 72}deg) `,
+            "style": `rotate(${i * 72}deg) translate(${0}px, ${59}px) rotate(-${i * 72}deg) `,
             clipPath: "poly5_36_1"
         }))],
     "spiral-19": [
@@ -86,6 +86,11 @@ function createInitialCss(scope: string, duration = 0, size = 20) {
 // inject css into style tag
 export function injectCss(id: string, generator: () => string) {
     let style = document.querySelector(`#${id}`)
+    if (style) {
+        log("removing existing style")
+        style.remove()
+        style = null
+    }
     if (!style) {
         style = document.createElement("style")
         style.id = id
@@ -100,8 +105,8 @@ function initialize() {
     injectPath("box", polygonToPath(polygonPath(4, 50, 45)))
     injectPath("0", polygonToPath(polygonPath(6, 21, 0)))
     injectPath("poly5_0", polygonToPath(polygonPath(5, 51, 0)))
-    injectPath("poly5_36", polygonToPath(polygonPath(5, 36, 52)))
-    injectPath("poly5_36_1", polygonToPath(polygonPath(5, 36, 52 + 36 + 0)))
+    injectPath("poly5_36", polygonToPath(polygonPath(5, 36, 18 * 3)))
+    injectPath("poly5_36_1", polygonToPath(polygonPath(5, 36, 18 * 5)))
     injectPath("30", polygonToPath(polygonPath(6, 21, 30)))
     injectPath("2", polygonToPath(translatePath(polygonPath(6, 64, 30), 64, 64)))
     injectRect("box_7x5", -35, -25, 70, 50)
