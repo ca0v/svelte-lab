@@ -32,6 +32,7 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 * FTR: Multi-level undo/redo
 * FTR: Multi-select then align-top|bottom|left|right
 * FTR: Would be nice to multi-select and apply effect to all cells at once (zoom, rotate, border coloring, etc.)
+* FTR: Make preview-mode into a slide show or at least hide workarea in preview mode
 * LRN: Make use of 'use', '#key', '#await', 'click|once|preventDefault', named &lt;slot&gt;, &lt;svelte:fragment&gt;, $$slots, svelte:self
 
 ## Authentication and Authorization

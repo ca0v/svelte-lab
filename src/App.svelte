@@ -475,7 +475,7 @@
   {/if}
 
   {#if states.isSignedIn}
-    <div class="frame">
+    <div class="frame" hidden={states.preview.visible}>
       <div class="work-area">
         <Toolbar>
           <h1>just.be.collage</h1>
