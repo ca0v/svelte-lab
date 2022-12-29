@@ -28,12 +28,14 @@ function gridMaker(cols: number, rows: number, width: number, height: number, cl
     }).flat()
 }
 
+const FLOWER_DY = (r = 36, sides = 5) => r * Math.cos(Math.PI / sides) * 2
+
 const transforms: Record<string, CollageTemplate> = {
     "flower-6": [
         { "i": 0, "style": "translate(0,0)", clipPath: "poly5_36" },
         ...[1, 2, 3, 4, 5].map((i) => ({
             "i": i,
-            "style": `rotate(${i * 72}deg) translate(${0}px, ${59}px) rotate(-${i * 72}deg) `,
+            "style": `rotate(${i * 72}deg) translate(${0}px, ${FLOWER_DY(36, 5)}px) rotate(-${i * 72}deg) `,
             clipPath: "poly5_36_1"
         }))],
     "spiral-19": [
