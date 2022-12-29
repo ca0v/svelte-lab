@@ -360,9 +360,8 @@ class Commander {
 
     redo() {
         const command = this.redoStack.pop();
-        if (command) {
-            return this.executeCommand(command);
-        }
+        if (!command) return false;
+        return this.executeCommand(command);
     }
 }
 

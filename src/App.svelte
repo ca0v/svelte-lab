@@ -616,7 +616,7 @@
 
   .three-by {
     display: grid;
-    grid-template-columns: repeat(4, 20vw);
+    grid-template-columns: repeat(auto-fit, max(20vw, 20rem));
     grid-template-rows: repeat(3, 1fr);
     row-gap: 2rem;
   }
