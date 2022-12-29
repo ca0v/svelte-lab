@@ -40,7 +40,7 @@
 
   let scope = `hexagon_spiral`
 
-  export let width = "auto"
+  export let width = "50cqw"
 
   function setWorkareaWidthCssVariable(value: string) {
     document.documentElement.style.setProperty("--workarea-width", `${value}`)
