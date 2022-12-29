@@ -33,7 +33,8 @@
   export let activeSource: Source | null = null
 
   onMount(() => {
-    contexts.workarea
+    // would only navigate the photo wheel when wanting to copy into the collage
+    contexts.copy
       .addCommand({
         event: "goto-next-photo",
         name: "Next photo",

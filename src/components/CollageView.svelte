@@ -208,20 +208,28 @@
             copy(sourceTransform, targetImage)
             focusTarget(targetImage.target!)
             getFocusCellIdentifier()
-            transforms = transforms
 
             command.undo = () => {
               Object.assign(targetImage, undoClone)
               focusTarget(sourceTransform.target!)
               transforms = transforms
+              return true
             }
+            transforms = transforms
             return true
           } else {
             const source = getPhotoWheelActiveSource()
             if (!source) throw "no active source"
             const targetImage = getTransform(index)
+            const undoClone = { ...targetImage }
             targetImage.id = source.id
             targetImage.baseurl = source.url
+            command.undo = () => {
+              Object.assign(targetImage, undoClone)
+              transforms = transforms
+              return true
+            }
+
             transforms = transforms
             return true
           }
@@ -241,6 +249,44 @@
           return true
         },
       })
+    })
+
+    contexts.primary.addCommand({
+      event: "swap-cell-up",
+      name: "Bring To Top",
+      trigger: {
+        key: "Enter",
+      },
+      disabled: () => !getSourceTransform(),
+      execute: (command: Command) => {
+        // need to swap the identity, as that is what determines the order on reload
+        if (!transforms.data) throw "no transforms data"
+        const sourceTransform = getSourceTransform()
+        if (!sourceTransform) throw "no source transform"
+        const index = transforms.data.findIndex(
+          (d) => d.target === sourceTransform.target
+        )
+        const targetTransform = transforms.data[transforms.data.length - 1]
+        if (targetTransform === sourceTransform) throw "already on top"
+
+        // place the source transform at the end of the list
+        transforms.data.splice(index, 1)
+        transforms.data.push(sourceTransform)
+
+        // redraw
+        transforms = transforms
+
+        command.undo = () => {
+          // place the source transform back where it was
+          const tail = transforms.data!.pop()
+          if (tail !== sourceTransform) throw "tail is not source transform"
+          transforms.data!.splice(index, 0, sourceTransform)
+          transforms = transforms
+          return true
+        }
+
+        return true
+      },
     })
 
     contexts.workarea
@@ -276,69 +322,31 @@
         },
       })
       .addCommand({
-        event: "swap-cell-up",
-        name: "Bring To Top",
+        name: "clone",
+        event: "clone-cell",
+        title: "Clone Current Cell",
         trigger: {
-          key: "Enter",
+          key: "d",
         },
-        disabled: () => !getSourceTransform(),
-        execute: (command: Command) => {
-          // need to swap the identity, as that is what determines the order on reload
+        execute: () => {
+          // get the image that is currently focused
           if (!transforms.data) throw "no transforms data"
-          const sourceTransform = getSourceTransform()
-          if (!sourceTransform) throw "no source transform"
-          const index = transforms.data.findIndex(
-            (d) => d.target === sourceTransform.target
+          const target = getFocusCellIdentifier()
+          if (!target) return
+
+          const sourceTransformIndex = transforms.data.findIndex(
+            (d) => d.target === target
           )
-          const targetTransform = transforms.data[transforms.data.length - 1]
-          if (targetTransform === sourceTransform) throw "already on top"
 
-          // place the source transform at the end of the list
-          transforms.data.splice(index, 1)
-          transforms.data.push(sourceTransform)
+          if (sourceTransformIndex < 0) return
 
-          // redraw
+          const clone = deepClone(transforms.data[sourceTransformIndex])
+          clone.target = "i" + (transforms.data.length + 1)
+          transforms.data.splice(sourceTransformIndex + 1, 0, clone)
           transforms = transforms
-
-          command.undo = () => {
-            // place the source transform back where it was
-            const tail = transforms.data!.pop()
-            if (tail !== sourceTransform) throw "tail is not source transform"
-            transforms.data!.splice(index, 0, sourceTransform)
-            transforms = transforms
-            return true
-          }
-
           return true
         },
       })
-
-    contexts.workarea.addCommand({
-      name: "clone",
-      event: "clone-cell",
-      title: "Clone Current Cell",
-      trigger: {
-        key: "d",
-      },
-      execute: () => {
-        // get the image that is currently focused
-        if (!transforms.data) throw "no transforms data"
-        const target = getFocusCellIdentifier()
-        if (!target) return
-
-        const sourceTransformIndex = transforms.data.findIndex(
-          (d) => d.target === target
-        )
-
-        if (sourceTransformIndex < 0) return
-
-        const clone = deepClone(transforms.data[sourceTransformIndex])
-        clone.target = "i" + (transforms.data.length + 1)
-        transforms.data.splice(sourceTransformIndex + 1, 0, clone)
-        transforms = transforms
-        return true
-      },
-    })
 
     {
       function place(cell: CollageCellState, box: BBox) {
@@ -401,7 +409,6 @@
         return (command: Command) => {
           const target = getActiveCell()
           if (!target) return
-          const rotation = 6
           const currentStyle = getEffectiveTransform(target.style.transform)
           target.style.transform = `${currentStyle} rotate(${rotation}deg)`
           transforms = transforms

@@ -102,6 +102,11 @@ export function isFilterMatch(searchFilter: string, command: Command) {
 }
 
 class Commander {
+    clearChangeHistory() {
+        this.undoStack.length = 0
+        this.redoStack.length = 0
+    }
+
     readonly primaryContext: CommandContext;
 
     constructor() {
@@ -336,8 +341,8 @@ class Commander {
         }
     }
 
-    undoStack = [] as Array<{ command: Command, undo: Function }>;
-    redoStack = [] as Command[];
+    readonly undoStack = [] as Array<{ command: Command, undo: Function }>;
+    readonly redoStack = [] as Command[];
 
     executeCommand(command: Command) {
         executeCommand(command);

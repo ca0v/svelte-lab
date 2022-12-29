@@ -96,17 +96,18 @@
     },
   }
 
+  function makeClean() {
+    hackState.editor.isTouched = false
+    hackState.editor.data = JSON.stringify(activeCollage)
+  }
+
   function isDirty() {
     if (!hackState.editor.data) return false
     if (!activeCollage?.data) return false
     if (hackState.editor.isTouched) return true
-    const was = hackState.editor.data
     buildDocument()
-    const is = JSON.stringify(activeCollage)
-    hackState.editor.isTouched = was !== is
-    if (hackState.editor.isTouched) {
-      log({ was, is })
-    }
+    hackState.editor.isTouched =
+      hackState.editor.data !== JSON.stringify(activeCollage)
     return hackState.editor.isTouched
   }
 
@@ -132,8 +133,9 @@
       toast("Acquiring story data...")
       await refreshStory(storyToLoad)
       activeCollage = storyToLoad
-      hackState.editor.isTouched = false
-      hackState.editor.data = JSON.stringify(storyToLoad)
+      makeClean()
+      // clear the undo/redo stack
+      commander.clearChangeHistory()
       activeCollageNote = storyToLoad.note || ""
     })
   }
@@ -230,6 +232,7 @@
 
       buildDocument()
       await saveCollage({ ...activeCollage })
+      makeClean()
       toast("Saved")
     } catch (ex) {
       reportError(ex)
