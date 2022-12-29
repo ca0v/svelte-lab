@@ -39,6 +39,7 @@
   import { refreshBaseurl } from "./store/photos"
   import GoogleSignin from "./components/GoogleSignin.svelte"
   import { getClipPathPoints } from "./lib/paths"
+  import { svgToCanvas } from "./store/svg"
 
   let photos: Array<Photo> = []
   let photosToShow: Array<Photo> = []
@@ -354,6 +355,17 @@
 
     contexts.primary
       .addCommand({
+        name: "quick",
+        trigger: {
+          key: "q",
+        },
+        execute: () => {
+          const svg = document.querySelector(".workarea svg") as SVGSVGElement
+          const canvas = document.querySelector("#canvas") as HTMLCanvasElement
+          svg && svgToCanvas(svg, canvas)
+        },
+      })
+      .addCommand({
         event: "zoom-in-workarea",
         name: "Zoom Workarea In",
         trigger: {
@@ -460,6 +472,9 @@
     }
   }}
 />
+
+<canvas id="canvas" width="200" height="200" />
+<img id="image" />
 
 <Commands bind:isOpen={states.menu.isOpen}>
   <GoogleSignin autoSignIn={false} />
@@ -589,6 +604,19 @@
 </main>
 
 <style>
+  canvas {
+    position: absolute;
+    top: 3rem;
+    left: 3rem;
+    width: 10rem;
+    height: 10rem;
+    z-index: 100;
+    border: 1px solid red;
+  }
+  #image {
+    position: absolute;
+    left: -1000px;
+  }
   main {
     display: grid;
     justify-content: center;
