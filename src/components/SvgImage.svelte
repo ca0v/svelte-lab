@@ -132,7 +132,12 @@
 {/if}
 
 {#if !readonly}
-  <g class={target} style={`transform: ${style}`} data-target={target}>
+  <g
+    class={target}
+    class:editmode
+    style={`transform: ${style}`}
+    data-target={target}
+  >
     <use
       class="border"
       class:active
@@ -150,7 +155,6 @@
       {href}
       bind:this={thisImage}
       class:active
-      class:editmode
       class:fast
       clip-path={`url(#clip_${clipPath})`}
       height="50"
@@ -176,9 +180,7 @@
     />
 
     <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-    <text class="selector if-focus" class:editmode class:active textLength="1"
-      >{hotkey}</text
-    >
+    <text class="selector if-focus" class:active textLength="1">{hotkey}</text>
   </g>
 {/if}
 
@@ -199,8 +201,9 @@
     outline: none;
   }
 
-  .border {
-    stroke: none;
+  .editmode .border {
+    stroke-width: 0.1;
+    stroke: var(--color-border);
   }
 
   /* this works, ignore the warnings 
@@ -213,7 +216,8 @@
   } */
 
   .border.active {
-    stroke: white;
+    stroke-width: 1;
+    stroke: var(--color-highlight);
   }
 
   .play {
@@ -233,7 +237,7 @@
     font-size: max(3px, min(1vmin, 5px));
   }
 
-  .selector.editmode {
+  .editmode .selector {
     visibility: visible;
   }
 
