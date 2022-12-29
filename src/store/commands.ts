@@ -355,7 +355,7 @@ class Commander {
         const info = this.undoStack.pop();
         if (!info) return false;
         this.redoStack.push(info.command);
-        return info.undo.apply(info.command, info.command);
+        return info.undo(info.command);
     }
 
     redo() {
