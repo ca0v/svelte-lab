@@ -33,17 +33,19 @@ function getClipPathId(image: SVGImageElement) {
 export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement) {
     const image = document.getElementById("image") as HTMLImageElement
     const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
-    const bbox = svg.getBBox()
+    const { x: dx, y: dy, width, height } = svg.viewBox.baseVal
+
+    const scaleX = canvas.width / width
+    const scaleY = canvas.height / height
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     async function injectImage(svgImage: SVGImageElement) {
-        const x = parseInt(svgImage.getAttribute("x") || "0")
-        const y = parseInt(svgImage.getAttribute("y") || "0")
+        // get the position if img relative to the svg container
+        const imgRect = svgImage.getBBox()
+        const { x, y } = imgRect;
 
         return new Promise<void>((resolve) => {
-            // get the position if img relative to the svg container
-            const imgRect = svgImage.getBBox()
 
             // get all the transforms applied to the image between the svg container and the image
             const transforms: Array<string> = []
@@ -54,12 +56,12 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
                 if (transform && transform != "none") transforms.unshift(transform)
                 current = current.parentNode as SVGElement
             }
-            console.log(transforms)
 
             image.style.transform = transforms.join(" ")
             let transform = getComputedStyle(image).transform
             if (transform == "none") transform = ""
 
+            //ctx.scale(1.5, 1.5)
             image.onload = function () {
                 const clipPathId = getClipPathId(svgImage)
                 const clipPath = clipPathId && getClipPath(clipPathId)?.querySelector("path")?.getAttribute("d")!
@@ -67,19 +69,18 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
                 // the svg image scales the image to fit...so if the image is 3x wider than the
                 // svg container, we need to scale the image down by 3x
                 const scale = Math.min(imgRect.width / image.width, imgRect.height / image.height)
-                log("scale", scale)
-                let matrix1 = new DOMMatrix(transform)
-                matrix1 = new DOMMatrix(`translate(${-bbox.x}px,${-bbox.y}px) ${transform}`)
-                let matrix2 = new DOMMatrix(`translate(${-bbox.x}px,${-bbox.y}px) ${transform} translate(${x}px,${y}px) scale(${scale}) translate(${-x}px,${-y}px)`)
+
+                let matrix1 = new DOMMatrix(`translate(${-dx * scaleX}px,${-dy * scaleY}px) scale(${scaleX},${scaleY}) ${transform}`)
+                let matrix2 = new DOMMatrix(`translate(${-dx * scaleX}px,${-dy * scaleY}px) scale(${scaleX},${scaleY}) ${transform} translate(${x}px,${y}px) scale(${scale}) translate(${-x}px,${-y}px)`)
 
                 const path = clipPath && new Path2D(clipPath)
                 ctx.save();
+                ctx.fillStyle = "red"
                 ctx.beginPath();
                 ctx.setTransform(matrix1)
                 path && ctx.clip(path);
                 path && ctx.fill(path);
                 ctx.setTransform(matrix2)
-                console.log({ x, y })
                 ctx.drawImage(image, x, y)
                 ctx.restore();
                 resolve()
@@ -94,4 +95,3 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
         await injectImage(images[i] as SVGImageElement)
     }
 }
-
