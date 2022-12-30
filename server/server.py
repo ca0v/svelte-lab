@@ -1,3 +1,4 @@
+from urllib.parse import unquote
 import requests
 from io import BytesIO
 import json
@@ -179,7 +180,8 @@ def getClientId():
 # route with a single query parameter for the url
 @app.route('/proxy/<path:url>', methods=['GET'])
 def proxy(url):
-    print("THE URL IS: ", url)
+    # decode twice, see https://github.com/pallets/flask/issues/900
+    url = unquote(url)
     response = requests.get(url)
     # return the image
     return response.content, 200, {'Content-Type': 'image/jpeg'}

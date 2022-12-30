@@ -10,6 +10,9 @@ if (!baseUrl) throw new Error("baseUrl is required");
 const api = new Api({ baseUrl });
 
 export function proxy(photoUrl: string) {
+    // encode the url twice (see https://github.com/pallets/flask/issues/900)
+    photoUrl = encodeURIComponent(photoUrl);
+    photoUrl = encodeURIComponent(photoUrl);
     return `${api.baseUrl}/proxy/${photoUrl}`;
 }
 
