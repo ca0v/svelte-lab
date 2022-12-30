@@ -473,7 +473,7 @@
   }}
 />
 
-<canvas id="canvas" width="200" height="200" />
+<canvas id="canvas" width="400" height="400" />
 <img id="image" />
 
 <Commands bind:isOpen={states.menu.isOpen}>
@@ -608,8 +608,8 @@
     position: absolute;
     top: 3rem;
     left: 3rem;
-    width: 10rem;
-    height: 10rem;
+    width: 400px;
+    height: 400px;
     z-index: 100;
     border: 1px solid red;
   }
