@@ -95,3 +95,16 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
         await injectImage(images[i] as SVGImageElement)
     }
 }
+
+export function canvasToClipboard(canvas: HTMLCanvasElement) {
+    // copy the canvas to the clipboard
+    canvas.addEventListener("click", () => {
+        canvas.toBlob(blob => {
+            if (!blob) throw "no blob";
+            navigator.clipboard.write([
+                new ClipboardItem({ "image/png": blob })])
+        })
+        console.log(canvas.toDataURL('image/png'))
+    })
+}
+

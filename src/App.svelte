@@ -39,7 +39,7 @@
   import { refreshBaseurl } from "./store/photos"
   import GoogleSignin from "./components/GoogleSignin.svelte"
   import { getClipPathPoints } from "./lib/paths"
-  import { svgToCanvas } from "./store/svg"
+  import { canvasToClipboard, svgToCanvas } from "./store/svg"
 
   let photos: Array<Photo> = []
   let photosToShow: Array<Photo> = []
@@ -262,6 +262,8 @@
   }
 
   onMount(async () => {
+    const canvas = document.querySelector("#canvas") as HTMLCanvasElement
+    canvasToClipboard(canvas)
     states = await getLocalStorage("app.state", states)
     $collageId = (await getLocalStorage("collage_name", "")) + ""
     log("collageId", { $collageId })
@@ -362,7 +364,9 @@
         execute: () => {
           const svg = document.querySelector(".workarea svg") as SVGSVGElement
           const canvas = document.querySelector("#canvas") as HTMLCanvasElement
-          svg && svgToCanvas(svg, canvas)
+          if (svg) {
+            svgToCanvas(svg, canvas)
+          }
         },
       })
       .addCommand({
@@ -474,7 +478,7 @@
 />
 
 <canvas id="canvas" width="400" height="400" />
-<img id="image" />
+<img id="image" crossorigin="anonymous" alt="svg-to-canvas helper" />
 
 <Commands bind:isOpen={states.menu.isOpen}>
   <GoogleSignin autoSignIn={false} />
