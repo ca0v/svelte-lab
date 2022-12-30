@@ -1,4 +1,7 @@
+import requests
+from io import BytesIO
 import json
+from os import sendfile
 from flask_sqlalchemy import SQLAlchemy
 from dataclasses import dataclass
 from flask_restful import Api
@@ -6,7 +9,7 @@ from flask import Flask, jsonify, request, render_template, session
 from flask_cors import CORS
 from flask_session import Session
 
-from google.auth.transport import requests
+from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 
 # Specify the CLIENT_ID of the app that accesses the backend:
@@ -173,6 +176,15 @@ def getClientId():
     return jsonify({'client_id': CLIENT_ID})
 
 
+# route with a single query parameter for the url
+@app.route('/proxy/<path:url>', methods=['GET'])
+def proxy(url):
+    print("THE URL IS: ", url)
+    response = requests.get(url)
+    # return the image
+    return response.content, 200, {'Content-Type': 'image/jpeg'}
+
+
 @app.route('/login', methods=['POST'])
 def validateRequest():
     # Specify the CLIENT_ID of the app that accesses the backend:
@@ -181,7 +193,7 @@ def validateRequest():
     print(f"requestData: {requestData}")
     idtoken = requestData['credential']
     idinfo = id_token.verify_oauth2_token(
-        idtoken, requests.Request(), CLIENT_ID, clock_skew_in_seconds=6000)
+        idtoken, google_requests.Request(), CLIENT_ID, clock_skew_in_seconds=6000)
     print(f"idinfo: {idinfo}")
     if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
         raise ValueError('Wrong issuer.')

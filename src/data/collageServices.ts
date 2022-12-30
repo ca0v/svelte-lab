@@ -9,6 +9,10 @@ const baseUrl = await getPhotoUrl();
 if (!baseUrl) throw new Error("baseUrl is required");
 const api = new Api({ baseUrl });
 
+export function proxy(photoUrl: string) {
+    return `${api.baseUrl}/proxy/${photoUrl}`;
+}
+
 export async function* fetchPhotoList(startDate: string, endDate: string): AsyncGenerator<Array<Photo>, void, void> {
     await sleep(1000);
     if (!startDate) throw new Error("startDate is required");

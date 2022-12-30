@@ -50,7 +50,7 @@ class Collage {
         return this.client_id
     }
 
-    async login(photoUrl: any, credential: any) {
+    async login(photoUrl: string, credential: string) {
         const response = await fetch(`${photoUrl}/login`, {
             method: 'POST',
             credentials: "include",

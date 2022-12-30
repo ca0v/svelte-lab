@@ -1,3 +1,4 @@
+import { proxy } from "@/data/collageServices";
 import { log } from "@/lib/globals";
 import { writable } from "svelte/store"
 
@@ -84,7 +85,7 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
                 ctx.restore();
                 resolve()
             }
-            image.src = svgImage.href.baseVal
+            image.src = proxy(svgImage.href.baseVal)
         });
     }
 
