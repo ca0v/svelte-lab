@@ -79,7 +79,6 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
                 ctx.beginPath();
                 ctx.setTransform(matrix1)
                 path && ctx.clip(path);
-                path && ctx.fill(path);
                 ctx.setTransform(matrix2)
                 ctx.drawImage(image, x, y)
                 ctx.restore();
@@ -97,14 +96,19 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
 }
 
 export function canvasToClipboard(canvas: HTMLCanvasElement) {
-    // copy the canvas to the clipboard
-    canvas.addEventListener("click", () => {
+    console.log(canvas.toDataURL('image/png'))
+    return new Promise<void>((resolve, reject) => {
+        // copy the canvas to the clipboard
         canvas.toBlob(blob => {
-            if (!blob) throw "no blob";
-            navigator.clipboard.write([
-                new ClipboardItem({ "image/png": blob })])
+            try {
+                if (!blob) throw "no blob";
+                navigator.clipboard.write([
+                    new ClipboardItem({ "image/png": blob })])
+                resolve();
+            } catch (e) {
+                reject(e);
+            }
         })
-        console.log(canvas.toDataURL('image/png'))
-    })
+    });
 }
 

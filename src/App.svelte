@@ -1,4 +1,10 @@
 <script lang="ts" context="module">
+  async function copyToClipboard() {
+    await canvasToClipboard(
+      document.querySelector("#canvas") as HTMLCanvasElement
+    )
+  }
+
   function asZulu(yyyymmdd: string | Date) {
     if (typeof yyyymmdd === "string") {
       const [year, month, day] = yyyymmdd.split("-").map((v) => parseInt(v))
@@ -25,7 +31,7 @@
   import Toolbar from "./components/Toolbar.svelte"
   import { loadAllStories } from "./store/stories"
   import { collageTemplates as transforms } from "./store/transforms"
-  import { commander, contexts } from "./store/commands"
+  import { commander, contexts, state } from "./store/commands"
 
   import Commands from "./components/Commands.svelte"
   import Notes from "./components/Notes.svelte"
@@ -55,6 +61,7 @@
   let states = {
     app: {
       showColorWheel: false,
+      showCanvas: false,
       colorWheelAngle: 0,
       isSaving: false,
       isLoading: false,
@@ -262,8 +269,6 @@
   }
 
   onMount(async () => {
-    const canvas = document.querySelector("#canvas") as HTMLCanvasElement
-    canvasToClipboard(canvas)
     states = await getLocalStorage("app.state", states)
     $collageId = (await getLocalStorage("collage_name", "")) + ""
     log("collageId", { $collageId })
@@ -357,16 +362,16 @@
 
     contexts.primary
       .addCommand({
-        name: "quick",
+        name: "Copy To Canvas",
         trigger: {
-          key: "q",
+          key: "c",
+          isCtrl: true,
         },
-        execute: () => {
+        execute: async () => {
+          states.app.showCanvas = true
           const svg = document.querySelector(".workarea svg") as SVGSVGElement
           const canvas = document.querySelector("#canvas") as HTMLCanvasElement
-          if (svg) {
-            svgToCanvas(svg, canvas)
-          }
+          await svgToCanvas(svg, canvas)
         },
       })
       .addCommand({
@@ -477,8 +482,21 @@
   }}
 />
 
-<canvas id="canvas" width="400" height="400" />
-<img id="image" crossorigin="anonymous" alt="svg-to-canvas helper" />
+<div class="canvas-viewer" class:off-screen={!states.app.showCanvas}>
+  <canvas id="canvas" width="1024" height="1024" />
+  <button
+    on:click={async () => {
+      await copyToClipboard()
+      states.app.showCanvas = false
+    }}>Copy To Clipboard</button
+  >
+  <img
+    class="off-screen"
+    id="image"
+    crossorigin="anonymous"
+    alt="svg-to-canvas helper"
+  />
+</div>
 
 <Commands bind:isOpen={states.menu.isOpen}>
   <GoogleSignin autoSignIn={false} />
@@ -608,16 +626,7 @@
 </main>
 
 <style>
-  canvas {
-    position: absolute;
-    top: 3rem;
-    left: 3rem;
-    width: 400px;
-    height: 400px;
-    z-index: 100;
-    border: 1px solid red;
-  }
-  #image {
+  .off-screen {
     position: absolute;
     left: -1000px;
   }
@@ -707,5 +716,21 @@
     padding: 1cqmin;
     overflow: hidden;
     justify-content: center;
+  }
+
+  .canvas-viewer {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    margin: 0 auto;
+    background-color: var(--color-background-highlight);
+    border: var(--color-border) 1px solid;
+    z-index: 1;
+  }
+
+  canvas {
+    width: 50vmin;
+    height: 50vmin;
   }
 </style>
