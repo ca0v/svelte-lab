@@ -31,7 +31,7 @@
   import Toolbar from "./components/Toolbar.svelte"
   import { loadAllStories } from "./store/stories"
   import { collageTemplates as transforms } from "./store/transforms"
-  import { commander, contexts, state } from "./store/commands"
+  import { commander, contexts, state as commandState } from "./store/commands"
 
   import Commands from "./components/Commands.svelte"
   import Notes from "./components/Notes.svelte"
@@ -564,7 +564,7 @@
               class:loading={states.app.isLoading}
               class:saving={states.app.isSaving}
             >
-              {$toasts[0]?.message || ""}
+              {$toasts[0]?.message || $commandState.activeContext + " mode"}
               {states.app.isLoading ? "loading..." : ""}
               {states.app.isSaving ? "saving..." : ""}
             </div>
@@ -686,21 +686,25 @@
   }
 
   .status {
-    height: 1.5rem;
-    width: min(30rem, var(--workarea-width));
     margin: 0 auto;
-    opacity: 0.5;
+    margin-top: 3px;
+    height: 2rem;
+    line-height: 2rem;
     transition-duration: 500ms;
     text-align: center;
     font-size: smaller;
+    /* prevent word wrapping */
+    white-space: nowrap;
+    border: 1px solid var(--color-background);
+    width: clamp(15rem, var(--workarea-width), 30rem);
+    background-color: var(--color-background);
   }
 
   .status.loading {
-    opacity: 1;
-    color: var(--color-highlight);
-    background-color: var(--color-background-highlight);
     border-radius: var(--border-radius);
+    border-color: var(--color-highlight);
   }
+
   .preview-area {
     position: fixed;
     top: 0;
