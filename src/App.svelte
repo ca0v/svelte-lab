@@ -50,6 +50,7 @@
   import GoogleSignin from "./components/GoogleSignin.svelte"
   import { getClipPathPoints } from "./lib/paths"
   import { canvasToClipboard, svgToCanvas } from "./store/svg"
+  import { signin } from "./lib/googleApi"
 
   let photos: Array<Photo> = []
   let photosToShow: Array<Photo> = []
@@ -66,6 +67,7 @@
     app: {
       showColorWheel: false,
       colorWheelAngle: 0,
+      autoSignin: false,
     },
     editor: {
       editmode: true,
@@ -148,6 +150,9 @@
       commander.clearChangeHistory()
       activeCollageNote = storyToLoad.note || ""
     })
+
+    // allow auto-signin if the user has previously signed in
+    states.app.autoSignin = true
   }
 
   // assign images to each image element
@@ -274,6 +279,9 @@
 
   onMount(async () => {
     states = await getLocalStorage("app.state", states)
+    if (states.app.autoSignin) {
+      $authenticatedWithGoogle = (await signin()) || false
+    }
     $collageId = (await getLocalStorage("collage_name", "")) + ""
     log("collageId", { $collageId })
 
@@ -504,18 +512,19 @@
   >
 </div>
 
-<Commands bind:isOpen={hackState.menu.isOpen}>
-  <GoogleSignin autoSignIn={false} />
-</Commands>
+{#if $authenticatedWithGoogle}
+  <Commands bind:isOpen={hackState.menu.isOpen}>
+    <GoogleSignin autoSignIn={states.app.autoSignin} />
+  </Commands>
 
-<Toolbar>
-  <h1>just.be.collage</h1>
-</Toolbar>
+  <Toolbar>
+    <h1>just.be.collage</h1>
+  </Toolbar>
+  <SvgPaths />
+{/if}
 
 <main>
-  {#if $authenticatedWithGoogle}
-    <SvgPaths />
-  {:else}
+  {#if !$authenticatedWithGoogle}
     <Logo>
       <GoogleSignin autoSignIn={false} on:signedin={handleAuthClick} /></Logo
     >

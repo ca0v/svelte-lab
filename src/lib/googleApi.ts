@@ -108,6 +108,7 @@ async function signin() {
     await useGapi();
     await useGooglePhotos();
     signedIn = true;
+    return signedIn;
 }
 
 async function signout() {
@@ -115,6 +116,7 @@ async function signout() {
     // logout of google authentication
     gapi.auth.signOut();
     signedIn = false;
+    return signedIn;
 }
 
 export { signin, signout }
