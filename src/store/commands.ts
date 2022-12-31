@@ -233,9 +233,13 @@ class Commander {
             return false;
         }
         const keyDownHandler = (e: KeyboardEvent) => {
-
+            let key = e.key;
+            if (key === "Dead" && e.altKey) {
+                // mac?
+                key = e.code.substring(3).toLowerCase();
+            }
             const shortcut = asKeyboardShortcut({
-                key: e.key,
+                key: key,
                 isShift: e.shiftKey,
                 isAlt: e.altKey,
                 isCtrl: e.ctrlKey,
