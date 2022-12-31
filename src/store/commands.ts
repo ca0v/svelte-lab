@@ -115,13 +115,12 @@ class Commander {
         this.primaryContext
             .addCommand({
                 event: "undo",
-                name: "Undo",
+                name: "Undo Last Action",
                 trigger: {
                     key: "z",
                     isCtrl: true,
                 },
                 execute: (command) => {
-                    log("Undo")
                     return this.undo()
                 }
             })

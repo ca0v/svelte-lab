@@ -184,6 +184,7 @@
             swap(sourceTransform, targetImage)
             focusTarget(sourceTransform.target!)
             transforms = transforms
+            return true
           }
           return true
         },
@@ -338,7 +339,7 @@
         trigger: {
           key: "d",
         },
-        execute: () => {
+        execute: (command: Command) => {
           // get the image that is currently focused
           if (!transforms.data) throw "no transforms data"
           const target = getFocusCellIdentifier()
@@ -354,6 +355,13 @@
           clone.target = "i" + (transforms.data.length + 1)
           transforms.data.splice(sourceTransformIndex + 1, 0, clone)
           transforms = transforms
+          command.undo = () => {
+            const index = transforms.data?.indexOf(clone)
+            if (index === undefined || index < 0) return false
+            transforms.data?.splice(index, 1)
+            transforms = transforms
+            return true
+          }
           return true
         },
       })
@@ -401,6 +409,7 @@
           sourceTransform.clipPath = clipPath.id.substring(5) // remove clip_
           command.undo = () => {
             clipPath.querySelector("path")?.setAttribute("d", undoClipPath)
+            return true
           }
           return true
         }
@@ -426,6 +435,7 @@
           command.undo = () => {
             target.style.transform = currentStyle
             transforms = transforms
+            return true
           }
           return true
         }
@@ -443,6 +453,7 @@
           command.undo = () => {
             sourceTransform.transform = currentStyle
             transforms = transforms
+            return true
           }
           return true
         }
@@ -457,6 +468,7 @@
           command.undo = () => {
             place(sourceTransform, undoBox)
             transforms = transforms
+            return true
           }
           transforms = transforms
           return true
@@ -478,6 +490,7 @@
           command.undo = () => {
             sourceTransform.transform = currentStyle
             transforms = transforms
+            return true
           }
           return true
         }
@@ -494,6 +507,7 @@
           command.undo = () => {
             place(sourceTransform, undoBox)
             transforms = transforms
+            return true
           }
 
           return true
