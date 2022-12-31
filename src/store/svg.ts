@@ -1,4 +1,5 @@
 import { proxy } from "@/data/collageServices";
+import { log } from "@/lib/globals";
 import { writable } from "svelte/store"
 import { toss } from "./toasts";
 
@@ -62,7 +63,6 @@ function getClipPathId(image: SVGImageElement) {
     7. draw the image onto the canvas at (0, 0)
 */
 export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement) {
-    const image = document.getElementById("image") as HTMLImageElement
     const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
 
     const svgToCanvasScale = getScaleToFitCanvas(svg, canvas)
@@ -85,6 +85,8 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
                 current = current.parentNode as SVGElement
             }
 
+            const image = document.createElement("img")
+            image.setAttribute("crossorigin", "anonymous")
             image.onload = function () {
                 const clipPathId = getClipPathId(svgImage)
                 const clipPath = clipPathId && getClipPath(clipPathId)?.querySelector("path")?.getAttribute("d")!
@@ -132,14 +134,15 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
     }
 
     // has clippath, href, x, y, width, height and is within a series of transforms
-    const images = svg.querySelectorAll("image");
-    for (let i = 0; i < images.length; i++) {
-        await injectImage(images[i] as SVGImageElement)
-    }
+    [...svg.querySelectorAll("image")]
+        .filter(image => !!image.href.baseVal)
+        .map(image => {
+            return injectImage(image as SVGImageElement)
+        })
 }
 
 export function canvasToClipboard(canvas: HTMLCanvasElement) {
-    console.log(canvas.toDataURL('image/png'))
+    window.open(canvas.toDataURL('image/png'), "_blank", "width=100,height=100");
     return new Promise<void>((resolve, reject) => {
         // copy the canvas to the clipboard
         canvas.toBlob(blob => {

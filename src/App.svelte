@@ -61,7 +61,6 @@
   let states = {
     app: {
       showColorWheel: false,
-      showCanvas: false,
       colorWheelAngle: 0,
     },
     menu: {
@@ -94,6 +93,7 @@
       colorWheelAngle: 0,
       isSaving: false,
       isLoading: false,
+      showCanvas: false,
     },
     editor: {
       isTouched: false,
@@ -372,7 +372,7 @@
           isCtrl: true,
         },
         execute: async () => {
-          states.app.showCanvas = true
+          hackState.app.showCanvas = true
           const svg = document.querySelector(".workarea svg") as SVGSVGElement
           const canvas = document.querySelector("#canvas") as HTMLCanvasElement
           await svgToCanvas(svg, canvas)
@@ -494,20 +494,14 @@
   }}
 />
 
-<div class="canvas-viewer" class:off-screen={!states.app.showCanvas}>
+<div class="canvas-viewer" class:off-screen={!hackState.app.showCanvas}>
   <canvas id="canvas" width="1024" height="1024" />
   <button
     on:click={async () => {
       await copyToClipboard()
-      states.app.showCanvas = false
+      hackState.app.showCanvas = false
     }}>Copy To Clipboard</button
   >
-  <img
-    class="off-screen"
-    id="image"
-    crossorigin="anonymous"
-    alt="svg-to-canvas helper"
-  />
 </div>
 
 <Commands bind:isOpen={states.menu.isOpen}>
@@ -576,7 +570,7 @@
               class:loading={hackState.app.isLoading}
               class:saving={hackState.app.isSaving}
             >
-              {$toasts[0]?.message || $commandState.activeContext + " mode"}
+              {$toasts[0]?.message || `"${$commandState.activeContext}"  mode`}
               {hackState.app.isLoading ? "loading..." : ""}
               {hackState.app.isSaving ? "saving..." : ""}
             </div>

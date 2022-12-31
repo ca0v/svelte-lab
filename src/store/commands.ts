@@ -1,7 +1,6 @@
 import { writable } from "svelte/store"
 import { log } from "@/lib/globals"
 import { toast, toss } from "./toasts"
-import { tick } from "svelte"
 
 export type CommandTrigger = {
     key?: string
@@ -245,15 +244,11 @@ class Commander {
 
             if (this.activeContext) {
                 command = this.activeContext.findCommand(shortcut);
-                if (!command) {
-                    log(`You pressed ${shortcut}, try one of these: ${Object.keys(this.activeContext.actions).join(" ")}`)
-                }
             }
 
             if (!command) {
                 const ctx = this.findContext(shortcut);
                 if (ctx) {
-                    log({ shortcut, ctx })
                     if (Object.values(ctx.actions).every(a => isCommandDisabled(a.command))) {
                         // ignore this context since we cannot execute any commands
                         return;
@@ -262,17 +257,15 @@ class Commander {
                     toast(ctx.command.name)
                     return preventDefault(e);
                 }
-                log(`You pressed ${shortcut}, try one of these: ${Object.keys(commander.contexts).join(" ")}`)
 
                 // search primary context
                 command = this.primaryContext.findCommand(shortcut);
                 if (command) {
-                    log(`Command found in primary context: ${command.name}`)
+                    toast(`Command found in primary context: ${command.name}`)
                     if (!isCommandDisabled(command)) {
                         this.setActiveContext(this.primaryContext);
                     }
                 }
-                else log(`Command not found in primary context, try one of these: ${Object.keys(this.primaryContext.actions).join(" ")}`)
             }
 
             if (command && !isCommandDisabled(command)) {

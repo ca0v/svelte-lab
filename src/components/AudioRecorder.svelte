@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { log } from "@/lib/globals"
   import { createEventDispatcher } from "svelte"
   import type { AudioRecording } from "../lib/db"
 
@@ -19,8 +20,8 @@
     try {
       await startListening()
       mediaRecorder.start()
-      console.log(mediaRecorder.state)
-      console.log("recorder started")
+      log(mediaRecorder.state)
+      log("recorder started")
       stop.disabled = false
       record.disabled = true
     } catch (e) {
@@ -33,15 +34,15 @@
 
   function stopClickHandler() {
     mediaRecorder.stop()
-    console.log(mediaRecorder.state)
-    console.log("recorder stopped")
+    log(mediaRecorder.state)
+    log("recorder stopped")
     // mediaRecorder.requestData();
     stop.disabled = true
     record.disabled = false
   }
 
   function stopMediaRecorderHandler() {
-    console.log("data available after MediaRecorder.stop() called.")
+    log("data available after MediaRecorder.stop() called.")
 
     const recording = {
       id: Date.now().toString(),
@@ -74,7 +75,7 @@
         }
       }
     } else {
-      console.log("getUserMedia not supported on your browser!")
+      log("getUserMedia not supported on your browser!")
     }
   }
 

@@ -5,10 +5,6 @@
     id: string
     url: string
   }
-
-  export function whatisit() {
-    console.log("whatisit")
-  }
 </script>
 
 <script lang="ts">
