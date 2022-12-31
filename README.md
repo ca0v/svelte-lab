@@ -6,7 +6,7 @@ This is a playground for learning [Svelte](https://svelte.dev/).
 
 Updated using `>npm create vite@latest`
 
-See the [live](https://ca0v.github.io/svelte-lab) site
+See the [live](https://ca0v.us/stories/static/svelte-lab/index.html) site
 
 ## What does it do?
 
@@ -52,37 +52,12 @@ Identifying the user on the server was a necessary step to ensure no users share
 
 ## Command Console
 
-I am not happy with the command interface.  Instead of meaningless keyboard shortcuts that do not work well on smaller keyboards it should be a fluent syntax.  Examples:
 
 | key   | Commmand |
 | ----- | -------- |
-| A ←   | Rotate active cell CCW |
-| A →   | Rotate active cell CW |
-| C *k* | Copy the active cell into cell *k*|
-| E← ←  | Move left edge of active cell left |
-| E← →  | Move left edge of active cell right |
-| E→ ←  | Move right edge of active cell left |
-| E→ →  | Move right edge of active cell right |
-| E↑ ↑  | Move top edge of active cell up |
-| E↑ ↓  | Move top edge of active cell down|
-| E↓ ↑  | Move bottom edge of active cell up |
-| E↓ ↓  | Move bottom edge of active cell down |
-| G *k* | Goto/Focus/Select cell *k*|
-| S *k* | swap the active cell with cell *k*|
-| S ↑   | scale-up background of active cell |
-| S ↓   | scale-down background of active cell |
-| T *k* | toggle selection of cell *k* |
+| TODO  | generate this table |
 
-These "prelude" keys put the processor in a context, making it convenient to repeat commands:
-
-    A←←← # rotate active cell CCW 3x
-    R←←← # move left-edge of active cell 3x
-    SaSsSdSf # Swap active cell with cell 'a' then 's' then 'd' then 'f'
-    S↑↑↑ # scale-up active cell 3x
-
-The `Escape` exits current context.
-
-This will scale better and be easier to remember.  Example of future expansion:
+Future examples:
 
 | key  | Commmand |
 | ---- | -------- |
@@ -93,9 +68,9 @@ This will scale better and be easier to remember.  Example of future expansion:
 
 ## Terms
 
-`Story` is a collection of collages
-`Collage` is a collection of cells
-`Cell` is an image container with transition and styling attributes
+* `Story` is a collection of collages
+* `Collage` is a collection of cells
+* `Cell` is an image container with transition and styling attributes
 
 ## References
 
