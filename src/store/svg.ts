@@ -4,6 +4,84 @@ import { writable } from "svelte/store"
 
 export const svgClipPaths = writable<Array<{ id: string, body: string }>>([])
 
+class SvgHelper {
+    static svgToImageData(svg: SVGSVGElement) {
+        // does not work with images?
+        const svgString = new XMLSerializer().serializeToString(svg)
+        const svg64 = btoa(svgString)
+        const b64Start = 'data:image/svg+xml;base64,'
+        const image64 = b64Start + svg64
+        const img = new Image()
+        img.src = image64
+        const canvas = document.createElement("canvas")
+        document.body.appendChild(canvas)
+        canvas.width = svg.width.baseVal.value
+        canvas.height = svg.height.baseVal.value
+        const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
+        ctx.drawImage(img, 0, 0)
+        // create a image url
+        return canvas.toDataURL("image/png")
+    }
+
+    static getImageScale(svgImage: SVGImageElement, image: HTMLImageElement) {
+        const { width: w1, height: h1 } = svgImage.getBBox()
+        const { naturalWidth: w2, naturalHeight: h2 } = image
+        return Math.min(w1 / w2, h1 / h2)
+    }
+
+    static computePadding(svgImage: SVGImageElement, image: HTMLImageElement) {
+        const { width: w1, height: h1 } = svgImage.getBBox()
+        const { naturalWidth: w2, naturalHeight: h2 } = image
+        const sx = w1 / w2
+        const sy = h1 / h2
+        const scale = Math.min(sx, sy)
+        console.log({ w1, h1, w2, h2, sx, sy, scale })
+        return [(1 - w2 / w1 * scale), (1 - h2 / h1 * scale)]
+    }
+
+    static getCanvasScale(svg: SVGSVGElement, canvas: HTMLCanvasElement) {
+        const { width, height } = svg.viewBox.baseVal
+        return Math.min(canvas.width / width, canvas.height / height)
+    }
+
+    static getSvgImageScale(svg: SVGSVGElement, image: SVGImageElement) {
+        const { width, height } = svg.viewBox.baseVal
+        const { width: imageWidth, height: imageHeight } = image.getBBox()
+        return Math.min(imageWidth / width, imageHeight / height)
+    }
+
+    static transform(node: HTMLElement | SVGElement, transform: string) {
+        let current = getComputedStyle(node).transform
+        if (current == "none") {
+            current = ""
+        }
+        node.style.transform = `${transform} ${current}`
+    }
+
+    static translate(x: number, y: number) {
+        return `translate(${x}px,${y}px)`
+    }
+
+    static rotate(degrees: number) {
+        return `rotate(${degrees}deg)`
+    }
+
+    static scale(scale: number) {
+        return `scale(${scale})`
+    }
+
+    static rotateAboutCenter(target: SVGElement, degrees: number) {
+        // get the transformation offset from center
+        const t = getComputedStyle(target).transform
+        let m = new DOMMatrix(t)
+        const t1 = SvgHelper.translate(-m.e, -m.f);
+        const r = SvgHelper.rotate(degrees)
+        const t2 = SvgHelper.translate(m.e, m.f)
+        SvgHelper.transform(target, `${t2} ${r} ${t1}`)
+    }
+
+}
+
 export function injectRect(id: string, x: number, y: number, width: number, height: number) {
     const left = x;
     const top = y;
@@ -34,17 +112,14 @@ function getClipPathId(image: SVGImageElement) {
 export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement) {
     const image = document.getElementById("image") as HTMLImageElement
     const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
-    const { x: dx, y: dy, width, height } = svg.viewBox.baseVal
 
-    const scaleX = canvas.width / width
-    const scaleY = canvas.height / height
+    const svgToCanvasScale = SvgHelper.getCanvasScale(svg, canvas)
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     async function injectImage(svgImage: SVGImageElement) {
-        // get the position if img relative to the svg container
-        const imgRect = svgImage.getBBox()
-        const { x, y } = imgRect;
+        // get the position of image relative to the svg container
+        const svgImageBox = svgImage.getBBox()
 
         return new Promise<void>((resolve) => {
 
@@ -58,31 +133,46 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
                 current = current.parentNode as SVGElement
             }
 
-            image.style.transform = transforms.join(" ")
-            let transform = getComputedStyle(image).transform
-            if (transform == "none") transform = ""
-
-            //ctx.scale(1.5, 1.5)
             image.onload = function () {
                 const clipPathId = getClipPathId(svgImage)
                 const clipPath = clipPathId && getClipPath(clipPathId)?.querySelector("path")?.getAttribute("d")!
 
-                // the svg image scales the image to fit...so if the image is 3x wider than the
-                // svg container, we need to scale the image down by 3x
-                const scale = Math.min(imgRect.width / image.width, imgRect.height / image.height)
+                if (image) {
+                    // 1st center image on (0,0)
+                    let transform = ""
+                    transform = SvgHelper.translate(-image.naturalWidth / 2, -image.naturalHeight / 2) + transform
 
-                let matrix1 = new DOMMatrix(`translate(${-dx * scaleX}px,${-dy * scaleY}px) scale(${scaleX},${scaleY}) ${transform}`)
-                let matrix2 = new DOMMatrix(`translate(${-dx * scaleX}px,${-dy * scaleY}px) scale(${scaleX},${scaleY}) ${transform} translate(${x}px,${y}px) scale(${scale}) translate(${-x}px,${-y}px)`)
+                    // 2nd scale the image to the svgImage
+                    transform = SvgHelper.scale(SvgHelper.getImageScale(svgImage, image)) + transform
 
-                const path = clipPath && new Path2D(clipPath)
-                ctx.save();
-                ctx.fillStyle = "red"
-                ctx.beginPath();
-                ctx.setTransform(matrix1)
-                path && ctx.clip(path);
-                ctx.setTransform(matrix2)
-                ctx.drawImage(image, x, y)
-                ctx.restore();
+                    // move to svgImage center
+                    transform = SvgHelper.translate(svgImageBox.x + svgImageBox.width / 2, svgImageBox.y + svgImageBox.height / 2) + transform
+
+                    // apply everything that happened to the svgImage
+                    transform = transforms.join(" ") + transform
+
+                    // scale to canvas
+                    transform = SvgHelper.scale(svgToCanvasScale) + transform
+
+                    // move to center of canvas
+                    transform = SvgHelper.translate(canvas.width / 2, canvas.height / 2) + transform
+
+                    ctx.save();
+                    ctx.beginPath();
+                    if (clipPath) {
+                        const path = new Path2D(clipPath)
+                        let transform = transforms.join(" ")
+                        const { x: dx, y: dy, width, height } = svg.viewBox.baseVal
+                        const scaleX = canvas.width / width
+                        const scaleY = canvas.height / height
+                        let matrix1 = new DOMMatrix(`translate(${-dx * scaleX}px,${-dy * scaleY}px) scale(${scaleX},${scaleY}) ${transform}`)
+                        ctx.setTransform(matrix1)
+                        ctx.clip(path);
+                    }
+                    ctx.setTransform(new DOMMatrix(transform))
+                    ctx.drawImage(image, 0, 0)
+                    ctx.restore();
+                }
                 resolve()
             }
             image.src = proxy(svgImage.href.baseVal)
