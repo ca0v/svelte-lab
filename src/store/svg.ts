@@ -142,7 +142,6 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
 }
 
 export function canvasToClipboard(canvas: HTMLCanvasElement) {
-    window.open(canvas.toDataURL('image/png'), "_blank", "width=100,height=100");
     return new Promise<void>((resolve, reject) => {
         // copy the canvas to the clipboard
         canvas.toBlob(blob => {
