@@ -20,7 +20,7 @@
   import PhotoWheel, { type Source } from "./PhotoWheel.svelte"
   import SvgImage from "./SvgImage.svelte"
   import type { BBox, CollageCellState, CollageData } from "../d.ts/index"
-  import { toast } from "../store/toasts"
+  import { toast, toss } from "../store/toasts"
   import { hasContext, onDestroy, onMount } from "svelte"
   import { commander, contexts, type Command } from "../store/commands"
   import {
@@ -155,7 +155,7 @@
 
     function getTransform(index: number) {
       const result = transforms.data![index]
-      if (!result) throw "no transform"
+      if (!result) throw toss("no transform")
       return result
     }
 
@@ -170,7 +170,7 @@
         },
         disabled: () => isDisabled(index),
         execute: (command: Command) => {
-          if (!transforms.data) throw "no transforms data"
+          if (!transforms.data) throw toss("no transforms data")
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
           const targetImage = transforms.data[index]
@@ -220,7 +220,7 @@
             return true
           } else {
             const source = getPhotoWheelActiveSource()
-            if (!source) throw "no active source"
+            if (!source) throw toss("no active source")
             const targetImage = getTransform(index)
             const undoClone = { ...targetImage }
             targetImage.id = source.id
@@ -261,14 +261,14 @@
       disabled: () => !getSourceTransform(),
       execute: (command: Command) => {
         // need to swap the identity, as that is what determines the order on reload
-        if (!transforms.data) throw "no transforms data"
+        if (!transforms.data) throw toss("no transforms data")
         const sourceTransform = getSourceTransform()
-        if (!sourceTransform) throw "no source transform"
+        if (!sourceTransform) throw toss("no source transform")
         const index = transforms.data.findIndex(
           (d) => d.target === sourceTransform.target
         )
         const targetTransform = transforms.data[transforms.data.length - 1]
-        if (targetTransform === sourceTransform) throw "already on top"
+        if (targetTransform === sourceTransform) throw toss("already on top")
 
         // place the source transform at the end of the list
         transforms.data.splice(index, 1)
@@ -280,7 +280,8 @@
         command.undo = () => {
           // place the source transform back where it was
           const tail = transforms.data!.pop()
-          if (tail !== sourceTransform) throw "tail is not source transform"
+          if (tail !== sourceTransform)
+            throw toss("tail is not source transform")
           transforms.data!.splice(index, 0, sourceTransform)
           transforms = transforms
           return true
@@ -341,7 +342,7 @@
         },
         execute: (command: Command) => {
           // get the image that is currently focused
-          if (!transforms.data) throw "no transforms data"
+          if (!transforms.data) throw toss("no transforms data")
           const target = getFocusCellIdentifier()
           if (!target) return
 
@@ -394,10 +395,10 @@
       function createEdgeMover(direction: Direction) {
         return (command: Command) => {
           const sourceTransform = getSourceTransform()
-          if (!sourceTransform) throw "no source transform"
+          if (!sourceTransform) throw toss("no source transform")
           // move the actual clippath points
           const image = getActiveCell()
-          if (!image) throw "no active cell"
+          if (!image) throw toss("no active cell")
           const clipPath = duplicateImageClipPath(
             image,
             `${transforms.id}-${sourceTransform.target}`

@@ -10,7 +10,7 @@
     state as commandState,
     type Command,
   } from "../store/commands"
-  import { toast } from "../store/toasts"
+  import { toast, toss } from "../store/toasts"
 
   const dispatcher = createEventDispatcher()
 
@@ -26,7 +26,7 @@
       return true
     }
 
-    if (!command.event) throw "cannot dispatch command with no event"
+    if (!command.event) throw toss("cannot dispatch command with no event")
     log(`dispatching ${command.event}`)
     dispatcher(command.event, { action: command })
     return true

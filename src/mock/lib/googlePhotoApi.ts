@@ -1,4 +1,7 @@
+import { log } from "@/lib/globals";
+
 async function* loadAllPhotos(startDate: gapi.client.photoslibrary.Date, endDate: gapi.client.photoslibrary.Date, pageToken?: string) {
+    log({ startDate, endDate, pageToken })
     const offset = new Date().getTimezoneOffset();
     let creationTime = new Date(startDate.year!, startDate.month! - 1, startDate.day!, 6, offset); // 6 am local time
     let endTime = new Date(endDate.year!, endDate.month! - 1, endDate.day!, 6, offset); // 6 am local time

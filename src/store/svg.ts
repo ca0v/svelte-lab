@@ -1,6 +1,6 @@
 import { proxy } from "@/data/collageServices";
-import { log } from "@/lib/globals";
 import { writable } from "svelte/store"
+import { toss } from "./toasts";
 
 export const svgClipPaths = writable<Array<{ id: string, body: string }>>([])
 
@@ -144,7 +144,7 @@ export function canvasToClipboard(canvas: HTMLCanvasElement) {
         // copy the canvas to the clipboard
         canvas.toBlob(blob => {
             try {
-                if (!blob) throw "no blob";
+                if (!blob) throw toss("no blob")
                 navigator.clipboard.write([
                     new ClipboardItem({ "image/png": blob })])
                 resolve();

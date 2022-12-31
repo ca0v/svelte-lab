@@ -4,7 +4,7 @@
 
   export let recordings: Array<AudioRecording> = []
 
-  const chunks_1 = []
+  const chunks_1 = [] as any[]
   const dispatch = createEventDispatcher()
   const appStartTime = Date.now()
 
@@ -91,7 +91,7 @@
 
   function playRecording(recording: AudioRecording) {
     if (!recording.url) {
-      recording.url = URL.createObjectURL(recording.blob)
+      recording.url = URL.createObjectURL(recording.blob!)
     }
     audioPlayer.src = recording.url
     audioPlayer.play()

@@ -1,3 +1,4 @@
+import { toss } from "@/store/toasts";
 import { Api } from "@justBeCollage/Api"
 import { getPhotoUrl } from "./globals";
 
@@ -51,6 +52,7 @@ async function useGapi() {
     return new Promise<void>(async (good, bad) => {
         const client_id = await api.collage.getClientId();
         const photoUrl = await getPhotoUrl();
+        if (!photoUrl) throw toss("no photo url")
         google.accounts.id.initialize({
             client_id,
             auto_select: true,

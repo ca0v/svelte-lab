@@ -1,3 +1,5 @@
+import { toss } from "@/store/toasts"
+
 type AudioRecording = {
     id?: string
     title?: string
@@ -34,9 +36,9 @@ export function blobToArray(blob: Blob) {
 async function saveAudioRecording(recording: AudioRecording) {
     // save to local storage
     let { id, title, blob } = recording;
-    if (!id) throw "id is required";
-    if (!title) throw "title is required";
-    if (!blob) throw "blob is required";
+    if (!id) throw toss("id is required")
+    if (!title) throw toss("title is required")
+    if (!blob) throw toss("blob is required")
 
     const recordings = getItem<AudioRecordings>('audio.recordings') || {};
 
@@ -54,7 +56,7 @@ async function saveAudioRecording(recording: AudioRecording) {
 
 function deleteAudioRecording(recording: AudioRecording) {
     const allRecordings = getItem<AudioRecordings>('audio.recordings') || {};
-    if (!recording.id) throw "id is required";
+    if (!recording.id) throw toss("id is required")
     const recordingToDelete = allRecordings[recording.id]
     if (!recordingToDelete) {
         throw `Recording not found: ${recording.id}`;

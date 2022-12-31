@@ -1,6 +1,6 @@
 import { writable } from "svelte/store"
 import { log } from "@/lib/globals"
-import { toast } from "./toasts"
+import { toast, toss } from "./toasts"
 import { tick } from "svelte"
 
 export type CommandTrigger = {
@@ -327,11 +327,11 @@ class Commander {
             throw `Action not found: ${contextHotkeys}`
         } else {
             const context = this.contexts[contextHotkeys];
-            if (!context) throw "Context not found"
+            if (!context) throw toss("Context not found")
 
             while (invocations.length) {
                 const actionHotKeys = invocations.shift();
-                if (!actionHotKeys) throw "Action hotkey not defined"
+                if (!actionHotKeys) throw toss("Action hotkey not defined")
 
                 const action = context.actions[actionHotKeys];
                 if (!action) throw `Action not found: ${actionHotKeys}`
@@ -486,7 +486,7 @@ export function asKeyboardShortcut(trigger: CommandTrigger) {
 }
 
 async function executeCommand(command: Command) {
-    if (isCommandDisabled(command)) throw "Command is disabled"
+    if (isCommandDisabled(command)) throw toss("Command is disabled")
     if (command.execute) {
         if (await command.execute(command)) {
             toast(command.title || command.name)

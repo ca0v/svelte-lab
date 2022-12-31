@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { log } from "@/lib/globals"
   import { asKeyboardShortcut, commander } from "../store/commands"
 
   // how to know when the commander commands have changed?
@@ -15,7 +14,7 @@
     {#if !cmds.length}
       <div class="empty"><slot /></div>
     {:else}
-      {#each cmds as c, i}
+      {#each cmds as c}
         <button
           title={asKeyboardShortcut(c.trigger || {})}
           on:click={() => commander.play(c.event || "")}

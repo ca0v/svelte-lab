@@ -12,6 +12,8 @@
 </script>
 
 <script lang="ts">
+  import { toss } from "@/store/toasts"
+
   import { createEventDispatcher, onDestroy, onMount } from "svelte"
   import { hasFocus } from "../lib/globals"
   import { polygonPath, polygonToPath, translatePath } from "../lib/paths"
@@ -90,7 +92,7 @@
     <button
       draggable="true"
       on:dragstart={(e) => {
-        if (!e.dataTransfer) throw "no dataTransfer"
+        if (!e.dataTransfer) throw toss("no dataTransfer")
         e.dataTransfer.dropEffect = "copy"
         e.dataTransfer.setData("application/json", JSON.stringify(source))
       }}

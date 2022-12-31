@@ -1,4 +1,4 @@
-import { getLocalStorage, getPhotoUrl, promptUser, setLocalStorage } from "@/lib/globals";
+import { getLocalStorage, getPhotoUrl, setLocalStorage } from "@/lib/globals";
 import type { CollageData } from "@/d.ts";
 
 class Collage {

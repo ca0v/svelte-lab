@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { toss } from "@/store/toasts"
   import { data } from "../data/stateTemplates"
 
   const resolution = 200
@@ -25,7 +26,7 @@
     const stateInfo = data.features.find(
       (f) => f.attributes.STATE_ABBR === state_id
     )
-    if (!stateInfo) throw "state not found"
+    if (!stateInfo) throw toss("state not found")
 
     // normalize the vector data (cannot use MIN_VALUE here...Math.max fails with it)
     let [minx, miny, maxx, maxy] = [

@@ -1,4 +1,4 @@
-import { getLocalStorage, setLocalStorage } from "@/lib/globals";
+import { getLocalStorage, log, setLocalStorage } from "@/lib/globals";
 import type { CollageData } from "@/d.ts";
 
 const TEST_COLLAGES: Array<CollageData> = [{
@@ -48,8 +48,6 @@ const TEST_COLLAGES: Array<CollageData> = [{
 }
 ]
 class Collage {
-    private client_id: string | undefined;
-
     constructor(private api: Api) {
     }
 
@@ -77,6 +75,7 @@ class Collage {
     }
 
     async login(photoUrl: any, credential: any) {
+        log({ photoUrl, credential })
         return { apiKey: "123" };
     }
 

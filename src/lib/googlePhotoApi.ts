@@ -36,16 +36,6 @@ export async function loadMediaItem(mediaItemId: string) {
     return response.result
 }
 
-export async function loadMediaItemsFromAlbum(album: gapi.client.photoslibrary.Album) {
-    const response = await gapi.client.photoslibrary.mediaItems.search({
-        resource: {
-            pageSize: 10,
-            albumId: album.id,
-        },
-    })
-    return response.result
-}
-
 export async function loadPhotos(startDate: gapi.client.photoslibrary.Date, endDate: gapi.client.photoslibrary.Date, pageToken?: string) {
     const response = await gapi.client.photoslibrary.mediaItems.search({
         resource: {

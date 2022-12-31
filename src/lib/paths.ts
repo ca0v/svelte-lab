@@ -1,3 +1,4 @@
+import { toss } from "@/store/toasts"
 import { log } from "./globals"
 
 type Direction = { top?: number, left?: number, bottom?: number, right?: number }
@@ -61,14 +62,14 @@ function cloneClipPath(sourceId: string, cloneId: string) {
 }
 
 function duplicateImageClipPath(clipPathOwner: SVGImageElement, cloneId: string) {
-    if (!clipPathOwner) throw "no clip path owner";
+    if (!clipPathOwner) throw toss("no clip path owner")
 
     const clipPath = clipPathOwner?.getAttribute("clip-path")
     const clipPathId = clipPath?.slice(5, -1)
-    if (!clipPathId) throw "no clip path"
+    if (!clipPathId) throw toss("no clip path")
 
     const clone = cloneClipPath(clipPathId, `clip_${cloneId}`)
-    if (!clone) throw "no clone"
+    if (!clone) throw toss("no clone")
 
     clipPathOwner.setAttribute("clip-path", `url(#${clone.id})`)
     return clone;

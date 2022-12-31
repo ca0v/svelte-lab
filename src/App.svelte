@@ -40,7 +40,7 @@
   import { addDays, getLocalStorage, log, setLocalStorage } from "./lib/globals"
   import type { ClipPaths, CollageData, Photo } from "./d.ts/index"
   import Toaster from "./components/Toaster.svelte"
-  import { toast, toasts } from "./store/toasts"
+  import { toast, toasts, toss } from "./store/toasts"
   import { shortcut } from "./store/commands"
   import { refreshBaseurl } from "./store/photos"
   import GoogleSignin from "./components/GoogleSignin.svelte"
@@ -63,13 +63,10 @@
       showColorWheel: false,
       showCanvas: false,
       colorWheelAngle: 0,
-      isSaving: false,
-      isLoading: false,
     },
     menu: {
       isOpen: false,
     },
-    isSignedIn: false,
     editor: {
       editmode: true,
       width: 100,
@@ -91,9 +88,12 @@
   }
 
   const hackState = {
+    isSignedIn: false,
     app: {
       showColorWheel: false,
       colorWheelAngle: 0,
+      isSaving: false,
+      isLoading: false,
     },
     editor: {
       isTouched: false,
@@ -124,20 +124,22 @@
     stories = await loadAllStories()
     log("stories loaded", JSON.stringify(stories))
     states.datefilter.from = states.datefilter.from || asZulu(new Date())
-    states.isSignedIn = true
+    hackState.isSignedIn = true
 
     refreshPhotoWheel()
 
     collageId.subscribe(async (v) => {
       if (!v) return
-      if (!states.isSignedIn) return
+      if (!hackState.isSignedIn) return
       if (isDirty()) {
         if (confirm("Save changes?")) await saveDocument()
       }
       setLocalStorage("collage_name", v)
       const storyToLoad = stories.find((h) => h.id === v + "")
       log("stories", JSON.stringify(stories))
-      if (!storyToLoad) throw `Story not found: ${v}`
+      if (!storyToLoad) {
+        throw toss(`Story not found: ${v}`)
+      }
       toast("Acquiring story data...")
       await refreshStory(storyToLoad)
       activeCollage = storyToLoad
@@ -150,7 +152,7 @@
 
   // assign images to each image element
   async function autoAssignImages(photos: Photo[]) {
-    if (!activeCollage?.data) throw new Error("No active collage")
+    if (!activeCollage?.data) throw toss("No active collage")
     let j = 0
     activeCollage.data.some((transform) => {
       if (j >= photos.length) return true
@@ -195,13 +197,13 @@
   }
 
   async function refreshPhotoWheel() {
-    if (states.isSignedIn && states.datefilter.from) {
+    if (hackState.isSignedIn && states.datefilter.from) {
       const from = asZulu(states.datefilter.from)
       states.datefilter.to = addDays(states.datefilter.from, 1)
       const to = asZulu(states.datefilter.to)
-      states.app.isLoading = true
+      hackState.app.isLoading = true
       photos = await getPhotosForOneDay(from)
-      states.app.isLoading = false
+      hackState.app.isLoading = false
       photosToShow = photos
         .filter((p) => {
           const result = from <= p.created! && p.created! < to
@@ -215,7 +217,7 @@
   async function saveDocument() {
     setLocalStorage("app.state", states)
     if (!activeCollage) throw new Error("No active collage")
-    states.app.isSaving = true
+    hackState.app.isSaving = true
     try {
       setLocalStorage(`${activeCollage.id}`, activeCollage)
 
@@ -246,7 +248,7 @@
       reportError(ex)
       toast(`Error: ${ex}`)
     } finally {
-      states.app.isSaving = false
+      hackState.app.isSaving = false
     }
   }
 
@@ -254,8 +256,10 @@
     // how to get this to run ony when the datefilter.from changes?
     if (states.datefilter.from !== hackState.datefilter.from) {
       hackState.datefilter.from = states.datefilter.from
-      toast(`Refreshing Photo Wheel`)
-      refreshPhotoWheel()
+      if (hackState.isSignedIn) {
+        toast(`Refreshing Photo Wheel`)
+        refreshPhotoWheel()
+      }
     }
 
     if (states.app.colorWheelAngle != hackState.app.colorWheelAngle) {
@@ -472,6 +476,14 @@
 </script>
 
 <svelte:window
+  on:error={(event) => {
+    try {
+      alert(event)
+      toast(JSON.stringify(event))
+    } catch (e) {
+      log(event)
+    }
+  }}
   on:beforeunload={(event) => {
     log("beforeunload")
     if (isDirty()) {
@@ -507,7 +519,7 @@
 </Toolbar>
 
 <main>
-  {#if states.isSignedIn}
+  {#if hackState.isSignedIn}
     <SvgPaths />
   {:else}
     <Logo>
@@ -515,7 +527,7 @@
     >
   {/if}
 
-  {#if states.isSignedIn}
+  {#if hackState.isSignedIn}
     <div class="frame" hidden={states.preview.visible}>
       <div class="work-area">
         <div class="two-column">
@@ -561,12 +573,12 @@
           >
             <div
               class="status"
-              class:loading={states.app.isLoading}
-              class:saving={states.app.isSaving}
+              class:loading={hackState.app.isLoading}
+              class:saving={hackState.app.isSaving}
             >
               {$toasts[0]?.message || $commandState.activeContext + " mode"}
-              {states.app.isLoading ? "loading..." : ""}
-              {states.app.isSaving ? "saving..." : ""}
+              {hackState.app.isLoading ? "loading..." : ""}
+              {hackState.app.isSaving ? "saving..." : ""}
             </div>
             <div class="toolbar">
               <DateRange
@@ -620,7 +632,7 @@
       </div>
     </div>
   {/if}
-  {#if !states.isSignedIn}
+  {#if !hackState.isSignedIn}
     <Toaster />
   {/if}
 </main>
