@@ -4,82 +4,23 @@ import { writable } from "svelte/store"
 
 export const svgClipPaths = writable<Array<{ id: string, body: string }>>([])
 
-class SvgHelper {
-    static svgToImageData(svg: SVGSVGElement) {
-        // does not work with images?
-        const svgString = new XMLSerializer().serializeToString(svg)
-        const svg64 = btoa(svgString)
-        const b64Start = 'data:image/svg+xml;base64,'
-        const image64 = b64Start + svg64
-        const img = new Image()
-        img.src = image64
-        const canvas = document.createElement("canvas")
-        document.body.appendChild(canvas)
-        canvas.width = svg.width.baseVal.value
-        canvas.height = svg.height.baseVal.value
-        const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
-        ctx.drawImage(img, 0, 0)
-        // create a image url
-        return canvas.toDataURL("image/png")
-    }
+function getScaleToFitSvgImage(svgImage: SVGImageElement, image: HTMLImageElement) {
+    const { width: w1, height: h1 } = svgImage.getBBox()
+    const { naturalWidth: w2, naturalHeight: h2 } = image
+    return Math.min(w1 / w2, h1 / h2)
+}
 
-    static getImageScale(svgImage: SVGImageElement, image: HTMLImageElement) {
-        const { width: w1, height: h1 } = svgImage.getBBox()
-        const { naturalWidth: w2, naturalHeight: h2 } = image
-        return Math.min(w1 / w2, h1 / h2)
-    }
+function getScaleToFitCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement) {
+    const { width, height } = svg.viewBox.baseVal
+    return Math.min(canvas.width / width, canvas.height / height)
+}
 
-    static computePadding(svgImage: SVGImageElement, image: HTMLImageElement) {
-        const { width: w1, height: h1 } = svgImage.getBBox()
-        const { naturalWidth: w2, naturalHeight: h2 } = image
-        const sx = w1 / w2
-        const sy = h1 / h2
-        const scale = Math.min(sx, sy)
-        console.log({ w1, h1, w2, h2, sx, sy, scale })
-        return [(1 - w2 / w1 * scale), (1 - h2 / h1 * scale)]
-    }
+function translate(x: number, y: number) {
+    return `translate(${x}px,${y}px)`
+}
 
-    static getCanvasScale(svg: SVGSVGElement, canvas: HTMLCanvasElement) {
-        const { width, height } = svg.viewBox.baseVal
-        return Math.min(canvas.width / width, canvas.height / height)
-    }
-
-    static getSvgImageScale(svg: SVGSVGElement, image: SVGImageElement) {
-        const { width, height } = svg.viewBox.baseVal
-        const { width: imageWidth, height: imageHeight } = image.getBBox()
-        return Math.min(imageWidth / width, imageHeight / height)
-    }
-
-    static transform(node: HTMLElement | SVGElement, transform: string) {
-        let current = getComputedStyle(node).transform
-        if (current == "none") {
-            current = ""
-        }
-        node.style.transform = `${transform} ${current}`
-    }
-
-    static translate(x: number, y: number) {
-        return `translate(${x}px,${y}px)`
-    }
-
-    static rotate(degrees: number) {
-        return `rotate(${degrees}deg)`
-    }
-
-    static scale(scale: number) {
-        return `scale(${scale})`
-    }
-
-    static rotateAboutCenter(target: SVGElement, degrees: number) {
-        // get the transformation offset from center
-        const t = getComputedStyle(target).transform
-        let m = new DOMMatrix(t)
-        const t1 = SvgHelper.translate(-m.e, -m.f);
-        const r = SvgHelper.rotate(degrees)
-        const t2 = SvgHelper.translate(m.e, m.f)
-        SvgHelper.transform(target, `${t2} ${r} ${t1}`)
-    }
-
+function scale(scale: number) {
+    return `scale(${scale})`
 }
 
 export function injectRect(id: string, x: number, y: number, width: number, height: number) {
@@ -109,11 +50,22 @@ function getClipPathId(image: SVGImageElement) {
     return clipPathId
 }
 
+/*
+    The purpose of this method is to copy images within the svg container into the canvas.
+    Getting this working was difficult so here are the discrete steps to achieve a solution:
+    1. accumulate the effective transforms applied to the svgImage (svg -> g* -> svgImage)
+    2. load the actual image using a <img>
+    3. translate image so that it is centered at the origin
+    4. scale image so that it will fit within the svgImage
+    5. translate image to the center of the svgImage
+    6. scale image to the canvas
+    7. draw the image onto the canvas at (0, 0)
+*/
 export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement) {
     const image = document.getElementById("image") as HTMLImageElement
     const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
 
-    const svgToCanvasScale = SvgHelper.getCanvasScale(svg, canvas)
+    const svgToCanvasScale = getScaleToFitCanvas(svg, canvas)
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -140,22 +92,22 @@ export async function svgToCanvas(svg: SVGSVGElement, canvas: HTMLCanvasElement)
                 if (image) {
                     // 1st center image on (0,0)
                     let transform = ""
-                    transform = SvgHelper.translate(-image.naturalWidth / 2, -image.naturalHeight / 2) + transform
+                    transform = translate(-image.naturalWidth / 2, -image.naturalHeight / 2) + transform
 
                     // 2nd scale the image to the svgImage
-                    transform = SvgHelper.scale(SvgHelper.getImageScale(svgImage, image)) + transform
+                    transform = scale(getScaleToFitSvgImage(svgImage, image)) + transform
 
                     // move to svgImage center
-                    transform = SvgHelper.translate(svgImageBox.x + svgImageBox.width / 2, svgImageBox.y + svgImageBox.height / 2) + transform
+                    transform = translate(svgImageBox.x + svgImageBox.width / 2, svgImageBox.y + svgImageBox.height / 2) + transform
 
                     // apply everything that happened to the svgImage
                     transform = transforms.join(" ") + transform
 
                     // scale to canvas
-                    transform = SvgHelper.scale(svgToCanvasScale) + transform
+                    transform = scale(svgToCanvasScale) + transform
 
                     // move to center of canvas
-                    transform = SvgHelper.translate(canvas.width / 2, canvas.height / 2) + transform
+                    transform = translate(canvas.width / 2, canvas.height / 2) + transform
 
                     ctx.save();
                     ctx.beginPath();
