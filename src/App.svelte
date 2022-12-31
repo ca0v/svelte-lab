@@ -125,6 +125,13 @@
   }
 
   async function handleAuthClick() {
+    if (!$authenticatedWithGoogle) {
+      $authenticatedWithGoogle = (await signin()) || false
+    }
+
+    if (!$authenticatedWithGoogle) {
+      throw toss("Sign in failed")
+    }
     // get the google auth2 object
     stories = await loadAllStories()
     states.datefilter.from = states.datefilter.from || asZulu(new Date())
@@ -280,7 +287,7 @@
   onMount(async () => {
     states = await getLocalStorage("app.state", states)
     if (states.app.autoSignin) {
-      $authenticatedWithGoogle = (await signin()) || false
+      await handleAuthClick()
     }
     $collageId = (await getLocalStorage("collage_name", "")) + ""
     log("collageId", { $collageId })
