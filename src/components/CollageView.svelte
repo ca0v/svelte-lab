@@ -312,12 +312,22 @@
           key: "Delete",
         },
         disabled: () => !getSourceTransform(),
-        execute: () => {
+        execute: (command: Command) => {
           const sourceTransform = getSourceTransform()
           if (!sourceTransform) return
+          const undoState = {
+            id: sourceTransform.id,
+            baseurl: sourceTransform.baseurl,
+          }
           sourceTransform.id = ""
           sourceTransform.baseurl = ""
           transforms = transforms
+          command.undo = () => {
+            sourceTransform.id = undoState.id
+            sourceTransform.baseurl = undoState.baseurl
+            transforms = transforms
+            return true
+          }
           return true
         },
       })
