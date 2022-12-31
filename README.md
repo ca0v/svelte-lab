@@ -27,6 +27,7 @@ The [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api) 
 * DGN: drag-drop should be handled by CollageView not SvgImage
 * DGN: Remove the PhotoWheel from the CollageView, create a higher-level composite control
 * DGN: The signin process is janky..eliminate the Google Popup and try to stay signed in? May not be possible.
+* DGN: The "store" files have become arbitrary, refactor
 * FTR: Can crop and round corners using clip-path: inset() on the svg image (<https://developer.mozilla.org/en-US/docs/Web/CSS/inset>)
 * FTR: Group multiple items and "frame" them with a border (fuse them into a single cell)
 * FTR: Multi-level undo/redo
@@ -99,3 +100,5 @@ This will scale better and be easier to remember.  Example of future expansion:
 ## References
 
 * [svelte cheet sheet](https://sveltesociety.dev/cheatsheet)
+* [google photo api](https://developers.google.com/photos/library/guides/get-started)
+* [google auth api](https://developers.google.com/identity/protocols/oauth2#clientside)

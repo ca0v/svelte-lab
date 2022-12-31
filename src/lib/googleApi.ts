@@ -112,6 +112,8 @@ async function signin() {
 
 async function signout() {
     if (!signedIn) return;
+    // logout of google authentication
+    gapi.auth.signOut();
     signedIn = false;
 }
 

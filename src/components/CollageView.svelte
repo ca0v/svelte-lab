@@ -51,7 +51,7 @@
   }
 
   function getPhotoWheelActiveSource() {
-    return photoWheel.activeSource as Source
+    return photoWheel?.activeSource as Source
   }
 
   function copy(from: CollageCellState, into: CollageCellState) {

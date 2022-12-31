@@ -1,3 +1,5 @@
+export let debugMode = false;
+
 let dummy: HTMLElement;
 
 class PhotoDB {
@@ -88,7 +90,7 @@ export function hasFocus(container: HTMLElement | SVGElement) {
 
 
 export function log(...args: any[]) {
-    console.log(...args)
+    debugMode && console.log(...args)
 }
 
 export function deepClone<T>(o: T) {

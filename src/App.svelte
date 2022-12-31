@@ -29,6 +29,10 @@
   import DateRange from "./components/DateRange.svelte"
   import Logo from "./components/Logo.svelte"
   import Toolbar from "./components/Toolbar.svelte"
+  import {
+    authenticatedWithGoogle,
+    authorizedWithGooglePhotos,
+  } from "./store/general"
   import { loadAllStories } from "./store/stories"
   import { collageTemplates as transforms } from "./store/transforms"
   import { commander, contexts, state as commandState } from "./store/commands"
@@ -63,9 +67,6 @@
       showColorWheel: false,
       colorWheelAngle: 0,
     },
-    menu: {
-      isOpen: false,
-    },
     editor: {
       editmode: true,
       width: 100,
@@ -87,7 +88,9 @@
   }
 
   const hackState = {
-    isSignedIn: false,
+    menu: {
+      isOpen: false,
+    },
     app: {
       showColorWheel: false,
       colorWheelAngle: 0,
@@ -122,21 +125,18 @@
   async function handleAuthClick() {
     // get the google auth2 object
     stories = await loadAllStories()
-    log("stories loaded", JSON.stringify(stories))
     states.datefilter.from = states.datefilter.from || asZulu(new Date())
-    hackState.isSignedIn = true
 
     refreshPhotoWheel()
 
     collageId.subscribe(async (v) => {
       if (!v) return
-      if (!hackState.isSignedIn) return
+      if (!$authenticatedWithGoogle) return
       if (isDirty()) {
         if (confirm("Save changes?")) await saveDocument()
       }
       setLocalStorage("collage_name", v)
       const storyToLoad = stories.find((h) => h.id === v + "")
-      log("stories", JSON.stringify(stories))
       if (!storyToLoad) {
         throw toss(`Story not found: ${v}`)
       }
@@ -197,7 +197,7 @@
   }
 
   async function refreshPhotoWheel() {
-    if (hackState.isSignedIn && states.datefilter.from) {
+    if ($authenticatedWithGoogle && states.datefilter.from) {
       const from = asZulu(states.datefilter.from)
       states.datefilter.to = addDays(states.datefilter.from, 1)
       const to = asZulu(states.datefilter.to)
@@ -256,7 +256,7 @@
     // how to get this to run ony when the datefilter.from changes?
     if (states.datefilter.from !== hackState.datefilter.from) {
       hackState.datefilter.from = states.datefilter.from
-      if (hackState.isSignedIn) {
+      if ($authenticatedWithGoogle) {
         toast(`Refreshing Photo Wheel`)
         refreshPhotoWheel()
       }
@@ -307,7 +307,7 @@
           states.titleEditor.edit = true
           states.editor.editmode = true
           // "toggle-command-menu"
-          states.menu.isOpen = true
+          hackState.menu.isOpen = true
           toast("New Story Created")
         },
       })
@@ -504,7 +504,7 @@
   >
 </div>
 
-<Commands bind:isOpen={states.menu.isOpen}>
+<Commands bind:isOpen={hackState.menu.isOpen}>
   <GoogleSignin autoSignIn={false} />
 </Commands>
 
@@ -513,15 +513,15 @@
 </Toolbar>
 
 <main>
-  {#if hackState.isSignedIn}
+  {#if $authenticatedWithGoogle}
     <SvgPaths />
   {:else}
     <Logo>
-      <GoogleSignin autoSignIn={true} on:signedin={handleAuthClick} /></Logo
+      <GoogleSignin autoSignIn={false} on:signedin={handleAuthClick} /></Logo
     >
   {/if}
 
-  {#if hackState.isSignedIn}
+  {#if $authenticatedWithGoogle}
     <div class="frame" hidden={states.preview.visible}>
       <div class="work-area">
         <div class="two-column">
@@ -597,36 +597,35 @@
         </div>
       </div>
     </div>
-  {/if}
 
-  {#if states.preview.visible}
-    <div class="preview-area">
-      <h2>Preview</h2>
-      <div class="frame three-by">
-        {#each stories.filter((c) => c.data?.length).reverse() as collage}
-          <div class="border">
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <h3 class="fit">
-              <button
-                on:click={() => {
-                  $collageId = collage.id || ""
-                  states.preview.visible = false
-                }}
-              >
-                {collage.title}
-              </button>
-            </h3>
-            {#await refreshStory(collage)}
-              <p>Loading...</p>
-            {:then}
-              <CollageView readonly={true} transforms={collage} />
-            {/await}
-          </div>
-        {/each}
+    {#if states.preview.visible}
+      <div class="preview-area">
+        <h2>Preview</h2>
+        <div class="frame three-by">
+          {#each stories.filter((c) => c.data?.length).reverse() as collage}
+            <div class="border">
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <h3 class="fit">
+                <button
+                  on:click={() => {
+                    $collageId = collage.id || ""
+                    states.preview.visible = false
+                  }}
+                >
+                  {collage.title}
+                </button>
+              </h3>
+              {#await refreshStory(collage)}
+                <p>Loading...</p>
+              {:then}
+                <CollageView readonly={true} transforms={collage} />
+              {/await}
+            </div>
+          {/each}
+        </div>
       </div>
-    </div>
-  {/if}
-  {#if !hackState.isSignedIn}
+    {/if}
+  {:else}
     <Toaster />
   {/if}
 </main>

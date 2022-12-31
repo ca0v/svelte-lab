@@ -2,22 +2,25 @@
   import { createEventDispatcher } from "svelte"
   import { signin, signout } from "@googlePhoto/googleApi"
   import { reportExceptions, toast } from "../store/toasts"
+  import {
+    authenticatedWithGoogle,
+    authorizedWithGooglePhotos,
+  } from "../store/general"
 
   const dispatch = createEventDispatcher()
 
   export let autoSignIn = true
-  let isSignedIn = false
 
   async function handleSigninClick() {
-    if (!isSignedIn) await signin()
-    isSignedIn = true
+    if (!$authenticatedWithGoogle) await signin()
+    $authenticatedWithGoogle = true
     dispatch("signedin")
   }
 
   function handleSignoutClick() {
-    if (isSignedIn) {
+    if ($authenticatedWithGoogle) {
       signout()
-      isSignedIn = false
+      $authenticatedWithGoogle = false
     }
     dispatch("signedout")
   }
@@ -32,14 +35,14 @@
 <section class="toolbar">
   <input
     type="button"
-    disabled={!isSignedIn}
+    disabled={!$authenticatedWithGoogle}
     class="google_photos_button"
     value="Sign out from Google Photos"
     on:click={reportExceptions(handleSignoutClick)}
   />
   <input
     type="button"
-    disabled={isSignedIn}
+    disabled={$authenticatedWithGoogle}
     class="google_photos_button"
     value="Connect to Google Photos"
     on:click={reportExceptions(handleSigninClick)}
